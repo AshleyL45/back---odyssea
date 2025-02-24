@@ -1,0 +1,53 @@
+/mvnw text eol=lf
+*.cmd text eol=crlf
+
+
+# Standardisation des fichiers texte (LF obligatoire)
+* text=auto eol=lf
+
+# Fichiers spécifiques avec LF (Back et Front)
+*.js eol=lf
+*.jsx eol=lf
+*.ts eol=lf
+*.tsx eol=lf
+*.json eol=lf
+*.html eol=lf
+*.css eol=lf
+*.scss eol=lf
+*.md eol=lf
+*.yml eol=lf
+*.yaml eol=lf
+*.env eol=lf
+*.sh eol=lf
+
+# Gestion des fichiers spécifiques au backend
+*.php eol=lf
+*.py eol=lf
+*.java eol=lf
+*.c eol=lf
+*.cpp eol=lf
+*.go eol=lf
+*.rb eol=lf
+
+# Configuration et scripts
+*.sql eol=lf
+*.xml eol=lf
+*.dockerfile eol=lf
+
+# Fichiers binaires (ne pas modifier)
+*.png binary
+*.jpg binary
+*.jpeg binary
+*.gif binary
+*.ico binary
+*.mp4 binary
+*.mp3 binary
+*.woff binary
+*.woff2 binary
+*.ttf binary
+*.otf binary
+*.zip binary
+*.tar binary
+*.gz binary
+*.exe binary
+*.dll binary
