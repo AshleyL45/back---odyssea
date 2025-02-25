@@ -1,40 +1,21 @@
 package com.example.odyssea.entities;
 
-import jakarta.validation.constraints.*;
-import java.math.BigDecimal;
+import java.time.Duration;
 
 public class Activity {
 
-    private Long id;
-
-    @NotNull(message = "La ville associée est obligatoire.")
-    private Long cityId;
-
-    @NotBlank(message = "Le nom ne doit pas être vide.")
+    private int id;
+    private int cityId;
     private String name;
-
-    @NotBlank(message = "Le type d'activité ne doit pas être vide.")
     private String type;
-
-    @Min(value = 1, message = "L'effort physique doit être au moins 1.")
-    @Max(value = 10, message = "L'effort physique doit être au maximum 10.")
-    private int physicalEffort;
-
-    @Min(value = 1, message = "La durée doit être d'au moins 1 minute.")
-    private int duration;
-
-    @Size(max = 1000, message = "La description ne doit pas dépasser 1000 caractères.")
+    private String physicalEffort;
+    private int duration; // 🔹 Stocke la durée en minutes
     private String description;
+    private Double price;
 
-    @NotNull(message = "Le prix est obligatoire.")
-    @PositiveOrZero(message = "Le prix doit être un nombre positif ou zéro.")
-    private BigDecimal price;
+    public Activity() {}
 
-    public Activity() {
-    }
-
-    public Activity(Long id, Long cityId, String name, String type, int physicalEffort,
-                    int duration, String description, BigDecimal price) {
+    public Activity(int id, int cityId, String name, String type, String physicalEffort, int duration, String description, Double price) {
         this.id = id;
         this.cityId = cityId;
         this.name = name;
@@ -45,28 +26,93 @@ public class Activity {
         this.price = price;
     }
 
-    // Getters & Setters
-    public Long getId() { return id; }
-    public void setId(Long id) { this.id = id; }
+    public int getId() {
+        return id;
+    }
 
-    public Long getCityId() { return cityId; }
-    public void setCityId(Long cityId) { this.cityId = cityId; }
+    public void setId(int id) {
+        this.id = id;
+    }
 
-    public String getName() { return name; }
-    public void setName(String name) { this.name = name; }
+    public int getCityId() {
+        return cityId;
+    }
 
-    public String getType() { return type; }
-    public void setType(String type) { this.type = type; }
+    public void setCityId(int cityId) {
+        this.cityId = cityId;
+    }
 
-    public int getPhysicalEffort() { return physicalEffort; }
-    public void setPhysicalEffort(int physicalEffort) { this.physicalEffort = physicalEffort; }
+    public String getName() {
+        return name;
+    }
 
-    public int getDuration() { return duration; }
-    public void setDuration(int duration) { this.duration = duration; }
+    public void setName(String name) {
+        this.name = name;
+    }
 
-    public String getDescription() { return description; }
-    public void setDescription(String description) { this.description = description; }
+    public String getType() {
+        return type;
+    }
 
-    public BigDecimal getPrice() { return price; }
-    public void setPrice(BigDecimal price) { this.price = price; }
+    public void setType(String type) {
+        this.type = type;
+    }
+
+    public String getPhysicalEffort() {
+        return physicalEffort;
+    }
+
+    public void setPhysicalEffort(String physicalEffort) {
+        this.physicalEffort = physicalEffort;
+    }
+
+    public int getDuration() {
+        return duration;
+    }
+
+    public void setDuration(int duration) {
+        this.duration = duration;
+    }
+
+    public String getDescription() {
+        return description;
+    }
+
+    public void setDescription(String description) {
+        this.description = description;
+    }
+
+    public Double getPrice() {
+        return price;
+    }
+
+    public void setPrice(Double price) {
+        this.price = price;
+    }
+
+
+    /**
+     * 🔹 Convertit une durée ISO 8601 (`PT5H49M`) en minutes
+     */
+    public static int convertIsoDurationToMinutes(String isoDuration) {
+        Duration duration = Duration.parse(isoDuration);
+        return (int) duration.toMinutes();
+    }
+
+
+    /**
+     * 🔹 Convertit `duration` (minutes) en format "5 heures 49"
+     */
+    public String getFormattedDuration() {
+        int hours = duration / 60;  // Extrait les heures
+        int minutes = duration % 60; // Extrait les minutes restantes
+
+        if (hours > 0 && minutes > 0) {
+            return hours + " heures " + minutes;
+        } else if (hours > 0) {
+            return hours + " heures";
+        } else {
+            return minutes + " minutes";
+        }
+    }
 }
