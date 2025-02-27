@@ -1,6 +1,6 @@
 package com.example.odyssea.daos;
 
-import com.example.odyssea.entities.Country;
+import com.example.odyssea.entities.mainTables.Country;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.stereotype.Repository;

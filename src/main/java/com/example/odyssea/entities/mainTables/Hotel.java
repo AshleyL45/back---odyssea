@@ -1,4 +1,4 @@
-package com.example.odyssea.entities;
+package com.example.odyssea.entities.mainTables;
 
 public class Hotel {
 

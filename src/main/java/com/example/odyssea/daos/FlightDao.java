@@ -1,6 +1,6 @@
 package com.example.odyssea.daos;
 
-import com.example.odyssea.entities.Flight;
+import com.example.odyssea.entities.mainTables.Flight;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
 

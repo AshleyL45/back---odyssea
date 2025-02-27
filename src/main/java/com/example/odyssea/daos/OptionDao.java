@@ -1,5 +1,5 @@
 package com.example.odyssea.daos;
-import com.example.odyssea.entities.Option;
+import com.example.odyssea.entities.mainTables.Option;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
 
