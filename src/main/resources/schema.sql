@@ -226,8 +226,10 @@ CREATE TABLE IF NOT EXISTS `flight` (
   `id` int NOT NULL AUTO_INCREMENT,
   `companyName` varchar(255) DEFAULT NULL,
   `duration` time NOT NULL,
+  `departureDate` date NOT NULL,
   `departureTime` time NOT NULL,
   `departureCityIata` varchar(255) NOT NULL,
+  `arrivalDate` date NOT NULL,
   `arrivalTime` time NOT NULL,
   `arrivalCityIata` varchar(255) NOT NULL,
   `price` decimal(7,2) NOT NULL,
@@ -240,6 +242,9 @@ CREATE TABLE IF NOT EXISTS `flight` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 SET FOREIGN_KEY_CHECKS = 1;
+
+ALTER TABLE flight ADD departureDate date NOT NULL;
+ALTER TABLE flight ADD arrivalDate date NOT NULL;
 --
 -- Dumping data for table `flight`
 --
@@ -455,7 +460,8 @@ CREATE TABLE IF NOT EXISTS `reservation` (
   `status` varchar(255) NOT NULL,
   `departureDate` date NOT NULL,
   `returnDate` date NOT NULL,
-  `numberOfPeople` int NOT NULL,
+   `numberOfAdults` int NOT NULL,
+   `numberOfKids` int NOT NULL DEFAULT 0,
   `totalPrice` decimal(7,2) NOT NULL,
   `purchaseDate` date DEFAULT (curdate()),
   PRIMARY KEY (`id`),
@@ -466,6 +472,10 @@ CREATE TABLE IF NOT EXISTS `reservation` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 SET FOREIGN_KEY_CHECKS = 1;
+
+ALTER TABLE reservation ADD numberOfAdults int NOT NULL;
+ALTER TABLE reservation ADD numberOfKids int NOT NULL DEFAULT 0;
+ALTER TABLE reservation DROP COLUMN numberOfPeople;
 --
 -- Dumping data for table `reservation`
 --
@@ -536,7 +546,7 @@ CREATE TABLE IF NOT EXISTS `userItinerary` (
   `userId` int NOT NULL,
   `startDate` date NOT NULL,
   `endDate` date NOT NULL,
-  `numberOfPeople` int NOT NULL,
+  `numberOfPeople` INT NOT NULL,
   `startingPrice` decimal(7,2) DEFAULT NULL,
   `totalDuration` time NOT NULL,
   PRIMARY KEY (`id`),
@@ -545,6 +555,12 @@ CREATE TABLE IF NOT EXISTS `userItinerary` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 SET FOREIGN_KEY_CHECKS = 1;
+
+ALTER TABLE userItinerary ADD departureCity VARCHAR(255) NOT NULL;
+ALTER TABLE userItinerary ADD itineraryName TEXT;
+ALTER TABLE userItinerary ADD numberOfAdults int NOT NULL;
+ALTER TABLE userItinerary ADD numberOfKids int NOT NULL DEFAULT 0;
+ALTER TABLE userItinerary DROP COLUMN numberOfPeople;
 --
 -- Dumping data for table `userItinerary`
 --
