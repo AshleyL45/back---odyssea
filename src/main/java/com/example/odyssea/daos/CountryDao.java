@@ -20,7 +20,38 @@ public class CountryDao {
     }
 
     /**
-     * 🔹 Vérifie si un pays avec l'ID spécifié existe dans la base de données
+     * 🔹 Sauvegarde un nouveau pays
+     */
+    public void save(Country country) {
+        String sql = """
+            INSERT INTO country (name, continent, price)
+            VALUES (?, ?, ?)
+        """;
+        jdbcTemplate.update(sql, country.getName(), country.getContinent(), country.getPrice());
+    }
+
+    /**
+     * 🔹 Met à jour un pays existant
+     */
+    public void update(Country country) {
+        String sql = """
+            UPDATE country 
+            SET name = ?, continent = ?, price = ? 
+            WHERE id = ?
+        """;
+        jdbcTemplate.update(sql, country.getName(), country.getContinent(), country.getPrice(), country.getId());
+    }
+
+    /**
+     * 🔹 Supprime un pays par ID
+     */
+    public void deleteById(int countryId) {
+        String sql = "DELETE FROM country WHERE id = ?";
+        jdbcTemplate.update(sql, countryId);
+    }
+
+    /**
+     * 🔹 Vérifie si un pays existe par son ID
      */
     public boolean existsById(int countryId) {
         String sql = "SELECT COUNT(*) FROM country WHERE id = ?";
@@ -29,41 +60,29 @@ public class CountryDao {
     }
 
     /**
-     * 🔹 Obtenir un pays en ayant le nom d'une ville
+     * 🔹 Récupère un pays par son ID
      */
-    public Optional<Country> findByCityName(String cityName) {
-        String sql = """
-            SELECT c.* FROM country c
-            JOIN city ct ON c.id = ct.country_id
-            WHERE ct.name = ?
-        """;
-        return jdbcTemplate.query(sql, new Object[]{cityName}, new CountryRowMapper())
+    public Optional<Country> findById(int countryId) {
+        String sql = "SELECT * FROM country WHERE id = ?";
+        return jdbcTemplate.query(sql, new Object[]{countryId}, new CountryRowMapper())
                 .stream()
                 .findFirst();
     }
 
     /**
-     * 🔹 Obtenir tous les pays en fonction du continent
+     * 🔹 Récupère tous les pays
      */
-    public List<Country> findByContinent(String continent) {
-        String sql = "SELECT * FROM country WHERE continent = ?";
-        return jdbcTemplate.query(sql, new Object[]{continent}, new CountryRowMapper());
+    public List<Country> findAll() {
+        String sql = "SELECT * FROM country";
+        return jdbcTemplate.query(sql, new CountryRowMapper());
     }
 
     /**
-     * 🔹 Obtenir tous les continents disponibles
+     * 🔹 Compte le nombre total de pays
      */
-    public List<String> getAllContinents() {
-        String sql = "SELECT DISTINCT continent FROM country";
-        return jdbcTemplate.queryForList(sql, String.class);
-    }
-
-    /**
-     * 🔹 Rechercher un pays par mot-clé (recherche partielle)
-     */
-    public List<Country> searchByKeyword(String keyword) {
-        String sql = "SELECT * FROM country WHERE LOWER(name) LIKE LOWER(?)";
-        return jdbcTemplate.query(sql, new Object[]{"%" + keyword + "%"}, new CountryRowMapper());
+    public int count() {
+        String sql = "SELECT COUNT(*) FROM country";
+        return jdbcTemplate.queryForObject(sql, Integer.class);
     }
 
     /**

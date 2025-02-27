@@ -8,6 +8,7 @@ import org.springframework.stereotype.Repository;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.Optional;
+import java.util.List;
 
 @Repository
 public class CityDistanceDao {
@@ -23,11 +24,51 @@ public class CityDistanceDao {
      */
     public void save(CityDistance distance) {
         if (!findByCities(distance.getFromCityId(), distance.getToCityId()).isPresent()) {
-            String sql = "INSERT INTO cityDistance (fromCityId, toCityId, drivingDurationSeconds, distanceKm) VALUES (?, ?, ?, ?)";
+            String sql = """
+                INSERT INTO cityDistance (fromCityId, toCityId, drivingDurationSeconds, distanceKm) 
+                VALUES (?, ?, ?, ?)
+            """;
             jdbcTemplate.update(sql, distance.getFromCityId(), distance.getToCityId(), distance.getDrivingDurationSeconds(), distance.getDistanceKm());
         } else {
             updateDistance(distance); // 🔹 Met à jour si la distance existe déjà
         }
+    }
+
+    /**
+     * 🔹 Met à jour une distance existante (durée en secondes)
+     */
+    public void updateDistance(CityDistance distance) {
+        String sql = """
+            UPDATE cityDistance 
+            SET drivingDurationSeconds = ?, distanceKm = ? 
+            WHERE fromCityId = ? AND toCityId = ?
+        """;
+        jdbcTemplate.update(sql, distance.getDrivingDurationSeconds(), distance.getDistanceKm(), distance.getFromCityId(), distance.getToCityId());
+    }
+
+    /**
+     * 🔹 Supprime une distance entre deux villes
+     */
+    public void deleteDistance(int fromCityId, int toCityId) {
+        String sql = "DELETE FROM cityDistance WHERE fromCityId = ? AND toCityId = ?";
+        jdbcTemplate.update(sql, fromCityId, toCityId);
+    }
+
+    /**
+     * 🔹 Supprime une distance par son ID
+     */
+    public void deleteById(int id) {
+        String sql = "DELETE FROM cityDistance WHERE id = ?";
+        jdbcTemplate.update(sql, id);
+    }
+
+    /**
+     * 🔹 Vérifie si une distance existe par son ID
+     */
+    public boolean existsById(int id) {
+        String sql = "SELECT COUNT(*) FROM cityDistance WHERE id = ?";
+        Integer count = jdbcTemplate.queryForObject(sql, new Object[]{id}, Integer.class);
+        return count != null && count > 0;
     }
 
     /**
@@ -41,28 +82,21 @@ public class CityDistanceDao {
     }
 
     /**
-     * 🔹 Met à jour une distance existante (durée en secondes)
+     * 🔹 Récupère une distance par son ID
      */
-    public void updateDistance(CityDistance distance) {
-        String sql = "UPDATE cityDistance SET drivingDurationSeconds = ?, distanceKm = ? WHERE fromCityId = ? AND toCityId = ?";
-        jdbcTemplate.update(sql, distance.getDrivingDurationSeconds(), distance.getDistanceKm(), distance.getFromCityId(), distance.getToCityId());
+    public Optional<CityDistance> findById(int id) {
+        String sql = "SELECT * FROM cityDistance WHERE id = ?";
+        return jdbcTemplate.query(sql, new Object[]{id}, new DistanceRowMapper())
+                .stream()
+                .findFirst();
     }
 
     /**
-     * 🔹 Supprime une distance entre deux villes
+     * 🔹 Récupère toutes les distances enregistrées
      */
-    public void deleteDistance(int fromCityId, int toCityId) {
-        String sql = "DELETE FROM cityDistance WHERE fromCityId = ? AND toCityId = ?";
-        jdbcTemplate.update(sql, fromCityId, toCityId);
-    }
-
-    /**
-     * 🔹 Récupère la durée formatée "X heures Y minutes" entre deux villes
-     */
-    public String getFormattedDurationBetweenCities(int fromCityId, int toCityId) {
-        Optional<CityDistance> distance = findByCities(fromCityId, toCityId);
-        return distance.map(CityDistance::getFormattedDuration)
-                .orElse("Durée non disponible");
+    public List<CityDistance> findAll() {
+        String sql = "SELECT * FROM cityDistance";
+        return jdbcTemplate.query(sql, new DistanceRowMapper());
     }
 
     /**

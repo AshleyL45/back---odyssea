@@ -20,6 +20,37 @@ public class CityDao {
     }
 
     /**
+     * 🔹 Sauvegarde une nouvelle ville
+     */
+    public void save(City city) {
+        String sql = """
+            INSERT INTO city (country_id, name, iata_code, longitude, latitude) 
+            VALUES (?, ?, ?, ?, ?)
+        """;
+        jdbcTemplate.update(sql, city.getCountryId(), city.getName(), city.getIataCode(), city.getLongitude(), city.getLatitude());
+    }
+
+    /**
+     * 🔹 Mettre à jour une ville existante
+     */
+    public void update(City city) {
+        String sql = """
+            UPDATE city 
+            SET country_id = ?, name = ?, iata_code = ?, longitude = ?, latitude = ? 
+            WHERE id = ?
+        """;
+        jdbcTemplate.update(sql, city.getCountryId(), city.getName(), city.getIataCode(), city.getLongitude(), city.getLatitude(), city.getId());
+    }
+
+    /**
+     * 🔹 Supprimer une ville par ID
+     */
+    public void deleteById(int cityId) {
+        String sql = "DELETE FROM city WHERE id = ?";
+        jdbcTemplate.update(sql, cityId);
+    }
+
+    /**
      * 🔹 Trouver une ville par son ID
      */
     public Optional<City> findById(int cityId) {
@@ -68,39 +99,6 @@ public class CityDao {
     }
 
     /**
-     * 🔹 Insérer une nouvelle ville en base
-     */
-    public void save(City city) {
-        String countryCheckSql = "SELECT COUNT(*) FROM country WHERE id = ?";
-        Integer count = jdbcTemplate.queryForObject(countryCheckSql, new Object[]{city.getCountryId()}, Integer.class);
-
-        if (count == null || count == 0) {
-            throw new IllegalArgumentException("Erreur : Le pays avec l'ID " + city.getCountryId() + " n'existe pas.");
-        }
-
-        String sql = "INSERT INTO city (countryId, name, iataCode, longitude, latitude) VALUES (?, ?, ?, ?, ?)";
-        jdbcTemplate.update(sql, city.getCountryId(), city.getName(), city.getIataCode(), city.getLongitude(), city.getLatitude());
-    }
-
-
-
-    /**
-     * 🔹 Mettre à jour une ville existante
-     */
-    public void update(City city) {
-        String sql = "UPDATE city SET country_id = ?, name = ?, iata_code = ?, longitude = ?, latitude = ? WHERE id = ?";
-        jdbcTemplate.update(sql, city.getCountryId(), city.getName(), city.getIataCode(), city.getLongitude(), city.getLatitude(), city.getId());
-    }
-
-    /**
-     * 🔹 Supprimer une ville par ID
-     */
-    public void deleteById(int cityId) {
-        String sql = "DELETE FROM city WHERE id = ?";
-        jdbcTemplate.update(sql, cityId);
-    }
-
-    /**
      * 🔹 Récupérer toutes les villes
      */
     public List<City> findAll() {
@@ -109,20 +107,11 @@ public class CityDao {
     }
 
     /**
-     * 🔹 Rechercher une ville avec un nom partiel (LIKE search)
+     * 🔹 Rechercher une ville avec un nom partiel
      */
     public List<City> searchByName(String partialName) {
-        String sql = "SELECT * FROM city WHERE name LIKE ?";
+        String sql = "SELECT * FROM city WHERE LOWER(name) LIKE LOWER(?)";
         return jdbcTemplate.query(sql, new Object[]{"%" + partialName + "%"}, new CityRowMapper());
-    }
-
-    /**
-     * 🔹 Vérifier si une ville existe avant d’insérer
-     */
-    public boolean existsByName(String cityName) {
-        String sql = "SELECT COUNT(*) FROM city WHERE name = ?";
-        Integer count = jdbcTemplate.queryForObject(sql, new Object[]{cityName}, Integer.class);
-        return count != null && count > 0;
     }
 
     /**
@@ -139,7 +128,7 @@ public class CityDao {
     }
 
     /**
-     * 🔹 Mapper pour convertir un `ResultSet` en objet `City`
+     * 🔹 RowMapper pour convertir un `ResultSet` en objet `City`
      */
     private static class CityRowMapper implements RowMapper<City> {
         @Override
