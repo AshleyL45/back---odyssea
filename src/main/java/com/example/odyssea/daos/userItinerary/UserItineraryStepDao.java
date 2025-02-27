@@ -4,6 +4,7 @@ import com.example.odyssea.entities.userItinerary.UserItineraryStep;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
 
+import java.time.LocalDate;
 import java.util.List;
 
 public class UserItineraryStepDao {
@@ -35,6 +36,15 @@ public class UserItineraryStepDao {
                 .stream()
                 .findFirst()
                 .orElseThrow(() -> new RuntimeException("The user itinerary step id " + id + "you are looking for does not exist."));
+    }
+
+    public LocalDate convertDayNumberToDate(int dayNumber, LocalDate startDate){
+       return startDate.plusDays(dayNumber - 1);
+    }
+
+    public LocalDate getStartDateForItinerary(int itineraryId) {
+        String sql = "SELECT startDate FROM userItinerary WHERE id = ?";
+        return jdbcTemplate.queryForObject(sql, LocalDate.class, itineraryId);
     }
 
     public UserItineraryStep save (UserItineraryStep userItineraryStep){
