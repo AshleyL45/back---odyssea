@@ -1,11 +1,11 @@
-package com.example.odyssea.entities.mainTables;
+package com.example.odyssea.dtos;
 
 import java.math.BigDecimal;
 import java.time.Duration;
 import java.time.LocalDate;
 import java.time.LocalTime;
 
-public class Flight {
+public class FlightDTO {
     private int id;
     private String companyName;
     private Duration duration;
@@ -18,8 +18,10 @@ public class Flight {
     private BigDecimal price;
     private String airplaneName;
 
+    public FlightDTO() {
+    }
 
-    public Flight(int id, String companyName, Duration duration, LocalDate departureDate, LocalTime departureTime, String departureCityIata, LocalDate arrivalDate, LocalTime arrivalTime, String arrivalCityIata, BigDecimal price, String airplaneName) {
+    public FlightDTO(int id, String companyName, Duration duration, LocalDate departureDate, LocalTime departureTime, String departureCityIata, LocalDate arrivalDate, LocalTime arrivalTime, String arrivalCityIata, BigDecimal price, String airplaneName) {
         this.id = id;
         this.companyName = companyName;
         this.duration = duration;
@@ -32,6 +34,7 @@ public class Flight {
         this.price = price;
         this.airplaneName = airplaneName;
     }
+
 
     public int getId() {
         return id;

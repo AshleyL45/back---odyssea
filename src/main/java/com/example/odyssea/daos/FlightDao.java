@@ -20,8 +20,10 @@ public class FlightDao {
             rs.getInt("id"),
             rs.getString("companyName"),
             Duration.ofMillis(rs.getLong("duration")), // A voir
+            rs.getDate("departureDate").toLocalDate(),
             rs.getTime("departureTime").toLocalTime(), // A voir
             rs.getString("departureCityIata"),
+            rs.getDate("arrivalDate").toLocalDate(),
             rs.getTime("arrivalTime").toLocalTime(), // A voir
             rs.getString("arrivalCityIata"),
             rs.getBigDecimal("price"),
