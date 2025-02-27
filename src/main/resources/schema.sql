@@ -243,8 +243,7 @@ CREATE TABLE IF NOT EXISTS `flight` (
 /*!40101 SET character_set_client = @saved_cs_client */;
 SET FOREIGN_KEY_CHECKS = 1;
 
-ALTER TABLE flight ADD departureDate date NOT NULL;
-ALTER TABLE flight ADD arrivalDate date NOT NULL;
+
 --
 -- Dumping data for table `flight`
 --
@@ -473,9 +472,7 @@ CREATE TABLE IF NOT EXISTS `reservation` (
 /*!40101 SET character_set_client = @saved_cs_client */;
 SET FOREIGN_KEY_CHECKS = 1;
 
-ALTER TABLE reservation ADD numberOfAdults int NOT NULL;
-ALTER TABLE reservation ADD numberOfKids int NOT NULL DEFAULT 0;
-ALTER TABLE reservation DROP COLUMN numberOfPeople;
+
 --
 -- Dumping data for table `reservation`
 --
@@ -556,11 +553,7 @@ CREATE TABLE IF NOT EXISTS `userItinerary` (
 /*!40101 SET character_set_client = @saved_cs_client */;
 SET FOREIGN_KEY_CHECKS = 1;
 
-ALTER TABLE userItinerary ADD departureCity VARCHAR(255) NOT NULL;
-ALTER TABLE userItinerary ADD itineraryName TEXT;
-ALTER TABLE userItinerary ADD numberOfAdults int NOT NULL;
-ALTER TABLE userItinerary ADD numberOfKids int NOT NULL DEFAULT 0;
-ALTER TABLE userItinerary DROP COLUMN numberOfPeople;
+
 --
 -- Dumping data for table `userItinerary`
 --
