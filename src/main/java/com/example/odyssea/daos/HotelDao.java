@@ -19,42 +19,30 @@ public class HotelDao {
         this.jdbcTemplate = jdbcTemplate;
     }
 
-    // Récupérer les hôtels d'une ville
-    public List<Hotel> findByCityId(int cityId) {
-        String sql = "SELECT * FROM hotels WHERE city_id = ?";
-        return jdbcTemplate.query(sql, new Object[]{cityId}, new HotelRowMapper());
-    }
-
-    // Récupérer les hôtels d'une ville avec un standing spécifique
-    public List<Hotel> findByCityIdAndStarRating(int cityId, int starRating) {
-        String sql = "SELECT * FROM hotels WHERE city_id = ? AND star_rating = ?";
-        return jdbcTemplate.query(sql, new Object[]{cityId, starRating}, new HotelRowMapper());
-    }
-
-    // Récupérer les hôtels par plage de prix
-    public List<Hotel> findByPriceRange(double minPrice, double maxPrice) {
-        String sql = "SELECT * FROM hotels WHERE price BETWEEN ? AND ?";
-        return jdbcTemplate.query(sql, new Object[]{minPrice, maxPrice}, new HotelRowMapper());
-    }
-
-    // Récupérer un hôtel par son nom
-    public Optional<Hotel> findByName(String hotelName) {
-        String sql = "SELECT * FROM hotels WHERE name LIKE ?";
-        return jdbcTemplate.query(sql, new Object[]{"%" + hotelName + "%"}, new HotelRowMapper())
+    // Récupérer un hôtel par son ID
+    public Optional<Hotel> findById(int hotelId) {
+        String sql = "SELECT * FROM hotel WHERE id = ?";
+        return jdbcTemplate.query(sql, new Object[]{hotelId}, new HotelRowMapper())
                 .stream().findFirst();
     }
 
-    // Vérifier si un hôtel existe en base
-    public boolean existsById(int hotelId) {
-        String sql = "SELECT COUNT(*) FROM hotels WHERE id = ?";
-        Integer count = jdbcTemplate.queryForObject(sql, Integer.class, hotelId);
-        return count != null && count > 0;
+    // Récupérer tous les hôtels
+    public List<Hotel> findAll() {
+        String sql = "SELECT * FROM hotel";
+        return jdbcTemplate.query(sql, new HotelRowMapper());
     }
 
-    // Sauvegarder un hôtel en base
+    // Sauvegarder un hôtel (ajout ou mise à jour)
     public void save(Hotel hotel) {
-        String sql = "INSERT INTO hotels (id, city_id, name, star_rating, description, price) VALUES (?, ?, ?, ?, ?, ?)";
+        String sql = "INSERT INTO hotel (id, city_id, name, star_rating, description, price) VALUES (?, ?, ?, ?, ?, ?)"
+                + " ON DUPLICATE KEY UPDATE city_id = VALUES(city_id), name = VALUES(name), star_rating = VALUES(star_rating), description = VALUES(description), price = VALUES(price)";
         jdbcTemplate.update(sql, hotel.getId(), hotel.getCityId(), hotel.getName(), hotel.getStarRating(), hotel.getDescription(), hotel.getPrice());
+    }
+
+    // Supprimer un hôtel par son ID
+    public void deleteById(int hotelId) {
+        String sql = "DELETE FROM hotel WHERE id = ?";
+        jdbcTemplate.update(sql, hotelId);
     }
 
     // Mapper pour convertir un ResultSet en objet Hotel
