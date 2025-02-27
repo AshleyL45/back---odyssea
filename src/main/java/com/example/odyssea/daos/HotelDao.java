@@ -21,27 +21,27 @@ public class HotelDao {
 
     // Récupérer un hôtel par son ID
     public Optional<Hotel> findById(int hotelId) {
-        String sql = "SELECT * FROM hotels WHERE id = ?";
+        String sql = "SELECT * FROM hotel WHERE id = ?";
         return jdbcTemplate.query(sql, new Object[]{hotelId}, new HotelRowMapper())
                 .stream().findFirst();
     }
 
     // Récupérer tous les hôtels
     public List<Hotel> findAll() {
-        String sql = "SELECT * FROM hotels";
+        String sql = "SELECT * FROM hotel";
         return jdbcTemplate.query(sql, new HotelRowMapper());
     }
 
     // Sauvegarder un hôtel (ajout ou mise à jour)
     public void save(Hotel hotel) {
-        String sql = "INSERT INTO hotels (id, city_id, name, star_rating, description, price) VALUES (?, ?, ?, ?, ?, ?)"
+        String sql = "INSERT INTO hotel (id, city_id, name, star_rating, description, price) VALUES (?, ?, ?, ?, ?, ?)"
                 + " ON DUPLICATE KEY UPDATE city_id = VALUES(city_id), name = VALUES(name), star_rating = VALUES(star_rating), description = VALUES(description), price = VALUES(price)";
         jdbcTemplate.update(sql, hotel.getId(), hotel.getCityId(), hotel.getName(), hotel.getStarRating(), hotel.getDescription(), hotel.getPrice());
     }
 
     // Supprimer un hôtel par son ID
     public void deleteById(int hotelId) {
-        String sql = "DELETE FROM hotels WHERE id = ?";
+        String sql = "DELETE FROM hotel WHERE id = ?";
         jdbcTemplate.update(sql, hotelId);
     }
 

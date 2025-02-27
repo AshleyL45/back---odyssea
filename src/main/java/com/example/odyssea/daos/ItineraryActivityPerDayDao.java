@@ -8,6 +8,7 @@ import org.springframework.stereotype.Repository;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.List;
+import java.util.Optional;
 
 
 @Repository
@@ -19,41 +20,48 @@ public class ItineraryActivityPerDayDao {
         this.jdbcTemplate = jdbcTemplate;
     }
 
-    /**
-     * 🔹 Ajouter une activité à un itinéraire pour un jour donné
-     */
+    // Récupérer une activité par son ID
+    public Optional<ItineraryActivityPerDay> findById(int itineraryStepsId, int activityId, int dayNumber) {
+        String sql = "SELECT * FROM activitiesPerDay WHERE itineraryStepsId = ? AND activityId = ? AND dayNumber = ?";
+        return jdbcTemplate.query(sql, new Object[]{itineraryStepsId, activityId, dayNumber}, new ItineraryActivityRowMapper())
+                .stream().findFirst();
+    }
+
+    // Récupérer toutes les activités d’un itinéraire
+    public List<ItineraryActivityPerDay> findAll() {
+        String sql = "SELECT * FROM activitiesPerDay";
+        return jdbcTemplate.query(sql, new ItineraryActivityRowMapper());
+    }
+
+    // Sauvegarder une activité (ajout)
     public void save(ItineraryActivityPerDay itineraryActivity) {
-        String sql = "INSERT INTO itinerary_activities_per_day (itinerary_steps_id, activity_id, day_number) VALUES (?, ?, ?)";
+        String sql = "INSERT INTO activitiesPerDay (itineraryStepsId, activityId, dayNumber) VALUES (?, ?, ?)";
         jdbcTemplate.update(sql, itineraryActivity.getItineraryStepsId(), itineraryActivity.getActivityId(), itineraryActivity.getDayNumber());
     }
 
-    /**
-     * 🔹 Récupérer toutes les activités d’un itinéraire
-     */
-    public List<ItineraryActivityPerDay> findByItineraryStepsId(int itineraryStepsId) {
-        String sql = "SELECT * FROM itinerary_activities_per_day WHERE itinerary_steps_id = ?";
-        return jdbcTemplate.query(sql, new Object[]{itineraryStepsId}, new ItineraryActivityRowMapper());
+    // Mettre à jour une activité existante
+    public void update(ItineraryActivityPerDay itineraryActivity) {
+        String sql = "UPDATE activitiesPerDay SET dayNumber = ? WHERE itineraryStepsId = ? AND activityId = ?";
+        jdbcTemplate.update(sql, itineraryActivity.getDayNumber(), itineraryActivity.getItineraryStepsId(), itineraryActivity.getActivityId());
     }
 
-    /**
-     * 🔹 Récupérer les activités d’un itinéraire pour un jour spécifique
-     */
-    public List<ItineraryActivityPerDay> findByItineraryStepsIdAndDay(int itineraryStepsId, int dayNumber) {
-        String sql = "SELECT * FROM itinerary_activities_per_day WHERE itinerary_steps_id = ? AND day_number = ?";
-        return jdbcTemplate.query(sql, new Object[]{itineraryStepsId, dayNumber}, new ItineraryActivityRowMapper());
+    // Supprimer une activité par son ID
+    public void deleteById(int itineraryStepsId, int activityId, int dayNumber) {
+        String sql = "DELETE FROM activitiesPerDay WHERE itineraryStepsId = ? AND activityId = ? AND dayNumber = ?";
+        jdbcTemplate.update(sql, itineraryStepsId, activityId, dayNumber);
     }
 
-    /**
-     * 🔹 Mapper pour convertir un `ResultSet` en objet `ItineraryActivityPerDay`
-     */
+    // Mapper pour convertir un ResultSet en objet ItineraryActivityPerDay
     private static class ItineraryActivityRowMapper implements RowMapper<ItineraryActivityPerDay> {
         @Override
         public ItineraryActivityPerDay mapRow(ResultSet rs, int rowNum) throws SQLException {
             return new ItineraryActivityPerDay(
-                    rs.getInt("itinerary_steps_id"),
-                    rs.getInt("activity_id"),
-                    rs.getInt("day_number")
+                    rs.getInt("itineraryStepsId"),
+                    rs.getInt("activityId"),
+                    rs.getInt("dayNumber")
             );
         }
     }
 }
+
+
