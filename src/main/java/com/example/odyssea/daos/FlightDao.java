@@ -3,10 +3,12 @@ package com.example.odyssea.daos;
 import com.example.odyssea.entities.mainTables.Flight;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
+import org.springframework.stereotype.Repository;
 
 import java.time.Duration;
 import java.util.List;
 
+@Repository
 public class FlightDao {
     private final JdbcTemplate jdbcTemplate;
 

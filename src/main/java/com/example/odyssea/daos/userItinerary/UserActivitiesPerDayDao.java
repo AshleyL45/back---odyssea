@@ -3,9 +3,11 @@ package com.example.odyssea.daos.userItinerary;
 import com.example.odyssea.entities.userItinerary.UserActivitiesPerDay;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
+import org.springframework.stereotype.Repository;
 
 import java.util.List;
 
+@Repository
 public class UserActivitiesPerDayDao {
     private final JdbcTemplate jdbcTemplate;
 
