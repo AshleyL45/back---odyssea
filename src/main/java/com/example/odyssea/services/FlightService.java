@@ -66,12 +66,16 @@ public class FlightService {
         }
 
         for (FlightOffersDTO offer : flightDataDTO.getData()) {
+            System.out.println("Offer itineraries: " + offer.getItineraries());
             if (offer.getItineraries().size() < 2) {
                 throw new RuntimeException("There isn't a round trip offer.");
             }
 
             FlightDTO outboundFlight = createFlightDTO(offer.getItineraries().get(0), offer, flightDataDTO.getDictionnary());
             FlightDTO returnFlight = createFlightDTO(offer.getItineraries().get(1), offer, flightDataDTO.getDictionnary());
+
+            /*System.out.println(outboundFlight == null);
+            System.out.println(returnFlight == null);*/
 
             ItineraryDTO itinerary = new ItineraryDTO(outboundFlight, returnFlight, offer.getPrice().getTotalPrice());
             itineraryList.add(itinerary);
@@ -81,8 +85,8 @@ public class FlightService {
 
     // Crée un Flight DTO
     private FlightDTO createFlightDTO(ItineraryDTO itinerary, FlightOffersDTO flightOffer, DictionnaryDTO dictionaries) {
-        System.out.println( "Outbound" + itinerary.getOutboundFlight());
-        System.out.println( "Outbound" + itinerary.getReturnFlight());
+        /*System.out.println( "Outbound" + itinerary.getOutboundFlight());
+        System.out.println( "Outbound" + itinerary.getReturnFlight());*/
 
         if (itinerary == null){
             // System.out.println("Itinerary is null");
@@ -93,7 +97,7 @@ public class FlightService {
         FlightDTO returnFlight = itinerary.getReturnFlight();
 
         if (outboundFlight == null || returnFlight == null) {
-            System.out.println("Outbound Flight or Return Flight is null");
+            //System.out.println("Outbound Flight or Return Flight is null");
             return null;
         }
 

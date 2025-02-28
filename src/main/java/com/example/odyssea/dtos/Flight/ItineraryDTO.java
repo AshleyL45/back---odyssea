@@ -1,11 +1,12 @@
 package com.example.odyssea.dtos.Flight;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
+
 import java.math.BigDecimal;
 
 public class ItineraryDTO {
 
-
-    private FlightDTO outboundFlight; // Vol aller
+    private FlightDTO outboundFlight;// Vol aller
     private FlightDTO returnFlight; // Vol retour
     private BigDecimal totalPrice;
 
