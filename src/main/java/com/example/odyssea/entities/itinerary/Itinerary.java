@@ -10,7 +10,7 @@ public class Itinerary {
     private int idItinerary;
     private String itineraryName;
     private String description;
-    private String homeText;
+    private String shortDescription;
     private int stock;
     private BigDecimal price;
     private Time totalDuration;
@@ -22,7 +22,7 @@ public class Itinerary {
         this.idItinerary = idItinerary;
         this.itineraryName = itineraryName;
         this.description = description;
-        this.homeText = homeText;
+        this.shortDescription = shortDescription;
         this.stock = stock;
         this.price = price;
         this.totalDuration= totalDuration;
@@ -54,12 +54,12 @@ public class Itinerary {
     }
 
 
-    public String getHomeText() {
-        return homeText;
+    public String getShortDescription() {
+        return shortDescription;
     }
 
-    public void setHomeText(String homeText) {
-        this.homeText = homeText;
+    public void setShortDescription(String homeText) {
+        this.shortDescription = homeText;
     }
 
     public int getStock() {
