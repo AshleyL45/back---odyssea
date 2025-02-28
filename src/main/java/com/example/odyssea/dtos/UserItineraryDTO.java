@@ -1,5 +1,7 @@
 package com.example.odyssea.dtos;
 
+import com.example.odyssea.dtos.Flight.FlightDTO;
+
 import java.math.BigDecimal;
 import java.time.Duration;
 import java.util.Date;

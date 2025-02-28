@@ -1,14 +1,13 @@
 package com.example.odyssea.services;
 
 import com.example.odyssea.daos.FlightDao;
-import com.example.odyssea.dtos.FlightDTO;
-import com.example.odyssea.entities.mainTables.Flight;
-import org.springframework.core.ParameterizedTypeReference;
+import com.example.odyssea.dtos.Flight.*;
 import org.springframework.stereotype.Service;
 import org.springframework.web.reactive.function.client.WebClient;
 import reactor.core.publisher.Mono;
 
 import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.List;
 
 @Service
@@ -23,12 +22,14 @@ public class FlightService {
         this.webClient = webClientBuilder.baseUrl("https://test.api.amadeus.com/").build();
     }
 
-    public FlightDTO getFlightDTO(int id){
+   /* public FlightDTO getFlightDTO(int id){
         Flight flight = flightDao.findById(id);
         return new FlightDTO(flight.getId(), flight.getCompanyName(), flight.getDuration(), flight.getDepartureDate(), flight.getDepartureTime(), flight.getDepartureCityIata(), flight.getArrivalDate(), flight.getArrivalTime(), flight.getArrivalCityIata(), flight.getPrice(), flight.getAirplaneName());
-    }
+    }*/
 
-    public Mono<List<FlightDTO>> getFlights(String departureIata, String arrivalIata, LocalDate departureDate, LocalDate arrivalDate, int totalPeople){
+
+    // Récupère les vols de l'API Amadeus
+    public Mono<List<ItineraryDTO>> getFlights(String departureIata, String arrivalIata, LocalDate departureDate, LocalDate arrivalDate, int totalPeople){
 
         return tokenService.getValidToken()
                         .flatMap(token -> (
@@ -45,13 +46,73 @@ public class FlightService {
                                         )
                                         .header("Authorization", "Bearer " + token)
                                         .retrieve()
-                                        .bodyToMono(new ParameterizedTypeReference<List<FlightDTO>>() {})
+                                        .bodyToMono(FlightDataDTO.class)
                                 ))
-                        .flatMap(flights ->
+                .map(this::convertToFlightDTO);
+                        /*.flatMap(flights ->
                         // Sauvegarde chaque vol dans la BDD de façon asynchrone
                         Mono.fromRunnable(() -> flights.forEach(flightDao::save))
                                 .thenReturn(flights) // Retourne la liste après sauvegarde
-        );
+        );*/
 
+    }
+
+    // Récupère les vols et le met dans une liste "flightList"
+    private List<ItineraryDTO> convertToFlightDTO(FlightDataDTO flightDataDTO) {
+        List<ItineraryDTO> itineraryList = new ArrayList<>();
+
+        if (flightDataDTO == null || flightDataDTO.getData() == null) {
+            return itineraryList;
+        }
+
+        for (FlightOffersDTO offer : flightDataDTO.getData()) {
+            if (offer.getItineraries().size() < 2) {
+                throw new RuntimeException("There isn't a round trip offer.");
+            }
+
+            FlightDTO outboundFlight = createFlightDTO(offer.getItineraries().get(0), offer, flightDataDTO.getDictionnary());
+            FlightDTO returnFlight = createFlightDTO(offer.getItineraries().get(1), offer, flightDataDTO.getDictionnary());
+
+            ItineraryDTO itinerary = new ItineraryDTO(outboundFlight, returnFlight, offer.getPrice().getTotalPrice());
+            itineraryList.add(itinerary);
+        }
+        return itineraryList;
+    }
+
+    // Crée un Flight DTO
+    private FlightDTO createFlightDTO(ItineraryDTO itinerary, FlightOffersDTO flightOffer, DictionnaryDTO dictionaries) {
+        System.out.println( "Outbound" + itinerary.getOutboundFlight());
+        System.out.println( "Outbound" + itinerary.getReturnFlight());
+
+        if (itinerary == null){
+            // System.out.println("Itinerary is null");
+            return null;
+        }
+
+        FlightDTO outboundFlight = itinerary.getOutboundFlight();
+        FlightDTO returnFlight = itinerary.getReturnFlight();
+
+        if (outboundFlight == null || returnFlight == null) {
+            System.out.println("Outbound Flight or Return Flight is null");
+            return null;
+        }
+
+        FlightDTO flight = new FlightDTO();
+
+
+        flight.setDepartureCityIata(outboundFlight.getDepartureCityIata());
+        flight.setArrivalCityIata(returnFlight.getArrivalCityIata());
+        flight.setDepartureDateTime(outboundFlight.getDepartureDateTime());
+        flight.setArrivalDateTime(returnFlight.getArrivalDateTime());
+        flight.setDuration(itinerary.getOutboundFlight().getDuration());
+        flight.setPrice(flightOffer.getPrice().getTotalPrice());
+
+        String carrierCode = outboundFlight.getCompanyName();  // La compagnie pour l'aller
+        flight.setCompanyName(dictionaries.getCarriers().getOrDefault(carrierCode, "Inconnu"));
+
+        String aircraftCode = outboundFlight.getAirplaneName(); // Le modèle de l'avion
+        flight.setAirplaneName(dictionaries.getAircraft().getOrDefault(aircraftCode, "Modèle inconnu"));
+
+        return flight;
     }
 }

@@ -1,6 +1,6 @@
 package com.example.odyssea.daos;
 
-import com.example.odyssea.dtos.FlightDTO;
+import com.example.odyssea.dtos.Flight.FlightDTO;
 import com.example.odyssea.entities.mainTables.Flight;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
@@ -86,7 +86,7 @@ public class FlightDao {
 
     public FlightDTO save(FlightDTO flight) {
         String sql = "INSERT INTO flight (companyName, duration, departureTime, departureCityIata, arrivalTime, arrivalCityIata, price, airplaneName) VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
-        jdbcTemplate.update(sql, flight.getCompanyName(), flight.getDuration(), flight.getDepartureTime(), flight.getDepartureCityIata(), flight.getArrivalTime(), flight.getArrivalCityIata(), flight.getPrice(), flight.getAirplaneName());
+        jdbcTemplate.update(sql, flight.getCompanyName(), flight.getDuration(), flight.getDepartureDateTime(), flight.getDepartureCityIata(), flight.getArrivalDateTime(), flight.getArrivalCityIata(), flight.getPrice(), flight.getAirplaneName());
 
         String sqlGetId = "SELECT LAST_INSERT_ID()";
         int id = jdbcTemplate.queryForObject(sqlGetId, Integer.class);
