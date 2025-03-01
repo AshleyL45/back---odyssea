@@ -8,7 +8,6 @@ import java.util.List;
 public class UserItineraryDTO {
 
     private int userId;
-    private BigDecimal price;
     private LocalDate departureDate;
     private String departureCityIata;
     private LocalDate arrivalDate;
@@ -22,9 +21,8 @@ public class UserItineraryDTO {
     }
 
 
-    public UserItineraryDTO(int userId, BigDecimal price, LocalDate departureDate, String departureCityIata, LocalDate arrivalDate, String arrivalCityIata, Duration duration, BigDecimal startingPrice, List<UserItineraryDayDTO> itineraryDays) {
+    public UserItineraryDTO(int userId, LocalDate departureDate, String departureCityIata, LocalDate arrivalDate, String arrivalCityIata, Duration duration, BigDecimal startingPrice, List<UserItineraryDayDTO> itineraryDays) {
         this.userId = userId;
-        this.price = price;
         this.departureDate = departureDate;
         this.departureCityIata = departureCityIata;
         this.arrivalDate = arrivalDate;
@@ -43,13 +41,6 @@ public class UserItineraryDTO {
         this.userId = userId;
     }
 
-    public BigDecimal getPrice() {
-        return price;
-    }
-
-    public void setPrice(BigDecimal price) {
-        this.price = price;
-    }
 
     public LocalDate getDepartureDate() {
         return departureDate;
