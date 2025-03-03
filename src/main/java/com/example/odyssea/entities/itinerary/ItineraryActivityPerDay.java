@@ -1,40 +1,37 @@
 package com.example.odyssea.entities.itinerary;
 
 public class ItineraryActivityPerDay {
-
-    private int itineraryStepsId;
+    private int itineraryStepId;
     private int activityId;
     private int dayNumber;
 
     public ItineraryActivityPerDay() {}
 
-    public ItineraryActivityPerDay(int itineraryStepsId, int activityId, int dayNumber) {
-        this.itineraryStepsId = itineraryStepsId;
+    public ItineraryActivityPerDay(int itineraryStepId, int activityId, int dayNumber) {
+        this.itineraryStepId = itineraryStepId;
         this.activityId = activityId;
         this.dayNumber = dayNumber;
     }
 
-    public int getItineraryStepsId() {
-        return itineraryStepsId;
+    // Getters et Setters
+    public int getItineraryStepId() {
+        return itineraryStepId;
     }
-
-    public void setItineraryStepsId(int itineraryStepsId) {
-        this.itineraryStepsId = itineraryStepsId;
+    public void setItineraryStepId(int itineraryStepId) {
+        this.itineraryStepId = itineraryStepId;
     }
-
     public int getActivityId() {
         return activityId;
     }
-
     public void setActivityId(int activityId) {
         this.activityId = activityId;
     }
-
     public int getDayNumber() {
         return dayNumber;
     }
-
     public void setDayNumber(int dayNumber) {
         this.dayNumber = dayNumber;
     }
 }
+
+

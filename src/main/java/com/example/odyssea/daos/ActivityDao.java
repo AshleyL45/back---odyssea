@@ -1,6 +1,8 @@
 package com.example.odyssea.daos;
 
 import com.example.odyssea.entities.mainTables.Activity;
+import com.example.odyssea.exceptions.ResourceNotFoundException;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.stereotype.Repository;
@@ -15,18 +17,34 @@ public class ActivityDao {
 
     private final JdbcTemplate jdbcTemplate;
 
+    @Autowired
     public ActivityDao(JdbcTemplate jdbcTemplate) {
         this.jdbcTemplate = jdbcTemplate;
     }
 
     /**
-     * 🔹 Sauvegarde une nouvelle activité
+     * Vérifie si la ville existe dans la table city
+     */
+    public boolean cityExists(int cityId) {
+        String sql = "SELECT COUNT(*) FROM city WHERE id = ?";
+        Integer count = jdbcTemplate.queryForObject(sql, Integer.class, cityId);
+        return count != null && count > 0;
+    }
+
+    /**
+     * Vérifie si une activité existe dans la table activity
+     */
+    public boolean existsById(int id) {
+        String sql = "SELECT COUNT(*) FROM activity WHERE id = ?";
+        Integer count = jdbcTemplate.queryForObject(sql, Integer.class, id);
+        return count != null && count > 0;
+    }
+
+    /**
+     * Enregistre une nouvelle activité
      */
     public void save(Activity activity) {
-        String sql = """
-            INSERT INTO activity (cityId, name, type, physicalEffort, duration, description, price)
-            VALUES (?, ?, ?, ?, ?, ?, ?)
-        """;
+        String sql = "INSERT INTO activity (cityId, name, type, physicalEffort, duration, description, price) VALUES (?, ?, ?, ?, ?, ?, ?)";
         jdbcTemplate.update(sql,
                 activity.getCityId(),
                 activity.getName(),
@@ -39,15 +57,11 @@ public class ActivityDao {
     }
 
     /**
-     * 🔹 Met à jour une activité existante
+     * Met à jour une activité existante
      */
     public void update(Activity activity) {
-        String sql = """
-            UPDATE activity 
-            SET cityId = ?, name = ?, type = ?, physicalEffort = ?, duration = ?, description = ?, price = ? 
-            WHERE id = ?
-        """;
-        jdbcTemplate.update(sql,
+        String sql = "UPDATE activity SET cityId = ?, name = ?, type = ?, physicalEffort = ?, duration = ?, description = ?, price = ? WHERE id = ?";
+        int rowsAffected = jdbcTemplate.update(sql,
                 activity.getCityId(),
                 activity.getName(),
                 activity.getType(),
@@ -57,37 +71,36 @@ public class ActivityDao {
                 activity.getPrice(),
                 activity.getId()
         );
+        if (rowsAffected == 0) {
+            throw new ResourceNotFoundException("Activity not found with id: " + activity.getId());
+        }
     }
 
     /**
-     * 🔹 Supprime une activité par ID
+     * Supprime une activité par son identifiant
      */
-    public void deleteById(int activityId) {
+    public void deleteById(int id) {
         String sql = "DELETE FROM activity WHERE id = ?";
-        jdbcTemplate.update(sql, activityId);
+        int rowsAffected = jdbcTemplate.update(sql, id);
+        if (rowsAffected == 0) {
+            throw new ResourceNotFoundException("Activity not found with id: " + id);
+        }
     }
 
     /**
-     * 🔹 Vérifie si une activité existe via son ID
+     * Récupère une activité par son identifiant
      */
-    public boolean existsById(int activityId) {
-        String sql = "SELECT COUNT(*) FROM activity WHERE id = ?";
-        Integer count = jdbcTemplate.queryForObject(sql, new Object[]{activityId}, Integer.class);
-        return count != null && count > 0;
-    }
-
-    /**
-     * 🔹 Récupère une activité par son ID
-     */
-    public Optional<Activity> findById(int activityId) {
+    public Optional<Activity> findById(int id) {
         String sql = "SELECT * FROM activity WHERE id = ?";
-        return jdbcTemplate.query(sql, new Object[]{activityId}, new ActivityRowMapper())
-                .stream()
-                .findFirst();
+        List<Activity> activities = jdbcTemplate.query(sql, new ActivityRowMapper(), id);
+        if (activities.isEmpty()) {
+            throw new ResourceNotFoundException("Activity not found with id: " + id);
+        }
+        return Optional.of(activities.get(0));
     }
 
     /**
-     * 🔹 Récupère toutes les activités
+     * Récupère toutes les activités
      */
     public List<Activity> findAll() {
         String sql = "SELECT * FROM activity";
@@ -95,37 +108,19 @@ public class ActivityDao {
     }
 
     /**
-     * 🔹 Récupère les activités d'une ville spécifique
+     * Récupère les 5 premières activités pour une ville donnée
      */
-    public List<Activity> findActivitiesByCityId(int cityId) {
-        String sql = "SELECT * FROM activity WHERE cityId = ?";
-        return jdbcTemplate.query(sql, new Object[]{cityId}, new ActivityRowMapper());
+    public List<Activity> findTop5ByCityId(int cityId) {
+        String sql = "SELECT * FROM activity WHERE cityId = ? LIMIT 5";
+        List<Activity> activities = jdbcTemplate.query(sql, new ActivityRowMapper(), cityId);
+        if (activities.isEmpty()) {
+            throw new ResourceNotFoundException("No activities found for city id: " + cityId);
+        }
+        return activities;
     }
 
     /**
-     * 🔹 Récupère les activités d'une ville appartenant à un pays donné.
-     */
-    public List<Activity> findActivitiesByCityAndCountry(String cityName, String countryName) {
-        String sql = """
-            SELECT a.*
-            FROM activity a
-            JOIN city c ON a.cityId = c.id
-            JOIN country co ON c.countryId = co.id
-            WHERE co.name = ? AND c.name = ?
-        """;
-        return jdbcTemplate.query(sql, new Object[]{countryName, cityName}, new ActivityRowMapper());
-    }
-
-    /**
-     * 🔹 Compte le nombre total d'activités
-     */
-    public int count() {
-        String sql = "SELECT COUNT(*) FROM activity";
-        return jdbcTemplate.queryForObject(sql, Integer.class);
-    }
-
-    /**
-     * 🔹 RowMapper pour convertir un ResultSet en `Activity`
+     * RowMapper pour transformer un ResultSet en objet Activity
      */
     private static class ActivityRowMapper implements RowMapper<Activity> {
         @Override

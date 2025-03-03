@@ -1,0 +1,106 @@
+package com.example.odyssea.dtos;
+
+import com.example.odyssea.entities.mainTables.Activity;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+
+import java.time.Duration;
+import java.util.Map;
+
+@JsonIgnoreProperties(ignoreUnknown = true)
+public class ActivityDto {
+    private String name;
+    private String description;
+    // Format ISO-8601 (ex. "PT90M")
+    private String minimumDuration;
+    // Contient par exemple { "amount": 25.0 }
+    private Map<String, Object> price;
+
+    public ActivityDto() {}
+
+    /**
+     * Convertit le DTO en entité Activity tout en gérant la conversion de durée
+     */
+    public Activity toActivity(int cityId) {
+        if (this.name == null || this.name.isEmpty()) {
+            throw new IllegalArgumentException("Le champ 'name' est obligatoire !");
+        }
+        int duration = parseDuration(this.minimumDuration);
+        Double parsedPrice = parsePrice(this.price);
+
+        return new Activity(0, cityId, this.name, "Autre", "Faible", duration, this.description, parsedPrice);
+    }
+
+    /**
+     * Convertit une durée au format ISO-8601 en minutes
+     */
+    private int parseDuration(String isoDuration) {
+        if (isoDuration != null && !isoDuration.isEmpty()) {
+            try {
+                Duration duration = Duration.parse(isoDuration);
+                return (int) duration.toMinutes();
+            } catch (Exception e) {
+                System.out.println("[ActivityDto] Erreur de conversion de la durée : " + e.getMessage());
+            }
+        }
+        return 0;
+    }
+
+    /**
+     * Convertit le prix sous forme de Map en Double
+     */
+    private Double parsePrice(Map<String, Object> price) {
+        if (price != null && price.containsKey("amount")) {
+            try {
+                return Double.parseDouble(price.get("amount").toString());
+            } catch (NumberFormatException e) {
+                System.out.println("[ActivityDto] Erreur de conversion du prix : " + e.getMessage());
+            }
+        }
+        return 0.0;
+    }
+
+    /**
+     * Convertit un nombre de minutes en format TIME (HH:MM:00)
+     */
+    public static String convertMinutesToTime(int minutes) {
+        int hours = minutes / 60;
+        int remainingMinutes = minutes % 60;
+        return String.format("%02d:%02d:00", hours, remainingMinutes);
+    }
+
+    /**
+     * Convertit un format TIME (HH:MM:00) en minutes
+     */
+    public static int convertTimeToMinutes(String time) {
+        String[] parts = time.split(":");
+        int hours = Integer.parseInt(parts[0]);
+        int minutes = Integer.parseInt(parts[1]);
+        return hours * 60 + minutes;
+    }
+
+    // Getters et Setters
+    public String getName() {
+        return name;
+    }
+    public void setName(String name) {
+        this.name = name;
+    }
+    public String getDescription() {
+        return description;
+    }
+    public void setDescription(String description) {
+        this.description = description;
+    }
+    public String getMinimumDuration() {
+        return minimumDuration;
+    }
+    public void setMinimumDuration(String minimumDuration) {
+        this.minimumDuration = minimumDuration;
+    }
+    public Map<String, Object> getPrice() {
+        return price;
+    }
+    public void setPrice(Map<String, Object> price) {
+        this.price = price;
+    }
+}
