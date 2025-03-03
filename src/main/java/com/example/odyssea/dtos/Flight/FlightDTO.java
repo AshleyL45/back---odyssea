@@ -1,37 +1,37 @@
-package com.example.odyssea.entities.mainTables;
+package com.example.odyssea.dtos.Flight;
 
 import java.math.BigDecimal;
 import java.time.Duration;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.LocalTime;
 
-public class Flight {
+public class FlightDTO {
     private int id;
     private String companyName;
     private Duration duration;
-    private LocalDate departureDate;
-    private LocalTime departureTime;
+    private LocalDateTime departureDateTime;
     private String departureCityIata;
-    private LocalDate arrivalDate;
-    private LocalTime arrivalTime;
+    private LocalDateTime arrivalDateTime;
     private String arrivalCityIata;
     private BigDecimal price;
     private String airplaneName;
 
+    public FlightDTO() {
+    }
 
-    public Flight(int id, String companyName, Duration duration, LocalDate departureDate, LocalTime departureTime, String departureCityIata, LocalDate arrivalDate, LocalTime arrivalTime, String arrivalCityIata, BigDecimal price, String airplaneName) {
+    public FlightDTO(int id, String companyName, Duration duration, LocalDateTime departureDateTime, String departureCityIata, LocalDateTime arrivalDateTime, String arrivalCityIata, BigDecimal price, String airplaneName) {
         this.id = id;
         this.companyName = companyName;
         this.duration = duration;
-        this.departureDate = departureDate;
-        this.departureTime = departureTime;
+        this.departureDateTime = departureDateTime;
         this.departureCityIata = departureCityIata;
-        this.arrivalDate = arrivalDate;
-        this.arrivalTime = arrivalTime;
+        this.arrivalDateTime = arrivalDateTime;
         this.arrivalCityIata = arrivalCityIata;
         this.price = price;
         this.airplaneName = airplaneName;
     }
+
 
     public int getId() {
         return id;
@@ -57,44 +57,12 @@ public class Flight {
         this.duration = duration;
     }
 
-    public LocalDate getDepartureDate() {
-        return departureDate;
-    }
-
-    public void setDepartureDate(LocalDate departureDate) {
-        this.departureDate = departureDate;
-    }
-
-    public LocalTime getDepartureTime() {
-        return departureTime;
-    }
-
-    public void setDepartureTime(LocalTime departureTime) {
-        this.departureTime = departureTime;
-    }
-
     public String getDepartureCityIata() {
         return departureCityIata;
     }
 
     public void setDepartureCityIata(String departureCityIata) {
         this.departureCityIata = departureCityIata;
-    }
-
-    public LocalDate getArrivalDate() {
-        return arrivalDate;
-    }
-
-    public void setArrivalDate(LocalDate arrivalDate) {
-        this.arrivalDate = arrivalDate;
-    }
-
-    public LocalTime getArrivalTime() {
-        return arrivalTime;
-    }
-
-    public void setArrivalTime(LocalTime arrivalTime) {
-        this.arrivalTime = arrivalTime;
     }
 
     public String getArrivalCityIata() {
@@ -119,5 +87,21 @@ public class Flight {
 
     public void setAirplaneName(String airplaneName) {
         this.airplaneName = airplaneName;
+    }
+
+    public LocalDateTime getDepartureDateTime() {
+        return departureDateTime;
+    }
+
+    public void setDepartureDateTime(LocalDateTime departureDateTime) {
+        this.departureDateTime = departureDateTime;
+    }
+
+    public LocalDateTime getArrivalDateTime() {
+        return arrivalDateTime;
+    }
+
+    public void setArrivalDateTime(LocalDateTime arrivalDateTime) {
+        this.arrivalDateTime = arrivalDateTime;
     }
 }
