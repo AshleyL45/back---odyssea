@@ -3,6 +3,7 @@ package com.example.odyssea.entities.mainTables;
 public class Image {
 
     private int idImage;
+    private int idEntity;
     private String entityType;
     private String sizeType;
     private String link;
@@ -10,8 +11,9 @@ public class Image {
 
 
     public Image(){}
-    public Image(int idImage, String entityType, String sizeType, String link, String altText){
+    public Image(int idImage, int idEntity, String entityType, String sizeType, String link, String altText){
         this.idImage = idImage;
+        this.idEntity =idEntity;
         this.entityType = entityType;
         this.sizeType = sizeType;
         this.link = link;
@@ -27,6 +29,14 @@ public class Image {
         this.idImage = idImages;
     }
 
+    public int getIdEntity() {
+        return idEntity;
+    }
+
+    public void setIdEntity(int idEntity) {
+        this.idEntity = idEntity;
+    }
+
     public String getEntityType() {
         return entityType;
     }
@@ -34,6 +44,7 @@ public class Image {
     public void setEntityType(String entityType) {
         this.entityType = entityType;
     }
+
 
     public String getSizeType() {
         return sizeType;

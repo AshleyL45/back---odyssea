@@ -3,10 +3,12 @@ package com.example.odyssea.daos.userItinerary;
 import com.example.odyssea.entities.userItinerary.UserItineraryStep;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
+import org.springframework.stereotype.Repository;
 
 import java.time.LocalDate;
 import java.util.List;
 
+@Repository
 public class UserItineraryStepDao {
     private final JdbcTemplate jdbcTemplate;
 

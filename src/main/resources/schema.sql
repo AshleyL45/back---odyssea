@@ -472,7 +472,6 @@ CREATE TABLE IF NOT EXISTS `reservation` (
 /*!40101 SET character_set_client = @saved_cs_client */;
 SET FOREIGN_KEY_CHECKS = 1;
 
-
 --
 -- Dumping data for table `reservation`
 --
@@ -546,13 +545,16 @@ CREATE TABLE IF NOT EXISTS `userItinerary` (
   `numberOfPeople` INT NOT NULL,
   `startingPrice` decimal(7,2) DEFAULT NULL,
   `totalDuration` time NOT NULL,
+  `departureCity` VARCHAR(255) NOT NULL,
+  `itineraryName` TEXT,
+  `numberOfAdults` int NOT NULL,
+  `numberOfKids` int NOT NULL DEFAULT 0,
   PRIMARY KEY (`id`),
   KEY `userId` (`userId`),
   CONSTRAINT `userItinerary_ibfk_1` FOREIGN KEY (`userId`) REFERENCES `user` (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 SET FOREIGN_KEY_CHECKS = 1;
-
 
 --
 -- Dumping data for table `userItinerary`

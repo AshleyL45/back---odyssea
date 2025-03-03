@@ -4,9 +4,11 @@ import com.example.odyssea.entities.userItinerary.UserItineraryOption;
 import com.example.odyssea.entities.userItinerary.UserItineraryStep;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
+import org.springframework.stereotype.Repository;
 
 import java.util.List;
 
+@Repository
 public class UserItineraryOptionDao {
     private final JdbcTemplate jdbcTemplate;
 

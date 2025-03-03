@@ -3,10 +3,12 @@ package com.example.odyssea.daos.userAuth;
 import com.example.odyssea.entities.userAuth.User;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
+import org.springframework.stereotype.Repository;
 
 import java.util.List;
 import java.util.Map;
 
+@Repository
 public class UserDao {
     private final JdbcTemplate jdbcTemplate;
 

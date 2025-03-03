@@ -1,12 +1,15 @@
 package com.example.odyssea.daos;
 
+import com.example.odyssea.dtos.Flight.FlightDTO;
 import com.example.odyssea.entities.mainTables.Flight;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
+import org.springframework.stereotype.Repository;
 
 import java.time.Duration;
 import java.util.List;
 
+@Repository
 public class FlightDao {
     private final JdbcTemplate jdbcTemplate;
 
@@ -18,8 +21,10 @@ public class FlightDao {
             rs.getInt("id"),
             rs.getString("companyName"),
             Duration.ofMillis(rs.getLong("duration")), // A voir
+            rs.getDate("departureDate").toLocalDate(),
             rs.getTime("departureTime").toLocalTime(), // A voir
             rs.getString("departureCityIata"),
+            rs.getDate("arrivalDate").toLocalDate(),
             rs.getTime("arrivalTime").toLocalTime(), // A voir
             rs.getString("arrivalCityIata"),
             rs.getBigDecimal("price"),
@@ -77,5 +82,16 @@ public class FlightDao {
         String sqlCheck = "SELECT COUNT(*) FROM flight WHERE id = ?";
         int count = jdbcTemplate.queryForObject(sqlCheck, Integer.class, id);
         return count > 0;
+    }
+
+    public FlightDTO save(FlightDTO flight) {
+        String sql = "INSERT INTO flight (companyName, duration, departureTime, departureCityIata, arrivalTime, arrivalCityIata, price, airplaneName) VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
+        jdbcTemplate.update(sql, flight.getCompanyName(), flight.getDuration(), flight.getDepartureDateTime(), flight.getDepartureCityIata(), flight.getArrivalDateTime(), flight.getArrivalCityIata(), flight.getPrice(), flight.getAirplaneName());
+
+        String sqlGetId = "SELECT LAST_INSERT_ID()";
+        int id = jdbcTemplate.queryForObject(sqlGetId, Integer.class);
+
+        flight.setId(id);
+        return flight;
     }
 }
