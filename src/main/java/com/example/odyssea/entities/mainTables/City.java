@@ -1,7 +1,6 @@
 package com.example.odyssea.entities.mainTables;
 
 public class City {
-
     private int id;
     private int countryId;
     private String name;
@@ -20,50 +19,40 @@ public class City {
         this.latitude = latitude;
     }
 
+    // Getters et Setters
     public int getId() {
         return id;
     }
-
     public void setId(int id) {
         this.id = id;
     }
-
     public int getCountryId() {
         return countryId;
     }
-
     public void setCountryId(int countryId) {
         this.countryId = countryId;
     }
-
     public String getName() {
         return name;
     }
-
     public void setName(String name) {
         this.name = name;
     }
-
     public String getIataCode() {
         return iataCode;
     }
-
     public void setIataCode(String iataCode) {
         this.iataCode = iataCode;
     }
-
     public double getLongitude() {
         return longitude;
     }
-
     public void setLongitude(double longitude) {
         this.longitude = longitude;
     }
-
     public double getLatitude() {
         return latitude;
     }
-
     public void setLatitude(double latitude) {
         this.latitude = latitude;
     }
