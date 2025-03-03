@@ -243,6 +243,7 @@ CREATE TABLE IF NOT EXISTS `flight` (
 /*!40101 SET character_set_client = @saved_cs_client */;
 SET FOREIGN_KEY_CHECKS = 1;
 
+
 --
 -- Dumping data for table `flight`
 --
@@ -470,6 +471,7 @@ CREATE TABLE IF NOT EXISTS `reservation` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 SET FOREIGN_KEY_CHECKS = 1;
+
 --
 -- Dumping data for table `reservation`
 --

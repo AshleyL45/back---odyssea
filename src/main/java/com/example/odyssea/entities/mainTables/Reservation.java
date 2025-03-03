@@ -10,22 +10,26 @@ public class Reservation {
     private String status;
     private Date departureDate;
     private Date returnDate;
-    private int numberOfPeople;
     private Double totalPrice;
     private Date purchase;
+    private int numberOfAdults;
+    private int numberOfKids;
+
+
 
 
     public Reservation(){}
-    public Reservation(int idReservation, int idUser, int idItinerary, String status, Date departureDate, Date returnDate, int numberOfPeople, Double totalPrice, Date purchase){
+    public Reservation(int idReservation, int idUser, int idItinerary, String status, Date departureDate, Date returnDate, Double totalPrice, Date purchase, int numberOfAdults, int numberOfKids){
         this.idReservation = idReservation;
         this.idUser = idUser;
         this.idItinerary = idItinerary;
         this.status = status;
         this.departureDate = departureDate;
         this.returnDate = returnDate;
-        this.numberOfPeople = numberOfPeople;
         this.totalPrice = totalPrice;
         this.purchase = purchase;
+        this.numberOfAdults = numberOfAdults;
+        this.numberOfKids = numberOfKids;
     }
 
 
@@ -77,14 +81,6 @@ public class Reservation {
         this.returnDate = returnDate;
     }
 
-    public int getNumberOfPeople() {
-        return numberOfPeople;
-    }
-
-    public void setNumberOfPeople(int numberOfPeople) {
-        this.numberOfPeople = numberOfPeople;
-    }
-
     public Double getTotalPrice() {
         return totalPrice;
     }
@@ -100,4 +96,23 @@ public class Reservation {
     public void setPurchase(Date purchase) {
         this.purchase = purchase;
     }
+
+    public int getNumberOfAdults() {
+        return numberOfAdults;
+    }
+
+    public void setNumberOfAdults(int numberOfAdults) {
+        this.numberOfAdults = numberOfAdults;
+    }
+
+
+    public int getNumberOfKids() {
+        return numberOfKids;
+    }
+
+    public void setNumberOfKids(int numberOfKids) {
+        this.numberOfKids = numberOfKids;
+    }
+
+
 }
