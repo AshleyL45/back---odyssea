@@ -102,9 +102,9 @@ public class CityDao {
     }
 
     /**
-     * Retrouver le code IATA en fonction du nom de la ville
+     * Retrouver le code IATA et l'id en fonction du nom de la ville
      */
-    public City findIATACodeByCityName(String cityName){
+    public City findCityByName(String cityName){
         String sql = "SELECT * FROM city WHERE name = ?";
         return jdbcTemplate.query(sql, new CityRowMapper(), cityName)
                 .stream()

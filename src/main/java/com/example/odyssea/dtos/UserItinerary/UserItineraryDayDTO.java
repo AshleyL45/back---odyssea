@@ -3,6 +3,7 @@ package com.example.odyssea.dtos.UserItinerary;
 import com.example.odyssea.dtos.ActivityDto;
 import com.example.odyssea.dtos.Flight.FlightItineraryDTO;
 import com.example.odyssea.dtos.HotelDto;
+import org.springframework.beans.factory.annotation.Autowired;
 
 import java.time.LocalDate;
 import java.util.List;
