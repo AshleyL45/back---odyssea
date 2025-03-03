@@ -22,15 +22,14 @@ public class FlightService {
         this.webClient = webClientBuilder.baseUrl("https://test.api.amadeus.com/").build();
     }
 
-   /* public FlightDTO getFlightDTO(int id){
+   /*public FlightDTO getFlightDTO(int id){
         Flight flight = flightDao.findById(id);
         return new FlightDTO(flight.getId(), flight.getCompanyName(), flight.getDuration(), flight.getDepartureDate(), flight.getDepartureTime(), flight.getDepartureCityIata(), flight.getArrivalDate(), flight.getArrivalTime(), flight.getArrivalCityIata(), flight.getPrice(), flight.getAirplaneName());
     }*/
 
 
     // Récupère les vols de l'API Amadeus
-    public Mono<List<ItineraryDTO>> getFlights(String departureIata, String arrivalIata, LocalDate departureDate, LocalDate arrivalDate, int totalPeople){
-
+    public Mono<List<FlightItineraryDTO>> getFlights(String departureIata, String arrivalIata, LocalDate departureDate, LocalDate arrivalDate, int totalPeople){
         return tokenService.getValidToken()
                         .flatMap(token -> (
                                 webClient.get()
@@ -48,7 +47,7 @@ public class FlightService {
                                         .retrieve()
                                         .bodyToMono(FlightDataDTO.class)
                                 ))
-                .map(this::convertToFlightDTO);
+                    .map(this::convertToFlightDTO);
                         /*.flatMap(flights ->
                         // Sauvegarde chaque vol dans la BDD de façon asynchrone
                         Mono.fromRunnable(() -> flights.forEach(flightDao::save))
@@ -58,8 +57,8 @@ public class FlightService {
     }
 
     // Récupère les vols et le met dans une liste "flightList"
-    private List<ItineraryDTO> convertToFlightDTO(FlightDataDTO flightDataDTO) {
-        List<ItineraryDTO> itineraryList = new ArrayList<>();
+    private List<FlightItineraryDTO> convertToFlightDTO(FlightDataDTO flightDataDTO) {
+        List<FlightItineraryDTO> itineraryList = new ArrayList<>();
 
         if (flightDataDTO == null || flightDataDTO.getData() == null) {
             return itineraryList;
@@ -67,24 +66,40 @@ public class FlightService {
 
         for (FlightOffersDTO offer : flightDataDTO.getData()) {
             System.out.println("Offer itineraries: " + offer.getItineraries());
+
             if (offer.getItineraries().size() < 2) {
                 throw new RuntimeException("There isn't a round trip offer.");
             }
 
-            FlightDTO outboundFlight = createFlightDTO(offer.getItineraries().get(0), offer, flightDataDTO.getDictionnary());
-            FlightDTO returnFlight = createFlightDTO(offer.getItineraries().get(1), offer, flightDataDTO.getDictionnary());
+            FlightItineraryDTO outboundItinerary = offer.getItineraries().get(0);
+            FlightItineraryDTO returnItinerary = offer.getItineraries().get(1);
 
-            /*System.out.println(outboundFlight == null);
-            System.out.println(returnFlight == null);*/
+            if (outboundItinerary.getSegments().isEmpty() || returnItinerary.getSegments().isEmpty()) {
+                System.out.println("One of the itineraries has no segments.");
+                continue;
+            }
 
-            ItineraryDTO itinerary = new ItineraryDTO(outboundFlight, returnFlight, offer.getPrice().getTotalPrice());
+            FlightDTO outboundFlight = createFlightDTO(outboundItinerary, offer, flightDataDTO.getDictionnary());
+            FlightDTO returnFlight = createFlightDTO(returnItinerary, offer, flightDataDTO.getDictionnary());
+
+            if (outboundFlight == null || returnFlight == null) {
+                System.out.println("Outbound or return flight is null");
+                continue;
+            }
+
+            FlightItineraryDTO itinerary = new FlightItineraryDTO();
+            itinerary.setSegments(outboundItinerary.getSegments());
+            itinerary.setDuration(outboundItinerary.getDuration());
+
             itineraryList.add(itinerary);
         }
+
         return itineraryList;
     }
 
+
     // Crée un Flight DTO
-    private FlightDTO createFlightDTO(ItineraryDTO itinerary, FlightOffersDTO flightOffer, DictionnaryDTO dictionaries) {
+    private FlightDTO createFlightDTO(FlightItineraryDTO itinerary, FlightOffersDTO flightOffer, DictionnaryDTO dictionaries) {
         /*System.out.println( "Outbound" + itinerary.getOutboundFlight());
         System.out.println( "Outbound" + itinerary.getReturnFlight());*/
 
@@ -93,8 +108,8 @@ public class FlightService {
             return null;
         }
 
-        FlightDTO outboundFlight = itinerary.getOutboundFlight();
-        FlightDTO returnFlight = itinerary.getReturnFlight();
+        FlightSegmentDTO outboundFlight = itinerary.getSegments().get(0);
+        FlightSegmentDTO returnFlight = itinerary.getSegments().getLast();
 
         if (outboundFlight == null || returnFlight == null) {
             //System.out.println("Outbound Flight or Return Flight is null");
@@ -104,18 +119,23 @@ public class FlightService {
         FlightDTO flight = new FlightDTO();
 
 
-        flight.setDepartureCityIata(outboundFlight.getDepartureCityIata());
-        flight.setArrivalCityIata(returnFlight.getArrivalCityIata());
-        flight.setDepartureDateTime(outboundFlight.getDepartureDateTime());
-        flight.setArrivalDateTime(returnFlight.getArrivalDateTime());
-        flight.setDuration(itinerary.getOutboundFlight().getDuration());
+        flight.setDepartureCityIata(outboundFlight.getDeparture().getIataCode());
+        flight.setArrivalCityIata(returnFlight.getArrival().getIataCode());
+        flight.setDepartureDateTime(outboundFlight.getDeparture().getDateTime());
+        flight.setArrivalDateTime(returnFlight.getArrival().getDateTime());
+
+        flight.setDuration(itinerary.getDuration());
+
         flight.setPrice(flightOffer.getPrice().getTotalPrice());
+        System.out.println(flightOffer.getPrice().getTotalPrice());
 
-        String carrierCode = outboundFlight.getCompanyName();  // La compagnie pour l'aller
+        String carrierCode = outboundFlight.getCarrierCode();  // La compagnie pour l'aller
         flight.setCompanyName(dictionaries.getCarriers().getOrDefault(carrierCode, "Inconnu"));
+        System.out.println("Dictionnary company : " + dictionaries.getCarriers());
 
-        String aircraftCode = outboundFlight.getAirplaneName(); // Le modèle de l'avion
+        String aircraftCode = outboundFlight.getAircraftCode().getCode(); // Le modèle de l'avion
         flight.setAirplaneName(dictionaries.getAircraft().getOrDefault(aircraftCode, "Modèle inconnu"));
+        System.out.println("Dictionnary airplane : " + dictionaries.getAircraft());
 
         return flight;
     }

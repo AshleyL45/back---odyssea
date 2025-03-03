@@ -1,6 +1,6 @@
 package com.example.odyssea.dtos.UserItinerary;
 
-import com.example.odyssea.dtos.Flight.ItineraryDTO;
+import com.example.odyssea.dtos.Flight.FlightItineraryDTO;
 
 import java.time.LocalDate;
 
@@ -8,7 +8,7 @@ public class UserItineraryDayDTO {
 
     private String cityName;
     private String countryName;
-    private ItineraryDTO flights;
+    private FlightItineraryDTO flights;
     //ActivityDTO et HôtelDTO
     private int dayNumber;
     private LocalDate date;
@@ -17,7 +17,7 @@ public class UserItineraryDayDTO {
     public UserItineraryDayDTO() {
     }
 
-    public UserItineraryDayDTO(String cityName, String countryName, ItineraryDTO flights, int dayNumber, LocalDate date) {
+    public UserItineraryDayDTO(String cityName, String countryName, FlightItineraryDTO flights, int dayNumber, LocalDate date) {
         this.cityName = cityName;
         this.countryName = countryName;
         this.flights = flights;
@@ -41,11 +41,11 @@ public class UserItineraryDayDTO {
         this.countryName = countryName;
     }
 
-    public ItineraryDTO getFlights() {
+    public FlightItineraryDTO getFlights() {
         return flights;
     }
 
-    public void setFlights(ItineraryDTO flights) {
+    public void setFlights(FlightItineraryDTO flights) {
         this.flights = flights;
     }
 

@@ -1,6 +1,6 @@
 package com.example.odyssea.controllers;
 
-import com.example.odyssea.dtos.Flight.ItineraryDTO;
+import com.example.odyssea.dtos.Flight.FlightItineraryDTO;
 import com.example.odyssea.services.FlightService;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -20,7 +20,7 @@ public class FlightController {
     }
 
     @GetMapping("/all")
-    public Mono<List<ItineraryDTO>> getAFlight(){ // A changer plus tard
+    public Mono<List<FlightItineraryDTO>> getAFlight(){ // A changer plus tard
         return flightService.getFlights("PAR", "BER", LocalDate.parse("2025-05-01"), LocalDate.parse("2025-05-28"), 2);
     }
 }

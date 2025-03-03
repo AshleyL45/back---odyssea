@@ -1,5 +1,6 @@
 package com.example.odyssea.services;
 
+import com.example.odyssea.dtos.Flight.FlightItineraryDTO;
 import com.example.odyssea.dtos.UserItinerary.UserItineraryDTO;
 import com.example.odyssea.dtos.UserItinerary.UserItineraryDayDTO;
 import com.example.odyssea.dtos.UserItinerary.UserPreferencesDTO;
@@ -7,7 +8,6 @@ import com.example.odyssea.entities.mainTables.Option;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
@@ -18,14 +18,16 @@ import java.util.stream.Stream;
 public class UserItineraryService {
     private UserItineraryDTO userItineraryDTO;
     private UserItineraryDayDTO userItineraryDayDTO;
+    private FlightService flightService;
 
 
     public UserItineraryService() {
     }
 
-    public UserItineraryService(UserItineraryDTO userItineraryDTO, UserItineraryDayDTO userItineraryDayDTO) {
+    public UserItineraryService(UserItineraryDTO userItineraryDTO, UserItineraryDayDTO userItineraryDayDTO, FlightService flightService) {
         this.userItineraryDTO = userItineraryDTO;
         this.userItineraryDayDTO = userItineraryDayDTO;
+        this.flightService = flightService;
     }
 
     public UserItineraryDTO generateUserItinerary(UserPreferencesDTO userPreferences) {
@@ -37,6 +39,14 @@ public class UserItineraryService {
         userItinerary.setDepartureCityIata(userPreferences.getDepartureCity()); // A modifier avec une fonction pour convertir des villes en code IATA
         userItinerary.setArrivalDate(userPreferences.getStartDate().plusDays(12));
         userItinerary.setArrivalCityIata(userPreferences.getDepartureCity());
+
+        List<FlightItineraryDTO> flights = flightService.getFlights(
+                userPreferences.getDepartureCity(),
+                userPreferences.getCountrySelection().getFirst().getCitySelection().getFirst().getCityName(),
+                userPreferences.getStartDate(),
+                userPreferences.getStartDate(),
+                userPreferences.getNumberOfAdults() + userPreferences.getNumberOfKids()
+        ).block();
 
         List<UserItineraryDayDTO> userItineraryDays = IntStream.range(0, 12)
                 .mapToObj(i -> new UserItineraryDayDTO())

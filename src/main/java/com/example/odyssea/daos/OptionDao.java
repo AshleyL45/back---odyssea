@@ -18,6 +18,7 @@ public class OptionDao {
     private final RowMapper<Option> optionRowMapper = (rs, _) -> new Option(
             rs.getInt("id"),
             rs.getString("name"),
+            rs.getString("description"),
             rs.getBigDecimal("price")
     );
 
@@ -34,8 +35,16 @@ public class OptionDao {
                 .orElseThrow(() -> new RuntimeException("The option you are looking for does not exist."));
     }
 
+    public Option findPrice (int optionId){
+        String sql = "SELECT name, description, price FROM options WHERE id = ?";
+        return jdbcTemplate.query(sql, optionRowMapper, optionId)
+                .stream()
+                .findFirst()
+                .orElseThrow(() -> new RuntimeException("The option you are looking for does not exist."));
+    }
+
     public Option save (Option option){
-        String sql = "INSERT INTO options (name, price) VALUES (?, ?)";
+        String sql = "INSERT INTO options (name, description, price) VALUES (?, ?, ?)";
         jdbcTemplate.update(sql, option.getName(), option.getPrice());
 
         String sqlGetId = "SELECT LAST_INSERT_ID()";
@@ -50,8 +59,8 @@ public class OptionDao {
             throw new RuntimeException("The option you are looking for does not exist.");
         }
 
-        String sql = "UPDATE options SET name = ?, price = ? WHERE id = ?";
-        int rowsAffected = jdbcTemplate.update(sql, option.getName(), option.getPrice(), id);
+        String sql = "UPDATE options SET name = ?, description = ?, price = ? WHERE id = ?";
+        int rowsAffected = jdbcTemplate.update(sql, option.getName(), option.getDescription(), option.getPrice(), id);
 
         if(rowsAffected <= 0){
             throw new RuntimeException("Failed to update the option with id : " + id);
