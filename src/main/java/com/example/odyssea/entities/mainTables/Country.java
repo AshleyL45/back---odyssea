@@ -1,14 +1,16 @@
 package com.example.odyssea.entities.mainTables;
 
+import java.math.BigDecimal;
+
 public class Country {
     private int id;
     private String name;
     private String continent;
-    private double price;
+    private BigDecimal price;
 
     public Country() {}
 
-    public Country(int id, String name, String continent, double price) {
+    public Country(int id, String name, String continent, BigDecimal price) {
         this.id = id;
         this.name = name;
         this.continent = continent;
@@ -34,10 +36,10 @@ public class Country {
     public void setContinent(String continent) {
         this.continent = continent;
     }
-    public double getPrice() {
+    public BigDecimal getPrice() {
         return price;
     }
-    public void setPrice(double price) {
+    public void setPrice(BigDecimal price) {
         this.price = price;
     }
 }

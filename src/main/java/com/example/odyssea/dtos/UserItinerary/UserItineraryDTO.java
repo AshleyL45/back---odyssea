@@ -11,8 +11,7 @@ public class UserItineraryDTO {
     private LocalDate departureDate;
     private String departureCityIata;
     private LocalDate arrivalDate;
-    private String arrivalCityIata;
-    private Duration duration;
+    private int duration;
     private BigDecimal startingPrice;
     private List<UserItineraryDayDTO> itineraryDays;
 
@@ -21,12 +20,11 @@ public class UserItineraryDTO {
     }
 
 
-    public UserItineraryDTO(int userId, LocalDate departureDate, String departureCityIata, LocalDate arrivalDate, String arrivalCityIata, Duration duration, BigDecimal startingPrice, List<UserItineraryDayDTO> itineraryDays) {
+    public UserItineraryDTO(int userId, LocalDate departureDate, String departureCityIata, LocalDate arrivalDate, int duration, BigDecimal startingPrice, List<UserItineraryDayDTO> itineraryDays) {
         this.userId = userId;
         this.departureDate = departureDate;
         this.departureCityIata = departureCityIata;
         this.arrivalDate = arrivalDate;
-        this.arrivalCityIata = arrivalCityIata;
         this.duration = duration;
         this.startingPrice = startingPrice;
         this.itineraryDays = itineraryDays;
@@ -66,19 +64,11 @@ public class UserItineraryDTO {
         this.arrivalDate = arrivalDate;
     }
 
-    public String getArrivalCityIata() {
-        return arrivalCityIata;
-    }
-
-    public void setArrivalCityIata(String arrivalCityIata) {
-        this.arrivalCityIata = arrivalCityIata;
-    }
-
-    public Duration getDuration() {
+    public int getDuration() {
         return duration;
     }
 
-    public void setDuration(Duration duration) {
+    public void setDuration(int duration) {
         this.duration = duration;
     }
 

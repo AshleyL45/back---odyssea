@@ -100,8 +100,6 @@ public class FlightService {
 
     // Crée un Flight DTO
     private FlightDTO createFlightDTO(FlightItineraryDTO itinerary, FlightOffersDTO flightOffer, DictionnaryDTO dictionaries) {
-        /*System.out.println( "Outbound" + itinerary.getOutboundFlight());
-        System.out.println( "Outbound" + itinerary.getReturnFlight());*/
 
         if (itinerary == null){
             // System.out.println("Itinerary is null");

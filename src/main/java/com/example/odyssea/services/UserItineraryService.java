@@ -1,9 +1,11 @@
 package com.example.odyssea.services;
 
 import com.example.odyssea.daos.CityDao;
+import com.example.odyssea.daos.CountryDao;
 import com.example.odyssea.dtos.Flight.FlightItineraryDTO;
 import com.example.odyssea.dtos.HotelDto;
 import com.example.odyssea.dtos.UserItinerary.*;
+import com.example.odyssea.entities.mainTables.Country;
 import com.example.odyssea.entities.mainTables.Hotel;
 import com.example.odyssea.entities.mainTables.Option;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -11,6 +13,7 @@ import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
@@ -20,26 +23,26 @@ import java.util.stream.Stream;
 public class UserItineraryService {
     private CityDao cityDao;
     private HotelService hotelService;
+    private CountryDao countryDao;
 
 
     public UserItineraryService() {
     }
 
     @Autowired
-    public UserItineraryService( FlightService flightService,CityDao cityDao, HotelService hotelService, HotelDto hotelDto) {
+    public UserItineraryService(CityDao cityDao, HotelService hotelService, CountryDao countryDao) {
         this.cityDao = cityDao;
         this.hotelService = hotelService;
+        this.countryDao = countryDao;
     }
 
     public UserItineraryDTO generateUserItinerary(UserPreferencesDTO userPreferences) {
         UserItineraryDTO userItinerary = new UserItineraryDTO();
 
         userItinerary.setUserId(userPreferences.getUserId());
-        //userItinerary.setStartingPrice(calculateTotal(userPreferences.getCountrySelection(). userPreferences.getNumberOfAdults(), userPreferences.getNumberOfKids()));
         userItinerary.setDepartureDate(userPreferences.getStartDate());
         userItinerary.setDepartureCityIata(userPreferences.getDepartureCity()); // A modifier avec une fonction pour convertir des villes en code IATA
         userItinerary.setArrivalDate(userPreferences.getStartDate().plusDays(12));
-        userItinerary.setArrivalCityIata(userPreferences.getDepartureCity());
 
         // Renvoyer les vols
        /* List<FlightItineraryDTO> flights = flightService.getFlights(
@@ -89,24 +92,40 @@ public class UserItineraryService {
             }
 
             // Assigner un hôtel
-            List<HotelDto> userItineraryDayHotel = assignHotel(userItineraryDay.getCityName(), userPreferences.getHotelStanding());
-            userItineraryDay.getHotels().add(userItineraryDayHotel.get(0));
+            /*List<HotelDto> userItineraryDayHotel = assignHotel(userItineraryDay.getCityName(), userPreferences.getHotelStanding());
+            userItineraryDay.getHotels().add(userItineraryDayHotel.get(0));*/
 
             userItineraryDay.setFlights(null);
 
             i += 1;
         }
 
+        List<BigDecimal> countriesPrices = userPreferences.getCountrySelection()
+                .stream()
+                .map(country -> Optional.ofNullable(countryDao.findByName(country.getCountryName()))
+                        .map(Country::getPrice)
+                        .orElse(BigDecimal.ZERO))
+                .collect(Collectors.toList());
+
+        List<BigDecimal> optionsPrices = userPreferences.getOptions()
+                        .stream()
+                                .map(Option::getPrice)
+                                        .collect(Collectors.toList());
+
+        userItinerary.setStartingPrice(calculateTotal(countriesPrices, optionsPrices, userPreferences.getNumberOfAdults(), userPreferences.getNumberOfKids()));
+        userItinerary.setDuration(12);
         userItinerary.setItineraryDays(userItineraryDays);
 
         return userItinerary;
     }
 
 
-    private BigDecimal calculateTotal(List<BigDecimal> countriesPrices, List<Option> options, Integer numberOfAdults, Integer numberOfKids){
+
+
+    private BigDecimal calculateTotal(List<BigDecimal> countriesPrices, List<BigDecimal> options, Integer numberOfAdults, Integer numberOfKids){
         return Stream.concat(
                     countriesPrices.stream(),
-                    options.stream().map(Option::getPrice)
+                    options.stream()
                 )
                 .reduce(BigDecimal.ZERO, BigDecimal::add)
                 .multiply(BigDecimal.valueOf(numberOfAdults + numberOfKids));
@@ -127,12 +146,15 @@ public class UserItineraryService {
 
     }
 
-    private List<HotelDto> assignHotel(String cityName, int starRating){
+    /*private List<HotelDto> assignHotel(String cityName, int starRating){
         List<Hotel> hotels = hotelService.getHotelsByCityAndStarRating(cityDao.findCityByName(cityName).getId(), starRating);
+        if(hotels.isEmpty()){
+            return null;
+        }
         return hotels.stream()
                 .map(HotelDto::fromEntity)
                 .collect(Collectors.toList());
-    }
+    }*/
 
 
 }
