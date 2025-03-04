@@ -4,6 +4,7 @@ import com.example.odyssea.dtos.Flight.FlightItineraryDTO;
 import com.example.odyssea.services.FlightService;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import reactor.core.publisher.Mono;
 
@@ -19,8 +20,11 @@ public class FlightController {
         this.flightService = flightService;
     }
 
-    @GetMapping("/all")
-    public Mono<List<FlightItineraryDTO>> getAFlight(){ // A changer plus tard
-        return flightService.getFlights("PAR", "BER", LocalDate.parse("2025-05-01"), LocalDate.parse("2025-05-28"), 2);
+    @GetMapping("/shortest")
+    public Mono<FlightItineraryDTO> getAFlight(@RequestParam String departureIata, @RequestParam String arrivalIata, @RequestParam String departureDate,
+                                               @RequestParam String arrivalDate, @RequestParam int numberOfPeople){
+        LocalDate departureDateParsed = LocalDate.parse(departureDate);
+        LocalDate arrivalDateParsed = LocalDate.parse(arrivalDate);
+        return flightService.getShortestFlight(departureIata, arrivalIata, departureDateParsed, arrivalDateParsed, numberOfPeople);
     }
 }

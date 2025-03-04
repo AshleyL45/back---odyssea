@@ -3,7 +3,7 @@ package com.example.odyssea.dtos.Flight;
 import com.example.odyssea.dtos.Flight.AirportDTO;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
-public class FlightSegmentDTO {
+public class FlightSegmentDTO { // Un seul vol
 
     @JsonProperty("id")
     private String id;
