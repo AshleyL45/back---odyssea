@@ -3,6 +3,7 @@ package com.example.odyssea.dtos.UserItinerary;
 import com.example.odyssea.dtos.ActivityDto;
 import com.example.odyssea.dtos.Flight.FlightItineraryDTO;
 import com.example.odyssea.dtos.HotelDto;
+import com.example.odyssea.entities.mainTables.Activity;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import java.time.LocalDate;
@@ -14,7 +15,7 @@ public class UserItineraryDayDTO {
     private String countryName;
     private List<FlightItineraryDTO> flights;
     private List<HotelDto> hotels;
-    private List<ActivityDto> activities;
+    private List<Activity> activities;
     private int dayNumber;
     private LocalDate date;
     private boolean dayOff;
@@ -23,7 +24,7 @@ public class UserItineraryDayDTO {
     public UserItineraryDayDTO() {
     }
 
-    public UserItineraryDayDTO(String cityName, String countryName, List<FlightItineraryDTO> flights, List<HotelDto> hotels, List<ActivityDto> activities, int dayNumber, LocalDate date, boolean dayOff) {
+    public UserItineraryDayDTO(String cityName, String countryName, List<FlightItineraryDTO> flights, List<HotelDto> hotels, List<Activity> activities, int dayNumber, LocalDate date, boolean dayOff) {
         this.cityName = cityName;
         this.countryName = countryName;
         this.flights = flights;
@@ -82,11 +83,11 @@ public class UserItineraryDayDTO {
         this.hotels = hotels;
     }
 
-    public List<ActivityDto> getActivities() {
+    public List<Activity> getActivities() {
         return activities;
     }
 
-    public void setActivities(List<ActivityDto> activities) {
+    public void setActivities(List<Activity> activities) {
         this.activities = activities;
     }
 

@@ -30,30 +30,37 @@ public class FlightService {
     }*/
 
     // Renvoie le vol le plus court au controller
-    public Mono<FlightItineraryDTO> getShortestFlight(String departureIata, String arrivalIata, LocalDate departureDate, LocalDate arrivalDate, int totalPeople){
+    public Mono<FlightItineraryDTO> getShortestFlightMono(String departureIata, String arrivalIata, LocalDate departureDate, LocalDate arrivalDate, int totalPeople){
         return getAllFlights(departureIata, arrivalIata, departureDate, arrivalDate, totalPeople)
                 .map(flightItineraries -> getShortestFlight(flightItineraries));
 
     }
 
     // Récupère les vols de l'API Amadeus
-    private Mono<List<FlightItineraryDTO>> getAllFlights(String departureIata, String arrivalIata, LocalDate departureDate, LocalDate arrivalDate, int totalPeople){
+    public Mono<List<FlightItineraryDTO>> getAllFlights(String departureIata, String arrivalIata, LocalDate departureDate, LocalDate arrivalDate, int totalPeople){
         return tokenService.getValidToken()
                         .flatMap(token -> (
                                 webClient.get()
                                         .uri(uriBuilder -> uriBuilder
                                                 .path("v2/shopping/flight-offers")
-                                                .queryParam("originLocationCode", departureIata) // A changer plus tard
-                                                .queryParam("destinationLocationCode", arrivalIata) // A changer plus tard
-                                                .queryParam("departureDate", departureDate.toString()) // A changer plus tard
-                                                .queryParam("returnDate", arrivalDate.toString()) // A changer plus tard
-                                                .queryParam("adults", totalPeople) // A changer plus tard
-                                                .queryParam("max", 2) // A changer plus tard
+                                                .queryParam("originLocationCode", departureIata)
+                                                .queryParam("destinationLocationCode", arrivalIata)
+                                                .queryParam("departureDate", departureDate.toString())
+                                                .queryParam("returnDate", arrivalDate.toString())
+                                                .queryParam("adults", totalPeople)
+                                                .queryParam("max", 2)
                                                 .build()
                                         )
                                         .header("Authorization", "Bearer " + token)
                                         .retrieve()
                                         .bodyToMono(FlightDataDTO.class)
+                                        .doOnNext(response -> {
+                                            if (response == null || response.getData() == null || response.getData().isEmpty()) {
+                                                System.out.println("Aucune donnée de vol retournée.");
+                                            } else {
+                                                System.out.println("Données reçues : " + response.getData());
+                                            }
+                                        })
                                 ))
                     .map(this::convertToFlightDTO);
                         /*.flatMap(flights ->
@@ -69,6 +76,7 @@ public class FlightService {
         List<FlightItineraryDTO> itineraryList = new ArrayList<>();
 
         if (flightDataDTO == null || flightDataDTO.getData() == null) {
+            System.out.println("FlightData is null");
             return itineraryList;
         }
 
@@ -81,19 +89,28 @@ public class FlightService {
             FlightItineraryDTO outboundItinerary = offer.getItineraries().get(0);
             FlightItineraryDTO returnItinerary = offer.getItineraries().get(1);
 
+            System.out.println("First flight : " + outboundItinerary );
+            System.out.println("Return flight : " + returnItinerary );
+
             if (outboundItinerary.getSegments().isEmpty() || returnItinerary.getSegments().isEmpty()) {
-               throw  new RuntimeException("One of the itineraries has no segments (outbound or return flight).");
+               //throw  new RuntimeException("One of the itineraries has no segments (outbound or return flight).");
+                return  null;
             }
 
-            FlightDTO outboundFlight = createFlightDTO(outboundItinerary, offer, flightDataDTO.getDictionnary());
-            FlightDTO returnFlight = createFlightDTO(returnItinerary, offer, flightDataDTO.getDictionnary());
+            /*FlightDTO outboundFlight = createFlightDTO(outboundItinerary, offer, flightDataDTO.getDictionnary());
+            FlightDTO returnFlight = createFlightDTO(returnItinerary, offer, flightDataDTO.getDictionnary());*/
 
             FlightItineraryDTO itinerary = new FlightItineraryDTO();
             itinerary.setSegments(outboundItinerary.getSegments());
+            System.out.println(itinerary);
             itinerary.setDuration(outboundItinerary.getDuration());
 
             itineraryList.add(itinerary);
         }
+
+        /*if (itineraryList.isEmpty()) {
+            throw new RuntimeException("Aucun itinéraire de vol valide trouvé.");
+        }*/
 
         return itineraryList;
     }
@@ -138,6 +155,9 @@ public class FlightService {
 
     // Trouver le vol le plus court
     private FlightItineraryDTO getShortestFlight(List<FlightItineraryDTO> flightItineraries){
+        if (flightItineraries == null || flightItineraries.isEmpty()) {
+            return null;
+        }
         return flightItineraries
                 .stream()
                 .min(Comparator.comparing(flightItineraryDTO -> flightItineraryDTO.getDuration().toHours()))

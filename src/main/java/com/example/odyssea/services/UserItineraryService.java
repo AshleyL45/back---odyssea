@@ -2,9 +2,9 @@ package com.example.odyssea.services;
 
 import com.example.odyssea.daos.CityDao;
 import com.example.odyssea.daos.CountryDao;
-import com.example.odyssea.dtos.Flight.FlightItineraryDTO;
 import com.example.odyssea.dtos.HotelDto;
 import com.example.odyssea.dtos.UserItinerary.*;
+import com.example.odyssea.entities.mainTables.Activity;
 import com.example.odyssea.entities.mainTables.Country;
 import com.example.odyssea.entities.mainTables.Hotel;
 import com.example.odyssea.entities.mainTables.Option;
@@ -12,6 +12,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -41,7 +42,7 @@ public class UserItineraryService {
 
         userItinerary.setUserId(userPreferences.getUserId());
         userItinerary.setDepartureDate(userPreferences.getStartDate());
-        userItinerary.setDepartureCityIata(userPreferences.getDepartureCity()); // A modifier avec une fonction pour convertir des villes en code IATA
+        userItinerary.setDepartureCityIata(cityDao.findCityByName(userPreferences.getDepartureCity()).getIataCode());
         userItinerary.setArrivalDate(userPreferences.getStartDate().plusDays(12));
 
         // Renvoyer les vols
@@ -73,11 +74,15 @@ public class UserItineraryService {
             int dayNumber = userItineraryDay.getDayNumber();
 
             if(dayNumber <=  4){
+                // Assigner une activité
                 assignCity(userItineraryDay, userPreferences.getCountrySelection().getFirst(), dayNumber);
+                assignActivity(userItineraryDay, userPreferences.getCountrySelection().getFirst());
             } else if (dayNumber <= 8){
                 assignCity(userItineraryDay, userPreferences.getCountrySelection().get(1), dayNumber);
+                assignActivity(userItineraryDay, userPreferences.getCountrySelection().get(1));
             } else if (dayNumber <= 12){
                 assignCity(userItineraryDay, userPreferences.getCountrySelection().getLast(), dayNumber);
+                assignActivity(userItineraryDay, userPreferences.getCountrySelection().get(2));
             } else {
                 userItineraryDay.setCountryName(null);
             }
@@ -93,7 +98,9 @@ public class UserItineraryService {
 
             // Assigner un hôtel
             /*List<HotelDto> userItineraryDayHotel = assignHotel(userItineraryDay.getCityName(), userPreferences.getHotelStanding());
-            userItineraryDay.getHotels().add(userItineraryDayHotel.get(0));*/
+            userItineraryDay.getHotels().add(userItineraryDayHotel.get(i));*/
+
+
 
             userItineraryDay.setFlights(null);
 
@@ -121,7 +128,7 @@ public class UserItineraryService {
 
 
 
-
+    // Calculer le prix total
     private BigDecimal calculateTotal(List<BigDecimal> countriesPrices, List<BigDecimal> options, Integer numberOfAdults, Integer numberOfKids){
         return Stream.concat(
                     countriesPrices.stream(),
@@ -131,6 +138,7 @@ public class UserItineraryService {
                 .multiply(BigDecimal.valueOf(numberOfAdults + numberOfKids));
     }
 
+    // Assigner la ville
     private void assignCity(UserItineraryDayDTO day, CountrySelectionDTO country, int dayNumber){
         if(country.getCitySelection().size() != 2){
             throw new RuntimeException("A country must have 2 cities");
@@ -139,14 +147,15 @@ public class UserItineraryService {
         day.setCountryName(country.getCountryName());
 
         if((dayNumber % 4) <= 2 && (dayNumber % 4) != 0){
-            day.setCityName(country.getCitySelection().get(0).getCityName());
+            day.setCityName(country.getCitySelection().getFirst().getCityName());
         } else {
             day.setCityName(country.getCitySelection().get(1).getCityName());
         }
 
     }
 
-    /*private List<HotelDto> assignHotel(String cityName, int starRating){
+    // Assigner un hôtel
+    private List<HotelDto> assignHotel(String cityName, int starRating){
         List<Hotel> hotels = hotelService.getHotelsByCityAndStarRating(cityDao.findCityByName(cityName).getId(), starRating);
         if(hotels.isEmpty()){
             return null;
@@ -154,7 +163,47 @@ public class UserItineraryService {
         return hotels.stream()
                 .map(HotelDto::fromEntity)
                 .collect(Collectors.toList());
-    }*/
+    }
+
+    // Assigner une activité
+    private List<Activity> assignActivity(UserItineraryDayDTO day, CountrySelectionDTO countrySelection){
+        if(day.isDayOff()){
+            return null;
+        }
+
+        // Les activités du jour
+        List<Activity> dayActivities = day.getActivities();
+        //System.out.println("Day activities 1: " + dayActivities);
+        if(dayActivities == null){
+            dayActivities = new ArrayList<>();
+            day.setActivities(dayActivities);
+        }
+
+        // Les villes du pays en question
+        List<CitySelectionDTO> cities = countrySelection.getCitySelection();
+        CitySelectionDTO firstCity = cities.getFirst();
+        CitySelectionDTO secondCity = cities.get(1);
+
+        System.out.println("First city : " + firstCity.getActivities().getFirst().getName() + " Second city : " + secondCity.getActivities().getFirst().getName() );
+
+
+        // Vérifier s'il y a plus de deux activités dans une ville
+        if(firstCity.getActivities().size() > 2 || secondCity.getActivities().size() > 2){
+            throw new RuntimeException("There can't be more then 3 activities per city.");
+        }
+        System.out.println("Day activities 2 : " + dayActivities);
+
+        if((day.getDayNumber() % 4) == 2){ // Si c'est le deuxième jour dans un pays
+           dayActivities.add(firstCity.getActivities().getFirst());
+        } else if((day.getDayNumber() % 4) == 3){ // Si c'est le troisième jour dans un pays
+            dayActivities.add(secondCity.getActivities().getFirst());
+        } else if (day.getDayNumber() % 4 == 0){ // Si c'est le quatrième jour dans un pays
+            dayActivities.add(secondCity.getActivities().get(1));
+        }
+        System.out.println("Day activities 3 : " + dayActivities);
+        return dayActivities;
+
+    }
 
 
 }

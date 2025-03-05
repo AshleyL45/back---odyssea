@@ -25,6 +25,6 @@ public class FlightController {
                                                @RequestParam String arrivalDate, @RequestParam int numberOfPeople){
         LocalDate departureDateParsed = LocalDate.parse(departureDate);
         LocalDate arrivalDateParsed = LocalDate.parse(arrivalDate);
-        return flightService.getShortestFlight(departureIata, arrivalIata, departureDateParsed, arrivalDateParsed, numberOfPeople);
+        return flightService.getShortestFlightMono(departureIata, arrivalIata, departureDateParsed, arrivalDateParsed, numberOfPeople);
     }
 }
