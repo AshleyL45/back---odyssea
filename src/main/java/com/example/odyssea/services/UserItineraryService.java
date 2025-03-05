@@ -14,6 +14,7 @@ import org.springframework.stereotype.Service;
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
@@ -97,10 +98,13 @@ public class UserItineraryService {
             }
 
             // Assigner un hôtel
-            /*List<HotelDto> userItineraryDayHotel = assignHotel(userItineraryDay.getCityName(), userPreferences.getHotelStanding());
-            userItineraryDay.getHotels().add(userItineraryDayHotel.get(i));*/
+            List<HotelDto> userItineraryDayHotels = assignHotel(userItineraryDay.getCityName(), userPreferences.getHotelStanding());
+            if(userItineraryDay.getHotels() == null){
+                userItineraryDay.setHotels(new ArrayList<>());
+            }
 
-
+            double random = Math.random() * userItineraryDayHotels.size();
+            userItineraryDay.getHotels().add(userItineraryDayHotels.get((int) random));
 
             userItineraryDay.setFlights(null);
 
@@ -130,13 +134,25 @@ public class UserItineraryService {
 
     // Calculer le prix total
     private BigDecimal calculateTotal(List<BigDecimal> countriesPrices, List<BigDecimal> options, Integer numberOfAdults, Integer numberOfKids){
-        return Stream.concat(
-                    countriesPrices.stream(),
-                    options.stream()
-                )
-                .reduce(BigDecimal.ZERO, BigDecimal::add)
-                .multiply(BigDecimal.valueOf(numberOfAdults + numberOfKids));
+
+        BigDecimal totalCountriesPrices = countriesPrices.stream()
+                .filter(Objects::nonNull)  // Filtre les valeurs nulles
+                .reduce(BigDecimal.ZERO, BigDecimal::add);
+
+        BigDecimal totalOptions = options.stream()
+                .filter(Objects::nonNull)  // Filtre les valeurs nulles
+                .reduce(BigDecimal.ZERO, BigDecimal::add);
+
+        int totalPeople = (numberOfAdults != null ? numberOfAdults : 0) + (numberOfKids != null ? numberOfKids : 0);
+
+
+        if (totalPeople == 0) {
+            return BigDecimal.ZERO;
+        }
+
+        return totalCountriesPrices.add(totalOptions).multiply(BigDecimal.valueOf(totalPeople));
     }
+
 
     // Assigner la ville
     private void assignCity(UserItineraryDayDTO day, CountrySelectionDTO country, int dayNumber){
@@ -184,14 +200,10 @@ public class UserItineraryService {
         CitySelectionDTO firstCity = cities.getFirst();
         CitySelectionDTO secondCity = cities.get(1);
 
-        System.out.println("First city : " + firstCity.getActivities().getFirst().getName() + " Second city : " + secondCity.getActivities().getFirst().getName() );
-
-
         // Vérifier s'il y a plus de deux activités dans une ville
         if(firstCity.getActivities().size() > 2 || secondCity.getActivities().size() > 2){
-            throw new RuntimeException("There can't be more then 3 activities per city.");
+            throw new RuntimeException("There can't be more then 2 activities per city.");
         }
-        System.out.println("Day activities 2 : " + dayActivities);
 
         if((day.getDayNumber() % 4) == 2){ // Si c'est le deuxième jour dans un pays
            dayActivities.add(firstCity.getActivities().getFirst());
@@ -200,7 +212,7 @@ public class UserItineraryService {
         } else if (day.getDayNumber() % 4 == 0){ // Si c'est le quatrième jour dans un pays
             dayActivities.add(secondCity.getActivities().get(1));
         }
-        System.out.println("Day activities 3 : " + dayActivities);
+
         return dayActivities;
 
     }
