@@ -5,6 +5,7 @@ import com.example.odyssea.entities.mainTables.Hotel;
 import com.example.odyssea.services.HotelService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
+import reactor.core.publisher.Mono;
 
 import java.util.List;
 
@@ -73,5 +74,10 @@ public class HotelController {
     @GetMapping("/by-city-and-star")
     public List<Hotel> getHotelsByCityAndStar(@RequestParam int cityId, @RequestParam int starRating) {
         return hotelService.getHotelsByCityAndStarRating(cityId, starRating);
+    }
+
+    @PostMapping("/from-amadeus")
+    public Mono<Void> createHotelFromAmadeus(@RequestParam String amadeusHotelId) {
+        return hotelService.createHotelFromAmadeus(amadeusHotelId);
     }
 }
