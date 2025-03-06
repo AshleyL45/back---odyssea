@@ -16,8 +16,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
+import java.sql.Date;
 import java.time.LocalDate;
-import java.time.ZoneId;
 import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
@@ -46,23 +46,31 @@ public class UserItineraryService {
         this.userDailyPlanService = userDailyPlanService;
     }
 
-    private LocalDate convertToLocalDate(Date date){
-        return date.toInstant()
-                .atZone(ZoneId.systemDefault())
-                .toLocalDate();
+    private LocalDate convertToLocalDate(Date date) {
+        if (date == null) {
+            return null;
+        }
+        return date.toLocalDate();
     }
+
 
     public UserItineraryDTO toUserItineraryDTO (UserItinerary userItinerary){
         LocalDate startDate = convertToLocalDate(userItinerary.getStartDate());
         LocalDate endDate = convertToLocalDate(userItinerary.getEndDate());
 
         List<UserItineraryStep> daysEntities = userItineraryStepDao.findDailyPlansOfAnItinerary(userItinerary.getId());
+        System.out.println("Steps found for itinerary " + userItinerary.getId() + ": " + daysEntities.size());
         List<UserItineraryDayDTO> days = new ArrayList<>();
         for(UserItineraryStep day : daysEntities){
             days.add( userDailyPlanService.toUserItineraryStep(userItinerary, day));
+
         }
 
+        System.out.println("Itinerary ID: " + userItinerary.getId() + ", Days: " + days.size());
+
+
         return new UserItineraryDTO(
+                userItinerary.getId(),
                 userItinerary.getUserId(),
                 startDate,
                 endDate,
@@ -79,7 +87,6 @@ public class UserItineraryService {
 
     public UserItineraryDTO generateUserItinerary(UserPreferencesDTO userPreferences) {
         UserItineraryDTO userItinerary = new UserItineraryDTO();
-
         userItinerary.setUserId(userPreferences.getUserId());
         userItinerary.setStartDate(userPreferences.getStartDate());
         userItinerary.setDepartureCity(cityDao.findCityByName(userPreferences.getDepartureCity()).getIataCode());
@@ -166,6 +173,8 @@ public class UserItineraryService {
         userItinerary.setDuration(13);
         userItinerary.setItineraryDays(userItineraryDays);
 
+        // Sauvegarder dans la BDD puis récupérer l'id
+
         return userItinerary;
     }
 
@@ -177,6 +186,7 @@ public class UserItineraryService {
         for(UserItinerary userItinerary : userItineraries){
             userItineraryDTOs.add(toUserItineraryDTO(userItinerary));
         }
+        System.out.println("Days of itinerary  all itineraries: " + userItineraryDTOs.size());
         return userItineraryDTOs;
     }
 
@@ -184,6 +194,7 @@ public class UserItineraryService {
     // Retourner un itinéraire
     public UserItineraryDTO getAUserItineraryById(int userItineraryId){
         UserItinerary userItinerary = userItineraryDao.findById(userItineraryId);
+        System.out.println("Days of itinerary : " + toUserItineraryDTO(userItinerary).getItineraryName());
         return toUserItineraryDTO(userItinerary);
     }
 

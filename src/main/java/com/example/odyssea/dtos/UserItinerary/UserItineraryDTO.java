@@ -9,6 +9,7 @@ import java.util.Date;
 import java.util.List;
 
 public class UserItineraryDTO {
+    private int id;
     private int userId;
     private LocalDate startDate;
     private LocalDate endDate;
@@ -20,7 +21,8 @@ public class UserItineraryDTO {
     private int numberOfKids;
     private List<UserItineraryDayDTO> itineraryDays;
 
-    public UserItineraryDTO(int userId, LocalDate startDate, LocalDate endDate, int duration, String departureCity, BigDecimal startingPrice, String itineraryName, int numberOfAdults, int numberOfKids, List<UserItineraryDayDTO> itineraryDays) {
+    public UserItineraryDTO(int id, int userId, LocalDate startDate, LocalDate endDate, int duration, String departureCity, BigDecimal startingPrice, String itineraryName, int numberOfAdults, int numberOfKids, List<UserItineraryDayDTO> itineraryDays) {
+        this.id = id;
         this.userId = userId;
         this.startDate = startDate;
         this.endDate = endDate;
@@ -36,7 +38,13 @@ public class UserItineraryDTO {
     public UserItineraryDTO() {
     }
 
+    public int getId() {
+        return id;
+    }
 
+    public void setId(int id) {
+        this.id = id;
+    }
 
     public int getUserId() {
         return userId;

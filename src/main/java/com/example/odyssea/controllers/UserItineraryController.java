@@ -18,7 +18,7 @@ public class UserItineraryController {
         this.userItineraryService = userItineraryService;
     }
 
-    // Avoir tous les itinéraires d'un utilisateur
+    // Avoir tous les itinéraires personnalisés d'un utilisateur
     @GetMapping("/all/{userId}")
     public ResponseEntity<List<UserItineraryDTO>> getAllUserItineraries(@PathVariable int userId){
         List<UserItineraryDTO> userItineraryDTOs = userItineraryService.getAllUserItineraries(userId);

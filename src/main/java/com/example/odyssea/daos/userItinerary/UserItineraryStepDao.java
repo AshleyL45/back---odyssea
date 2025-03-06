@@ -66,14 +66,14 @@ public class UserItineraryStepDao {
     public List<Hotel> getHotelInADay(int userItineraryId, int dayNumber){
         String sql = "SELECT hotel.* FROM userDailyPlan \n" +
                 "INNER JOIN hotel ON userDailyPlan.hotelId = hotel.id\n" +
-                "WHERE userItineraryId = ? AND dayNumber = ?;";
+                "WHERE userItineraryId = ? AND dayNumber = ?";
         return jdbcTemplate.query(sql, new Object[]{userItineraryId, dayNumber}, new BeanPropertyRowMapper<>(Hotel.class));
     }
 
     public List<Activity> getActivitiesInADay(int userItineraryId, int dayNumber){
         String sql = "SELECT activity.* FROM userDailyPlan \n" +
                 "INNER JOIN activity ON userDailyPlan.activityId = activity.id\n" +
-                "WHERE userItineraryId = ? AND dayNumber = ?;";
+                "WHERE userItineraryId = ? AND dayNumber = ?";
         return jdbcTemplate.query(sql, new Object[]{userItineraryId, dayNumber}, new BeanPropertyRowMapper<>(Activity.class));
     }
 

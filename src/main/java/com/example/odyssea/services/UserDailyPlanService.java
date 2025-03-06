@@ -34,7 +34,7 @@ public class UserDailyPlanService {
     public UserItineraryDayDTO toUserItineraryStep(UserItinerary userItinerary, UserItineraryStep userItineraryStep){
         String cityName = cityDao.findById(userItineraryStep.getCityId()).map(City::getName).orElseThrow(() -> new RuntimeException("City not found."));
         String countryName = countryDao.findByCityName(cityName).map(Country::getName).orElseThrow(() -> new RuntimeException("Country not found."));
-        LocalDate date = userItinerary.getStartDate().toInstant().atZone(ZoneId.systemDefault()).toLocalDate().plusDays(userItineraryStep.getDayNumber());
+        LocalDate date = userItinerary.getStartDate().toLocalDate().plusDays(userItineraryStep.getDayNumber());
 
         List<Hotel> hotels = userItineraryStepDao.getHotelInADay(userItinerary.getId(), userItineraryStep.getDayNumber());
         List<HotelDto> hotelDtos = new ArrayList<>();
