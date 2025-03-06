@@ -3,6 +3,7 @@ package com.example.odyssea.services;
 import com.example.odyssea.daos.CityDao;
 import com.example.odyssea.daos.CountryDao;
 import com.example.odyssea.daos.userItinerary.UserItineraryDao;
+import com.example.odyssea.daos.userItinerary.UserItineraryStepDao;
 import com.example.odyssea.dtos.HotelDto;
 import com.example.odyssea.dtos.UserItinerary.*;
 import com.example.odyssea.entities.mainTables.Activity;
@@ -10,14 +11,14 @@ import com.example.odyssea.entities.mainTables.Country;
 import com.example.odyssea.entities.mainTables.Hotel;
 import com.example.odyssea.entities.mainTables.Option;
 import com.example.odyssea.entities.userItinerary.UserItinerary;
+import com.example.odyssea.entities.userItinerary.UserItineraryStep;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Objects;
-import java.util.Optional;
+import java.time.LocalDate;
+import java.time.ZoneId;
+import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
@@ -28,17 +29,52 @@ public class UserItineraryService {
     private HotelService hotelService;
     private CountryDao countryDao;
     private UserItineraryDao userItineraryDao;
+    private UserItineraryStepDao userItineraryStepDao;
+    private UserDailyPlanService userDailyPlanService;
 
+    public UserItineraryService(UserItineraryStepDao userItineraryStepDao) {
 
-    public UserItineraryService() {
     }
 
     @Autowired
-    public UserItineraryService(CityDao cityDao, HotelService hotelService, CountryDao countryDao, UserItineraryDao userItineraryDao) {
+    public UserItineraryService(CityDao cityDao, HotelService hotelService, CountryDao countryDao, UserItineraryDao userItineraryDao, UserItineraryStepDao userItineraryStepDao, UserDailyPlanService userDailyPlanService) {
         this.cityDao = cityDao;
         this.hotelService = hotelService;
         this.countryDao = countryDao;
         this.userItineraryDao = userItineraryDao;
+        this.userItineraryStepDao = userItineraryStepDao;
+        this.userDailyPlanService = userDailyPlanService;
+    }
+
+    private LocalDate convertToLocalDate(Date date){
+        return date.toInstant()
+                .atZone(ZoneId.systemDefault())
+                .toLocalDate();
+    }
+
+    public UserItineraryDTO toUserItineraryDTO (UserItinerary userItinerary){
+        LocalDate startDate = convertToLocalDate(userItinerary.getStartDate());
+        LocalDate endDate = convertToLocalDate(userItinerary.getEndDate());
+
+        List<UserItineraryStep> daysEntities = userItineraryStepDao.findDailyPlansOfAnItinerary(userItinerary.getId());
+        List<UserItineraryDayDTO> days = new ArrayList<>();
+        for(UserItineraryStep day : daysEntities){
+            days.add( userDailyPlanService.toUserItineraryStep(userItinerary, day));
+        }
+
+        return new UserItineraryDTO(
+                userItinerary.getUserId(),
+                startDate,
+                endDate,
+                userItinerary.getTotalDuration(),
+                userItinerary.getDepartureCity(),
+                userItinerary.getStartingPrice(),
+                userItinerary.getItineraryName(),
+                userItinerary.getNumberOfAdults(),
+                userItinerary.getNumberOfKids(),
+                days
+        );
+
     }
 
     public UserItineraryDTO generateUserItinerary(UserPreferencesDTO userPreferences) {
@@ -134,11 +170,21 @@ public class UserItineraryService {
     }
 
     // Retourner la liste de tous les itinéraires d'un utilisateur
+    public List<UserItineraryDTO> getAllUserItineraries(int userId){
+        List<UserItinerary> userItineraries = userItineraryDao.findAllUserItineraries(userId);
+        List<UserItineraryDTO> userItineraryDTOs = new ArrayList<>();
+
+        for(UserItinerary userItinerary : userItineraries){
+            userItineraryDTOs.add(toUserItineraryDTO(userItinerary));
+        }
+        return userItineraryDTOs;
+    }
+
 
     // Retourner un itinéraire
     public UserItineraryDTO getAUserItineraryById(int userItineraryId){
         UserItinerary userItinerary = userItineraryDao.findById(userItineraryId);
-        return UserItineraryDTO.toUserItineraryEntity(userItinerary);
+        return toUserItineraryDTO(userItinerary);
     }
 
 

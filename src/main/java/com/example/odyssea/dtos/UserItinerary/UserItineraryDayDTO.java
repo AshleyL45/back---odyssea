@@ -1,9 +1,11 @@
 package com.example.odyssea.dtos.UserItinerary;
 
+import com.example.odyssea.daos.userItinerary.UserItineraryStepDao;
 import com.example.odyssea.dtos.ActivityDto;
 import com.example.odyssea.dtos.Flight.FlightItineraryDTO;
 import com.example.odyssea.dtos.HotelDto;
 import com.example.odyssea.entities.mainTables.Activity;
+import com.example.odyssea.entities.userItinerary.UserItineraryStep;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import java.time.LocalDate;

@@ -19,12 +19,18 @@ public class UserItineraryController {
     }
 
     // Avoir tous les itinéraires d'un utilisateur
-    /*@GetMapping("/all/${userId}")
+    @GetMapping("/all/{userId}")
     public ResponseEntity<List<UserItineraryDTO>> getAllUserItineraries(@PathVariable int userId){
-
-    }*/
+        List<UserItineraryDTO> userItineraryDTOs = userItineraryService.getAllUserItineraries(userId);
+        return ResponseEntity.status(HttpStatus.OK).body(userItineraryDTOs);
+    }
 
     // Avoir un itinéraire en particulier
+    @GetMapping("/{userItineraryId}")
+    public ResponseEntity<UserItineraryDTO> getAnItinerary(@PathVariable int userItineraryId){
+        UserItineraryDTO userItinerary = userItineraryService.getAUserItineraryById(userItineraryId);
+        return ResponseEntity.status(HttpStatus.OK).body(userItinerary);
+    }
 
     // Générer un itinéraire
     @PostMapping("/generate")

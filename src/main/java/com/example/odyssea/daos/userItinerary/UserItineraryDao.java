@@ -58,6 +58,11 @@ public class UserItineraryDao {
                 .orElseThrow(() -> new RuntimeException("The user itinerary id " + id + "you are looking for does not exist."));
     }
 
+    public List<UserItinerary> findAllUserItineraries(int userId){
+        String sql = "SELECT * FROM userItinerary WHERE userId = ?";
+        return jdbcTemplate.query(sql, userItineraryRowMapper, userId);
+    }
+
     public UserItinerary save (UserItinerary userItinerary){
         String sql = "INSERT INTO userItinerary (userId, startDate, endDate, startingPrice, totalDuration, departureCity, itineraryName, numberOfAdults, numberOfKids, flightId, optionId) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?,?)";
         jdbcTemplate.update(sql, userItinerary.getUserId(), userItinerary.getStartDate(), userItinerary.getEndDate(), userItinerary.getTotalDuration(), userItinerary.getDepartureCity(), userItinerary.getItineraryName(), userItinerary.getNumberOfAdults(), userItinerary.getNumberOfKids(), userItinerary.getFlightId(), userItinerary.getOptionId());

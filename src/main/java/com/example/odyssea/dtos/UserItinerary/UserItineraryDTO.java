@@ -37,32 +37,6 @@ public class UserItineraryDTO {
     }
 
 
-    private static LocalDate convertToLocalDate(Date date){
-        return date.toInstant()
-                .atZone(ZoneId.systemDefault())
-                .toLocalDate();
-    }
-
-
-    public static UserItineraryDTO toUserItineraryEntity (UserItinerary userItinerary){
-        LocalDate startDate = convertToLocalDate(userItinerary.getStartDate());
-        LocalDate endDate = convertToLocalDate(userItinerary.getEndDate()) ;
-
-        return new UserItineraryDTO(
-                userItinerary.getUserId(),
-                startDate,
-                endDate,
-                userItinerary.getTotalDuration(),
-                userItinerary.getDepartureCity(),
-                userItinerary.getStartingPrice(),
-                userItinerary.getItineraryName(),
-                userItinerary.getNumberOfAdults(),
-                userItinerary.getNumberOfKids(),
-                new ArrayList<>()
-        );
-
-    }
-
 
     public int getUserId() {
         return userId;
