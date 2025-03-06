@@ -1,6 +1,9 @@
 package com.example.odyssea.daos.userItinerary;
 
+import com.example.odyssea.entities.mainTables.Activity;
+import com.example.odyssea.entities.mainTables.Hotel;
 import com.example.odyssea.entities.userItinerary.UserItineraryStep;
+import org.springframework.jdbc.core.BeanPropertyRowMapper;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.stereotype.Repository;
@@ -58,6 +61,20 @@ public class UserItineraryStepDao {
 
         userItineraryStep.setId(id);
         return userItineraryStep;
+    }
+
+    public List<Hotel> getHotelInADay(int userItineraryId, int dayNumber){
+        String sql = "SELECT hotel.* FROM userDailyPlan \n" +
+                "INNER JOIN hotel ON userDailyPlan.hotelId = hotel.id\n" +
+                "WHERE userItineraryId = ? AND dayNumber = ?;";
+        return jdbcTemplate.query(sql, new Object[]{userItineraryId, dayNumber}, new BeanPropertyRowMapper<>(Hotel.class));
+    }
+
+    public List<Activity> getActivitiesInADay(int userItineraryId, int dayNumber){
+        String sql = "SELECT activity.* FROM userDailyPlan \n" +
+                "INNER JOIN activity ON userDailyPlan.activityId = activity.id\n" +
+                "WHERE userItineraryId = ? AND dayNumber = ?;";
+        return jdbcTemplate.query(sql, new Object[]{userItineraryId, dayNumber}, new BeanPropertyRowMapper<>(Activity.class));
     }
 
     public UserItineraryStep update(int id, UserItineraryStep userItineraryStep){

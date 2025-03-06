@@ -1,33 +1,66 @@
 package com.example.odyssea.dtos.UserItinerary;
 
+import com.example.odyssea.entities.userItinerary.UserItinerary;
 import java.math.BigDecimal;
-import java.time.Duration;
 import java.time.LocalDate;
+import java.time.ZoneId;
+import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
 public class UserItineraryDTO {
-
     private int userId;
-    private LocalDate departureDate;
-    private String departureCityIata;
-    private LocalDate arrivalDate;
+    private LocalDate startDate;
+    private LocalDate endDate;
     private int duration;
+    private String departureCity;
     private BigDecimal startingPrice;
+    private String itineraryName;
+    private int numberOfAdults;
+    private int numberOfKids;
     private List<UserItineraryDayDTO> itineraryDays;
 
+    public UserItineraryDTO(int userId, LocalDate startDate, LocalDate endDate, int duration, String departureCity, BigDecimal startingPrice, String itineraryName, int numberOfAdults, int numberOfKids, List<UserItineraryDayDTO> itineraryDays) {
+        this.userId = userId;
+        this.startDate = startDate;
+        this.endDate = endDate;
+        this.duration = duration;
+        this.departureCity = departureCity;
+        this.startingPrice = startingPrice;
+        this.itineraryName = itineraryName;
+        this.numberOfAdults = numberOfAdults;
+        this.numberOfKids = numberOfKids;
+        this.itineraryDays = itineraryDays;
+    }
 
     public UserItineraryDTO() {
     }
 
 
-    public UserItineraryDTO(int userId, LocalDate departureDate, String departureCityIata, LocalDate arrivalDate, int duration, BigDecimal startingPrice, List<UserItineraryDayDTO> itineraryDays) {
-        this.userId = userId;
-        this.departureDate = departureDate;
-        this.departureCityIata = departureCityIata;
-        this.arrivalDate = arrivalDate;
-        this.duration = duration;
-        this.startingPrice = startingPrice;
-        this.itineraryDays = itineraryDays;
+    private static LocalDate convertToLocalDate(Date date){
+        return date.toInstant()
+                .atZone(ZoneId.systemDefault())
+                .toLocalDate();
+    }
+
+
+    public static UserItineraryDTO toUserItineraryEntity (UserItinerary userItinerary){
+        LocalDate startDate = convertToLocalDate(userItinerary.getStartDate());
+        LocalDate endDate = convertToLocalDate(userItinerary.getEndDate()) ;
+
+        return new UserItineraryDTO(
+                userItinerary.getUserId(),
+                startDate,
+                endDate,
+                userItinerary.getTotalDuration(),
+                userItinerary.getDepartureCity(),
+                userItinerary.getStartingPrice(),
+                userItinerary.getItineraryName(),
+                userItinerary.getNumberOfAdults(),
+                userItinerary.getNumberOfKids(),
+                new ArrayList<>()
+        );
+
     }
 
 
@@ -39,29 +72,20 @@ public class UserItineraryDTO {
         this.userId = userId;
     }
 
-
-    public LocalDate getDepartureDate() {
-        return departureDate;
+    public LocalDate getStartDate() {
+        return startDate;
     }
 
-    public void setDepartureDate(LocalDate departureDate) {
-        this.departureDate = departureDate;
+    public void setStartDate(LocalDate startDate) {
+        this.startDate = startDate;
     }
 
-    public String getDepartureCityIata() {
-        return departureCityIata;
+    public LocalDate getEndDate() {
+        return endDate;
     }
 
-    public void setDepartureCityIata(String departureCityIata) {
-        this.departureCityIata = departureCityIata;
-    }
-
-    public LocalDate getArrivalDate() {
-        return arrivalDate;
-    }
-
-    public void setArrivalDate(LocalDate arrivalDate) {
-        this.arrivalDate = arrivalDate;
+    public void setEndDate(LocalDate endDate) {
+        this.endDate = endDate;
     }
 
     public int getDuration() {
@@ -72,12 +96,44 @@ public class UserItineraryDTO {
         this.duration = duration;
     }
 
+    public String getDepartureCity() {
+        return departureCity;
+    }
+
+    public void setDepartureCity(String departureCity) {
+        this.departureCity = departureCity;
+    }
+
     public BigDecimal getStartingPrice() {
         return startingPrice;
     }
 
     public void setStartingPrice(BigDecimal startingPrice) {
         this.startingPrice = startingPrice;
+    }
+
+    public String getItineraryName() {
+        return itineraryName;
+    }
+
+    public void setItineraryName(String itineraryName) {
+        this.itineraryName = itineraryName;
+    }
+
+    public int getNumberOfAdults() {
+        return numberOfAdults;
+    }
+
+    public void setNumberOfAdults(int numberOfAdults) {
+        this.numberOfAdults = numberOfAdults;
+    }
+
+    public int getNumberOfKids() {
+        return numberOfKids;
+    }
+
+    public void setNumberOfKids(int numberOfKids) {
+        this.numberOfKids = numberOfKids;
     }
 
     public List<UserItineraryDayDTO> getItineraryDays() {
