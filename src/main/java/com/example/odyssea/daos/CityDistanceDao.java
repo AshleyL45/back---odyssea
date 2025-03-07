@@ -22,13 +22,18 @@ public class CityDistanceDao {
     }
 
     /**
-     * Vérifie si une entrée CityDistance existe en base par son ID
+     * Recherche la distance et la durée entre deux villes spécifiées par leurs identifiants
      */
-    public boolean existsById(int id) {
-        String sql = "SELECT COUNT(*) FROM cityDistance WHERE id = ?";
-        Integer count = jdbcTemplate.queryForObject(sql, Integer.class, id);
-        return count != null && count > 0;
+    public Optional<CityDistance> findByCityIds(int fromCityId, int toCityId) {
+        String sql = "SELECT * FROM cityDistance WHERE fromCityId = ? AND toCityId = ?";
+        List<CityDistance> distances = jdbcTemplate.query(sql, new CityDistanceRowMapper(), fromCityId, toCityId);
+        if (distances.isEmpty()) {
+            throw new ResourceNotFoundException("CityDistance not found between city IDs " + fromCityId + " and " + toCityId);
+        }
+        return Optional.of(distances.get(0));
     }
+
+
 
     /**
      * Enregistre une nouvelle entrée CityDistance en base de données
@@ -92,15 +97,12 @@ public class CityDistanceDao {
     }
 
     /**
-     * Recherche la distance et la durée entre deux villes spécifiées par leurs identifiants
+     * Vérifie si une entrée CityDistance existe en base par son ID
      */
-    public Optional<CityDistance> findByCityIds(int fromCityId, int toCityId) {
-        String sql = "SELECT * FROM cityDistance WHERE fromCityId = ? AND toCityId = ?";
-        List<CityDistance> distances = jdbcTemplate.query(sql, new CityDistanceRowMapper(), fromCityId, toCityId);
-        if (distances.isEmpty()) {
-            throw new ResourceNotFoundException("CityDistance not found between city IDs " + fromCityId + " and " + toCityId);
-        }
-        return Optional.of(distances.get(0));
+    public boolean existsById(int id) {
+        String sql = "SELECT COUNT(*) FROM cityDistance WHERE id = ?";
+        Integer count = jdbcTemplate.queryForObject(sql, Integer.class, id);
+        return count != null && count > 0;
     }
 
     /**
