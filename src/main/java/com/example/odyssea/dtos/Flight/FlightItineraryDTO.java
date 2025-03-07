@@ -10,6 +10,7 @@ public class FlightItineraryDTO { // Deux vols: un aller et un retour
 
     @JsonProperty("segments")
     private List<FlightSegmentDTO> segments; // Liste de segments de vol
+    @JsonProperty("duration") // Durée des vols allers ou retours
     private Duration duration;
 
     public FlightItineraryDTO() {

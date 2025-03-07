@@ -4,10 +4,6 @@ import com.example.odyssea.dtos.Flight.AirportDTO;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 public class FlightSegmentDTO { // Un seul vol
-
-    @JsonProperty("id")
-    private String id;
-
     @JsonProperty("departure")
     private AirportDTO departure;
 
@@ -21,21 +17,17 @@ public class FlightSegmentDTO { // Un seul vol
     private AircraftDTO aircraftCode;
 
     @JsonProperty("duration")
-    private String duration;
+    private String duration; // Durée d'un seul vol
 
     public FlightSegmentDTO() {}
 
-    public FlightSegmentDTO(String id, AirportDTO departure, AirportDTO arrival, String carrierCode, AircraftDTO aircraftCode, String duration) {
-        this.id = id;
+    public FlightSegmentDTO(AirportDTO departure, AirportDTO arrival, String carrierCode, AircraftDTO aircraftCode, String duration) {
         this.departure = departure;
         this.arrival = arrival;
         this.carrierCode = carrierCode;
         this.aircraftCode = aircraftCode;
         this.duration = duration;
     }
-
-    public String getId() { return id; }
-    public void setId(String id) { this.id = id; }
 
     public AirportDTO getDeparture() { return departure; }
     public void setDeparture(AirportDTO departure) { this.departure = departure; }

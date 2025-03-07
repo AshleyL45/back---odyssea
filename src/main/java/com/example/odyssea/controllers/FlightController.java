@@ -20,11 +20,19 @@ public class FlightController {
         this.flightService = flightService;
     }
 
-    @GetMapping("/shortest")
+    /*@GetMapping("/shortest")
     public Mono<FlightItineraryDTO> getAFlight(@RequestParam String departureIata, @RequestParam String arrivalIata, @RequestParam String departureDate,
                                                @RequestParam String arrivalDate, @RequestParam int numberOfPeople){
         LocalDate departureDateParsed = LocalDate.parse(departureDate);
         LocalDate arrivalDateParsed = LocalDate.parse(arrivalDate);
         return flightService.getShortestFlightMono(departureIata, arrivalIata, departureDateParsed, arrivalDateParsed, numberOfPeople);
+    }*/
+
+    @GetMapping("/all")
+    public Mono<List<FlightItineraryDTO>> getAllFlights(@RequestParam String departureIata, @RequestParam String arrivalIata, @RequestParam String departureDate,
+                                                  @RequestParam String arrivalDate, @RequestParam int numberOfPeople){
+        LocalDate departureDateParsed = LocalDate.parse(departureDate);
+        LocalDate arrivalDateParsed = LocalDate.parse(arrivalDate);
+        return flightService.getAllFlights(departureIata, arrivalIata, departureDateParsed, arrivalDateParsed, numberOfPeople);
     }
 }
