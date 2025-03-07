@@ -1,7 +1,7 @@
 package com.example.odyssea.services;
 
 import com.example.odyssea.daos.BlogArticleDao;
-import com.example.odyssea.entities.mainTables.BlogArticle;
+import com.example.odyssea.entities.BlogArticle;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -33,8 +33,6 @@ public class BlogArticleService {
 
     /**
      * Crée un nouvel article de blog dans la base de données
-     *
-     * @param article L'article de blog à enregistrer
      */
     public void createArticle(BlogArticle article) {
         blogArticleDao.save(article);

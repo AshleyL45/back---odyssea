@@ -1,6 +1,6 @@
 package com.example.odyssea.daos;
 
-import com.example.odyssea.entities.mainTables.BlogArticle;
+import com.example.odyssea.entities.BlogArticle;
 import com.example.odyssea.exceptions.ResourceNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.JdbcTemplate;
