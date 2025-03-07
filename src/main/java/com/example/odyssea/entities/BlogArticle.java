@@ -1,4 +1,4 @@
-package com.example.odyssea.entities.mainTables;
+package com.example.odyssea.entities;
 
 public class BlogArticle {
     private int id;
