@@ -9,6 +9,7 @@ import org.springframework.jdbc.core.RowMapper;
 import org.springframework.stereotype.Repository;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 
 @Repository
@@ -21,7 +22,6 @@ public class PlaneRideDao {
     }
 
     private final RowMapper<PlaneRide> planeRideRowMapper = (rs, _) -> new PlaneRide(
-            rs.getInt("id"),
             rs.getBoolean("one_way"),
             rs.getBigDecimal("totalPrice"),
             rs.getString("currency"),
@@ -82,10 +82,22 @@ public class PlaneRideDao {
         String sql = "INSERT INTO planeRide (one_way, totalPrice, currency, created_at) VALUES (?, ?, ?, ?)";
         jdbcTemplate.update(sql, planeRide.isOneWay(), planeRide.getTotalPrice(), planeRide.getCurrency(), planeRide.getCreatedAt());
 
-        String sqlGetId = "SELECT LAST_INSERT_ID()";
-        int id = jdbcTemplate.queryForObject(sqlGetId, Integer.class);
-
-        planeRide.setId(id);
         return planeRide;
+    }
+
+    public void saveAll(List<PlaneRide> planeRides) {
+        String sql = "INSERT INTO planeRide (one_way, totalPrice, currency, created_at) VALUES (?, ?, ?, ?)";
+
+        List<Object[]> batchArgs = new ArrayList<>();
+        for (PlaneRide planeRide : planeRides) {
+            batchArgs.add(new Object[]{ // Contient les valeurs (sous forme de tableau) à insérer dans la BDD
+                    planeRide.isOneWay(),
+                    planeRide.getTotalPrice(),
+                    planeRide.getCurrency(),
+                    planeRide.getCreatedAt()
+            });
+        }
+
+        jdbcTemplate.batchUpdate(sql, batchArgs); // BatchUpdate attend pour chaque ligne de la table un objet avec les valeurs dans un tableau
     }
 }

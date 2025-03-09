@@ -7,6 +7,7 @@ import org.springframework.stereotype.Repository;
 
 import java.time.LocalDateTime;
 import java.time.LocalTime;
+import java.util.ArrayList;
 import java.util.List;
 
 @Repository
@@ -19,7 +20,6 @@ public class FlightSegmentDao {
     }
 
     private final RowMapper<FlightSegment> flightSegmentRowMapper = (rs, _) -> new FlightSegment(
-            rs.getInt("id"),
             rs.getString("departureAirportIata"),
             rs.getString("arrivalAirportIata"),
             rs.getObject("departureDateTime", LocalDateTime.class),
@@ -78,10 +78,27 @@ public class FlightSegmentDao {
         String sql = "INSERT INTO flightSegment (departureAirportIata, arrivalAirportIata, departureDateTime, arrivalDateTime, carrierCode, carrierName, aircraftCode, aircraftName, duration) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)";
         jdbcTemplate.update(sql, flightSegment.getDepartureAirportIata(), flightSegment.getArrivalAirportIata(), flightSegment.getDepartureDateTime(), flightSegment.getArrivalDateTime(), flightSegment.getCarrierCode(), flightSegment.getCarrierName(), flightSegment.getAircraftCode(), flightSegment.getAircraftName(), flightSegment.getDuration());
 
-        String sqlGetId = "SELECT LAST_INSERT_ID()";
-        int id = jdbcTemplate.queryForObject(sqlGetId, Integer.class);
-
-        flightSegment.setId(id);
         return flightSegment;
+    }
+
+    public void saveAll(List<FlightSegment> flightSegments){
+        String sql = "INSERT INTO flightSegment (departureAirportIata, arrivalAirportIata, departureDateTime, arrivalDateTime, carrierCode, carrierName, aircraftCode, aircraftName, duration) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)";
+        List<Object []> batchArgs = new ArrayList<>();
+
+        for(FlightSegment flightSegment : flightSegments){
+            batchArgs.add(new Object[]{
+                    flightSegment.getDepartureAirportIata(),
+                    flightSegment.getArrivalAirportIata(),
+                    flightSegment.getDepartureDateTime(),
+                    flightSegment.getArrivalDateTime(),
+                    flightSegment.getCarrierCode(),
+                    flightSegment.getCarrierName(),
+                    flightSegment.getAircraftCode(),
+                    flightSegment.getAircraftName(),
+                    flightSegment.getDuration()
+            });
+        }
+
+        jdbcTemplate.batchUpdate(sql, batchArgs);
     }
 }

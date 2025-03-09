@@ -5,9 +5,10 @@ import java.util.List;
 
 public class FlightOffersDTO {
 
+    @JsonProperty("oneWay")
+    private boolean oneWay;
     @JsonProperty("itineraries")
     private List<FlightItineraryDTO> itineraries;  // Offre de vol
-
     @JsonProperty("price")
     private FlightPriceDTO price;
 
@@ -15,7 +16,8 @@ public class FlightOffersDTO {
     public FlightOffersDTO() {
     }
 
-    public FlightOffersDTO(List<FlightItineraryDTO> itineraries, FlightPriceDTO price) {
+    public FlightOffersDTO(boolean oneWay, List<FlightItineraryDTO> itineraries, FlightPriceDTO price) {
+        this.oneWay = oneWay;
         this.itineraries = itineraries;
         this.price = price;
     }
@@ -34,5 +36,13 @@ public class FlightOffersDTO {
 
     public void setPrice(FlightPriceDTO price) {
         this.price = price;
+    }
+
+    public boolean isOneWay() {
+        return oneWay;
+    }
+
+    public void setOneWay(boolean oneWay) {
+        this.oneWay = oneWay;
     }
 }

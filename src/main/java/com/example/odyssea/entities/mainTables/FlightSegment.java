@@ -1,9 +1,12 @@
 package com.example.odyssea.entities.mainTables;
 
+import org.springframework.data.annotation.Id;
+
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 
 public class FlightSegment {
+    @Id
     private int id;
     private String departureAirportIata;
     private String arrivalAirportIata;
@@ -18,8 +21,7 @@ public class FlightSegment {
     public FlightSegment() {
     }
 
-    public FlightSegment(int id, String departureAirportIata, String arrivalAirportIata, LocalDateTime departureDateTime, LocalDateTime arrivalDateTime, String carrierCode, String carrierName, String aircraftCode, String aircraftName, LocalTime duration) {
-        this.id = id;
+    public FlightSegment(String departureAirportIata, String arrivalAirportIata, LocalDateTime departureDateTime, LocalDateTime arrivalDateTime, String carrierCode, String carrierName, String aircraftCode, String aircraftName, LocalTime duration) {
         this.departureAirportIata = departureAirportIata;
         this.arrivalAirportIata = arrivalAirportIata;
         this.departureDateTime = departureDateTime;
@@ -35,9 +37,6 @@ public class FlightSegment {
         return id;
     }
 
-    public void setId(int id) {
-        this.id = id;
-    }
 
     public String getDepartureAirportIata() {
         return departureAirportIata;

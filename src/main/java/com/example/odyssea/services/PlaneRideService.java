@@ -2,12 +2,13 @@ package com.example.odyssea.services;
 
 import com.example.odyssea.daos.PlaneRideDao;
 import com.example.odyssea.dtos.Flight.FlightDataDTO;
-import com.example.odyssea.dtos.Flight.FlightItineraryDTO;
 import com.example.odyssea.dtos.Flight.FlightOffersDTO;
+import com.example.odyssea.entities.mainTables.PlaneRide;
 import org.springframework.stereotype.Service;
 import org.springframework.web.reactive.function.client.WebClient;
 import reactor.core.publisher.Mono;
 
+import java.time.Duration;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -19,17 +20,30 @@ public class PlaneRideService {
     private final TokenService tokenService;
     private final WebClient webClient;
 
-    public PlaneRideService(PlaneRideDao planeRideDao, TokenService tokenService, WebClient webClient) {
+    public PlaneRideService(PlaneRideDao planeRideDao, TokenService tokenService, WebClient.Builder webClientBuilder) {
         this.planeRideDao = planeRideDao;
         this.tokenService = tokenService;
-        this.webClient = webClient;
+        this.webClient = webClientBuilder.baseUrl("https://test.api.amadeus.com/").build();
     }
 
-    /*private LocalDateTime calculateTotalSegmentDuration(List<String> durations){
+    private PlaneRide flightOfferToPlaneRide(FlightOffersDTO flightOffersDTO){
+        return new PlaneRide(
+                flightOffersDTO.isOneWay(),
+                flightOffersDTO.getPrice().getTotalPrice(),
+                "EUR",
+                LocalDateTime.now()
+        );
+    }
 
-    }*/
+    // Avoir le vol le plus court
+//    public FlightOffersDTO getShortestFlight(List<FlightOffersDTO> flightOffersDTOs){
+//        List<String> duration = new ArrayList<>();
+//        int size = 0;
+//
+//        calculateTotalSegmentDuration()
+//    }
 
-    // Requête GET avec lAPI Amadeus
+    // Requête GET avec l'API Amadeus
     public Mono<List<FlightOffersDTO>> getAllFlightsFromAmadeus(String departureIata, String arrivalIata, LocalDate departureDate, LocalDate arrivalDate, int totalPeople){
         return tokenService.getValidToken()
                 .flatMap(token -> (
@@ -48,13 +62,37 @@ public class PlaneRideService {
                                 .retrieve()
                                 .bodyToMono(FlightDataDTO.class)
                 ))
-                .map(this::convertToFlightDTO);
-
+                .map(this::convertToFlightOffersDTO)
+                .flatMap( flightOffersDTOS -> {
+                    List<PlaneRide> planeRides = flightOffersDTOS.stream() // Convertit chaque offre en Plane Ride et l'ajoute dans une liste
+                            .map(this::flightOfferToPlaneRide)
+                            .toList();
+                    planeRideDao.saveAll(planeRides); // Enregistre la liste dans la BDD
+                            return Mono.just(flightOffersDTOS); // Retourne un FLightOfferDTO au controller
+                });
     }
 
 
-    private List<FlightOffersDTO> convertToFlightDTO(FlightDataDTO flightDataDTO){
-        return new ArrayList<>(flightDataDTO.getData());
+    private List<FlightOffersDTO> convertToFlightOffersDTO(FlightDataDTO flightDataDTO){
+        List<FlightOffersDTO> flightOffers = new ArrayList<>();
+       for (FlightOffersDTO flightOffer : flightDataDTO.getFlightOffers()){
+           flightOffers.add(flightOffer);
+       }
+        return flightOffers;
+    }
+
+    private Duration calculateTotalSegmentDuration(List<String> durations){
+        Duration totalDuration = Duration.ZERO;
+        for(String segmentDuration : durations){
+            Duration duration = Duration.parse(segmentDuration);
+            totalDuration = totalDuration.plus(duration);
+        }
+
+        long hours = totalDuration.toHours();
+        long minutes = totalDuration.toMinutes() % 60;
+
+        return totalDuration;
+
     }
 
 }

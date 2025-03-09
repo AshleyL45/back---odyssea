@@ -1,10 +1,13 @@
 package com.example.odyssea.entities.mainTables;
 
+import org.springframework.data.annotation.Id;
+
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
 public class PlaneRide {
 
+    @Id
     private int id;
     private boolean oneWay;
     private BigDecimal totalPrice;
@@ -14,8 +17,7 @@ public class PlaneRide {
     public PlaneRide() {
     }
 
-    public PlaneRide(int id, boolean oneWay, BigDecimal totalPrice, String currency, LocalDateTime createdAt) {
-        this.id = id;
+    public PlaneRide(boolean oneWay, BigDecimal totalPrice, String currency, LocalDateTime createdAt) {
         this.oneWay = oneWay;
         this.totalPrice = totalPrice;
         this.currency = currency;
@@ -24,10 +26,6 @@ public class PlaneRide {
 
     public int getId() {
         return id;
-    }
-
-    public void setId(int id) {
-        this.id = id;
     }
 
     public boolean isOneWay() {
