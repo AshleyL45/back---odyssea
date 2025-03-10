@@ -3,7 +3,6 @@ package com.example.odyssea.controllers;
 import com.example.odyssea.dtos.HotelDto;
 import com.example.odyssea.entities.mainTables.Hotel;
 import com.example.odyssea.services.HotelService;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 import reactor.core.publisher.Mono;
 
@@ -15,13 +14,12 @@ public class HotelController {
 
     private final HotelService hotelService;
 
-    @Autowired
     public HotelController(HotelService hotelService) {
         this.hotelService = hotelService;
     }
 
     /**
-     * Récupère tous les hôtels disponibles
+     * Récupère tous les hôtels disponibles (mode bloquant)
      */
     @GetMapping
     public List<Hotel> getAllHotels() {
@@ -29,10 +27,10 @@ public class HotelController {
     }
 
     /**
-     * Récupère un hôtel spécifique par son identifiant
+     * Récupère un hôtel spécifique par son identifiant de manière asynchrone.
      */
     @GetMapping("/{id}")
-    public Hotel getHotelById(@PathVariable int id) {
+    public Mono<Hotel> getHotelById(@PathVariable int id) {
         return hotelService.getHotel(id);
     }
 
@@ -76,6 +74,9 @@ public class HotelController {
         return hotelService.getHotelsByCityAndStarRating(cityId, starRating);
     }
 
+    /**
+     * Crée un hôtel à partir de l'API Amadeus et l'enregistre en base
+     */
     @PostMapping("/from-amadeus")
     public Mono<Void> createHotelFromAmadeus(@RequestParam String amadeusHotelId) {
         return hotelService.createHotelFromAmadeus(amadeusHotelId);
