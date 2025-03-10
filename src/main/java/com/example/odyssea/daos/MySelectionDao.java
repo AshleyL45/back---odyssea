@@ -16,73 +16,55 @@ public class MySelectionDao {
         this.jdbcTemplate = jdbcTemplate;
     }
 
-
+    // RowMapper pour convertir un enregistrement de la table myselection en objet MySelection
     private final RowMapper<MySelection> mySelectionRowMapper = (rs, rowNum) -> new MySelection(
             rs.getInt("userId"),
             rs.getInt("itineraryId")
     );
 
-
+    // Retourne toutes les sélections de la table myselection
     public List<MySelection> findAll() {
         String sql = "SELECT * FROM myselection";
         return jdbcTemplate.query(sql, mySelectionRowMapper);
     }
 
-
-
-    public MySelection findById(int idUser) {
-        String sql = "SELECT * FROM myselection WHERE userId = ?";
-        return jdbcTemplate.query(sql, mySelectionRowMapper, idUser)
+    // Retourne une sélection identifiée par le couple (userId, itineraryId)
+    public MySelection findById(int userId, int itineraryId) {
+        String sql = "SELECT * FROM myselection WHERE userId = ? AND itineraryId = ?";
+        return jdbcTemplate.query(sql, mySelectionRowMapper, userId, itineraryId)
                 .stream()
                 .findFirst()
-                .orElseThrow(() -> new RuntimeException("Sélection avec l'ID de l'utilisateur : " + idUser + " n'existe pas"));
+                .orElseThrow(() -> new RuntimeException("Selection with userId: " + userId + " and itineraryId: " + itineraryId + " does not exist"));
     }
 
-
-
+    // Insère une nouvelle sélection dans la table myselection
     public MySelection save(MySelection mySelection) {
         String sql = "INSERT INTO myselection (userId, itineraryId) VALUES (?, ?)";
-        jdbcTemplate.update(sql, mySelection.getIdUser(),mySelection.getIdItinerary());
-
-        String sqlGetId = "SELECT LAST_INSERT_ID()";
-        int id = jdbcTemplate.queryForObject(sqlGetId, Integer.class);
-
-        mySelection.setIdUser(id);
+        jdbcTemplate.update(sql, mySelection.getIdUser(), mySelection.getIdItinerary());
         return mySelection;
     }
 
-
-
-
-    public MySelection update(int id, MySelection mySelection) {
-        if (!mySelectionExists(id)) {
-            throw new RuntimeException("Sélection avec l'ID : " + id + " n'existe pas");
-        }
-
-        String sql = "UPDATE myselection SET userId = ?, itineraryId = ? WHERE userId = ?";
-        int rowsAffected = jdbcTemplate.update(sql, mySelection.getIdUser(), mySelection.getIdItinerary(), id);
-
+    // Met à jour une sélection identifiée par le couple (userId, itineraryId)
+    public MySelection update(int userId, int itineraryId, MySelection mySelection) {
+        // Vérifie d'abord que la sélection existe
+        findById(userId, itineraryId);
+        String sql = "UPDATE myselection SET userId = ?, itineraryId = ? WHERE userId = ? AND itineraryId = ?";
+        int rowsAffected = jdbcTemplate.update(sql,
+                mySelection.getIdUser(),
+                mySelection.getIdItinerary(),
+                userId,
+                itineraryId
+        );
         if (rowsAffected <= 0) {
-            throw new RuntimeException("Échec de la mise à jour du produit avec l'ID : " + id);
+            throw new RuntimeException("Failed to update selection with userId: " + userId + " and itineraryId: " + itineraryId);
         }
-
-        return this.findById(id);
+        return findById(mySelection.getIdUser(), mySelection.getIdItinerary());
     }
 
-
-    private boolean mySelectionExists(int id) {
-        String checkSql = "SELECT COUNT(*) FROM myselection WHERE userId = ?";
-        int count = jdbcTemplate.queryForObject(checkSql, Integer.class, id);
-        return count > 0;
-    }
-
-
-
-
-    public boolean delete(int id) {
-        String sql = "DELETE FROM myselection WHERE itineraryId = ?";
-        int rowsAffected = jdbcTemplate.update(sql, id);
+    // Supprime une sélection identifiée par le couple (userId, itineraryId)
+    public boolean delete(int userId, int itineraryId) {
+        String sql = "DELETE FROM myselection WHERE userId = ? AND itineraryId = ?";
+        int rowsAffected = jdbcTemplate.update(sql, userId, itineraryId);
         return rowsAffected > 0;
     }
-
 }
