@@ -2,7 +2,6 @@ package com.example.odyssea.daos;
 
 import com.example.odyssea.entities.mainTables.Hotel;
 import com.example.odyssea.exceptions.ResourceNotFoundException;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.stereotype.Repository;
@@ -17,7 +16,6 @@ public class HotelDao {
 
     private final JdbcTemplate jdbcTemplate;
 
-    @Autowired
     public HotelDao(JdbcTemplate jdbcTemplate) {
         this.jdbcTemplate = jdbcTemplate;
     }
@@ -93,12 +91,13 @@ public class HotelDao {
 
     /**
      * Recherche un hôtel par son identifiant
+     * Retourne Optional.empty() si non trouvé
      */
     public Optional<Hotel> findById(int id) {
         String sql = "SELECT * FROM hotel WHERE id = ?";
         List<Hotel> hotels = jdbcTemplate.query(sql, new HotelRowMapper(), id);
         if (hotels.isEmpty()) {
-            throw new ResourceNotFoundException("Hotel with id " + id + " not found.");
+            return Optional.empty();
         }
         return Optional.of(hotels.get(0));
     }

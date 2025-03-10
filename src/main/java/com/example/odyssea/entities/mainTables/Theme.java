@@ -2,38 +2,24 @@ package com.example.odyssea.entities.mainTables;
 
 public class Theme {
 
-
-    private int idTheme;
-    private int idItinerary;
+    private int themeId;
     private String themeName;
 
-    public Theme(){}
-    public Theme(int idTheme, int idItinerary, String themeName){
-        this.idTheme = idTheme;
-        this.idItinerary = idItinerary;
+    public Theme() {}
+
+    public Theme(int themeId, int idItinerary, String themeName){
+        this.themeId = themeId;
         this.themeName = themeName;
     }
 
 
-    public int getIdTheme() {
-        return idTheme;
+    public int getThemeId() {
+        return themeId;
     }
 
-    public void setIdTheme(int idTheme) {
-        this.idTheme = idTheme;
+    public void setThemeId(int themeId) {
+        this.themeId = themeId;
     }
-
-
-    public int getIdItinerary() {
-        return idItinerary;
-    }
-
-
-    public void setIdItinerary(int idItinerary) {
-        this.idItinerary = idItinerary;
-    }
-
-
 
     public String getThemeName() {
         return themeName;

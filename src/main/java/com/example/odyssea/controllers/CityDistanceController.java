@@ -3,8 +3,11 @@ package com.example.odyssea.controllers;
 import com.example.odyssea.dtos.CityDistanceDto;
 import com.example.odyssea.dtos.CityDistanceInfoDto;
 import com.example.odyssea.entities.CityDistance;
+import com.example.odyssea.exceptions.ResourceNotFoundException;
 import com.example.odyssea.services.CityDistanceService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -68,11 +71,22 @@ public class CityDistanceController {
         return cityDistanceService.getDistanceInfoBetweenCities(fromCityId, toCityId);
     }
 
+    @GetMapping("/between")
+    public ResponseEntity<?> getDistanceBetweenCities(@RequestParam int fromCityId, @RequestParam int toCityId) {
+        try {
+            CityDistance cityDistance = cityDistanceService.getDistanceBetweenCities(fromCityId, toCityId);
+            return ResponseEntity.ok(cityDistance);
+        } catch (ResourceNotFoundException ex) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(ex.getMessage());
+        }
+    }
+
+
     /**
      * Importe les informations de distance et de durée entre deux villes
      */
     @PostMapping("/import")
-    public void importCityDistance(
+    public ResponseEntity<?> importCityDistance(
             @RequestParam int fromCityId,
             @RequestParam int toCityId,
             @RequestParam double fromLongitude,
@@ -81,7 +95,8 @@ public class CityDistanceController {
             @RequestParam double toLatitude,
             @RequestParam String apiKey
     ) {
-        cityDistanceService.importCityDistance(fromCityId, toCityId,
-                fromLongitude, fromLatitude, toLongitude, toLatitude, apiKey);
+        cityDistanceService.importCityDistance(fromCityId, toCityId, fromLongitude, fromLatitude, toLongitude, toLatitude, apiKey);
+        return ResponseEntity.ok("Import successful");
     }
+
 }
