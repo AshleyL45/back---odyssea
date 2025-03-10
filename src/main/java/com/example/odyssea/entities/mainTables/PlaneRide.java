@@ -1,6 +1,7 @@
 package com.example.odyssea.entities.mainTables;
 
 import org.springframework.data.annotation.Id;
+import org.springframework.data.relational.core.sql.In;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
@@ -8,7 +9,7 @@ import java.time.LocalDateTime;
 public class PlaneRide {
 
     @Id
-    private int id;
+    private Integer id;
     private boolean oneWay;
     private BigDecimal totalPrice;
     private String currency;
@@ -24,7 +25,7 @@ public class PlaneRide {
         this.createdAt = createdAt;
     }
 
-    public int getId() {
+    public Integer getId() {
         return id;
     }
 
@@ -58,5 +59,9 @@ public class PlaneRide {
 
     public void setCreatedAt(LocalDateTime createdAt) {
         this.createdAt = createdAt;
+    }
+
+    public void setId(Integer id) {
+        this.id = id;
     }
 }

@@ -3,7 +3,6 @@ package com.example.odyssea.services;
 import com.example.odyssea.dtos.TokenAmadeus;
 import org.springframework.stereotype.Service;
 import reactor.core.publisher.Mono;
-
 import java.time.Instant;
 import java.util.concurrent.atomic.AtomicReference;
 
@@ -12,25 +11,25 @@ public class TokenService {
     private final APIAuthService apiAuthService;
     private final AtomicReference<TokenAmadeus> cachedToken = new AtomicReference<>();
 
-
     public TokenService(APIAuthService apiAuthService) {
         this.apiAuthService = apiAuthService;
     }
 
-    public Mono<String> getValidToken(){
+    public Mono<String> getValidToken() {
         TokenAmadeus token = cachedToken.get();
 
-        if(token != null && Instant.now().isBefore(token.getExpiryTime())){
+        // Vérifie si le token en cache est valide
+        if (token != null && !token.isExpired()) {
+            System.out.println("Utilisation du token en cache: " + token.getToken());
             return Mono.just(token.getToken());
         }
 
+        // Si le token est expiré ou absent, en demande un nouveau
         return apiAuthService.loginToAmadeus()
-                .doOnNext(
-                        (newToken -> {
-                            newToken.setExpiryTime(Instant.now().plusSeconds(newToken.getExpiresIn(newToken.getExpiresInString()))); // Stocke le temps d'expiration
-                            cachedToken.set(newToken);
-                        })
-                )
+                .doOnNext(newToken -> {
+                    System.out.println("Nouveau token généré: " + newToken.getToken());
+                    cachedToken.set(newToken); // Met à jour le cache
+                })
                 .map(TokenAmadeus::getToken);
     }
 }

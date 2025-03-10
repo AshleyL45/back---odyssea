@@ -19,14 +19,19 @@ public class FlightSegmentDTO { // Un seul vol
     @JsonProperty("duration")
     private String duration; // Durée d'un seul vol
 
+    private String carrierName;
+    private String aircraftName;
+
     public FlightSegmentDTO() {}
 
-    public FlightSegmentDTO(AirportDTO departure, AirportDTO arrival, String carrierCode, AircraftDTO aircraftCode, String duration) {
+    public FlightSegmentDTO(AirportDTO departure, AirportDTO arrival, String carrierCode, AircraftDTO aircraftCode, String duration, String carrierName, String aircraftName) {
         this.departure = departure;
         this.arrival = arrival;
         this.carrierCode = carrierCode;
         this.aircraftCode = aircraftCode;
         this.duration = duration;
+        this.carrierName = carrierName;
+        this.aircraftName = aircraftName;
     }
 
     public AirportDTO getDeparture() { return departure; }
@@ -43,4 +48,20 @@ public class FlightSegmentDTO { // Un seul vol
 
     public String getDuration() { return duration; }
     public void setDuration(String duration) { this.duration = duration; }
+
+    public String getCarrierName() {
+        return carrierName;
+    }
+
+    public void setCarrierName(String carrierName) {
+        this.carrierName = carrierName;
+    }
+
+    public String getAircraftName() {
+        return aircraftName;
+    }
+
+    public void setAircraftName(String aircraftName) {
+        this.aircraftName = aircraftName;
+    }
 }

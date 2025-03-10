@@ -5,6 +5,7 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.stereotype.Repository;
 
+import java.sql.*;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.ArrayList;
@@ -76,10 +77,40 @@ public class FlightSegmentDao {
 
     public FlightSegment save(FlightSegment flightSegment) {
         String sql = "INSERT INTO flightSegment (departureAirportIata, arrivalAirportIata, departureDateTime, arrivalDateTime, carrierCode, carrierName, aircraftCode, aircraftName, duration) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)";
-        jdbcTemplate.update(sql, flightSegment.getDepartureAirportIata(), flightSegment.getArrivalAirportIata(), flightSegment.getDepartureDateTime(), flightSegment.getArrivalDateTime(), flightSegment.getCarrierCode(), flightSegment.getCarrierName(), flightSegment.getAircraftCode(), flightSegment.getAircraftName(), flightSegment.getDuration());
+
+        // Utilisation de Statement.RETURN_GENERATED_KEYS pour récupérer l'ID généré
+        try (Connection conn = jdbcTemplate.getDataSource().getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
+
+            // Paramétrage des valeurs dans la requête
+            stmt.setString(1, flightSegment.getDepartureAirportIata());
+            stmt.setString(2, flightSegment.getArrivalAirportIata());
+            stmt.setTimestamp(3, Timestamp.valueOf(flightSegment.getDepartureDateTime()));
+            stmt.setTimestamp(4, Timestamp.valueOf(flightSegment.getArrivalDateTime()));
+            stmt.setString(5, flightSegment.getCarrierCode());
+            stmt.setString(6, flightSegment.getCarrierName());
+            stmt.setString(7, flightSegment.getAircraftCode());
+            stmt.setString(8, flightSegment.getAircraftName());
+            stmt.setString(9, flightSegment.getDuration().toString()); // LocalTime to String
+
+            // Exécution de l'insertion
+            int rowsAffected = stmt.executeUpdate();
+
+            // Si l'insertion est réussie, récupérer l'ID généré
+            if (rowsAffected > 0) {
+                try (ResultSet generatedKeys = stmt.getGeneratedKeys()) {
+                    if (generatedKeys.next()) {
+                        flightSegment.setId(generatedKeys.getInt(1));  // Récupérer l'ID généré
+                    }
+                }
+            }
+        } catch (SQLException e) {
+            throw new RuntimeException("Erreur lors de l'insertion du FlightSegment", e);
+        }
 
         return flightSegment;
     }
+
 
     public void saveAll(List<FlightSegment> flightSegments){
         String sql = "INSERT INTO flightSegment (departureAirportIata, arrivalAirportIata, departureDateTime, arrivalDateTime, carrierCode, carrierName, aircraftCode, aircraftName, duration) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)";

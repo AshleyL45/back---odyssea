@@ -7,7 +7,7 @@ import java.time.LocalTime;
 
 public class FlightSegment {
     @Id
-    private int id;
+    private Integer id;
     private String departureAirportIata;
     private String arrivalAirportIata;
     private LocalDateTime departureDateTime;
@@ -33,7 +33,7 @@ public class FlightSegment {
         this.duration = duration;
     }
 
-    public int getId() {
+    public Integer getId() {
         return id;
     }
 
@@ -108,5 +108,9 @@ public class FlightSegment {
 
     public void setDuration(LocalTime duration) {
         this.duration = duration;
+    }
+
+    public void setId(Integer id) {
+        this.id = id;
     }
 }

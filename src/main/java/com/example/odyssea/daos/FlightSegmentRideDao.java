@@ -1,10 +1,12 @@
 package com.example.odyssea.daos;
 
 import com.example.odyssea.entities.mainTables.FlightSegmentRide;
+import com.example.odyssea.entities.mainTables.PlaneRide;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.stereotype.Repository;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @Repository
@@ -67,5 +69,18 @@ public class FlightSegmentRideDao {
         jdbcTemplate.update(sql, flightSegmentRide.getPlaneRideId(), flightSegmentRide.getFlightSegmentId());
 
         return flightSegmentRide;
+    }
+
+    public void saveAll(List<FlightSegmentRide> flightSegmentRides){
+        String sql = "INSERT INTO flightSegmentRide (planeRideId, flightSegmentId) VALUES (?, ?)";
+
+        List<Object[]> batchArgs = new ArrayList<>();
+        for (FlightSegmentRide flightSegmentRide : flightSegmentRides) {
+            batchArgs.add(new Object[]{
+                    flightSegmentRide.getFlightSegmentId(),
+                    flightSegmentRide.getPlaneRideId()
+            });
+        }
+        jdbcTemplate.batchUpdate(sql, batchArgs);
     }
 }

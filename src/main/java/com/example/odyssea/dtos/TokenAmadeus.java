@@ -11,14 +11,17 @@ public class TokenAmadeus {
     @JsonProperty("access_token")
     private String Token;
     @JsonProperty("expires_in")
-    private String expiresIn; // Temps d'expiration en secondes
+    private int expiresIn; // Temps d'expiration en secondes
     private Instant expiryTime; // Date d'expiration
 
 
-    public TokenAmadeus(String tokenType, String token, String expiresIn) {
+    public TokenAmadeus(String tokenType, String token, int expiresIn) {
         this.tokenType = tokenType;
         Token = token;
         this.expiresIn = expiresIn;
+    }
+
+    public TokenAmadeus() {
     }
 
     public String getTokenType() {
@@ -37,23 +40,20 @@ public class TokenAmadeus {
         Token = token;
     }
 
-    public int getExpiresIn(String expiresIn) {
-        return Integer.parseInt(expiresIn);
-    }
-
-    public String getExpiresInString(){
+    public int getExpiresIn() {
         return expiresIn;
     }
 
-    public void setExpiresIn(String expiresIn) {
+    public void setExpiresIn(int expiresIn) {
         this.expiresIn = expiresIn;
+        this.expiryTime = Instant.now().plusSeconds(expiresIn); // Calcule la date d'expiration
     }
 
     public Instant getExpiryTime() {
         return expiryTime;
     }
 
-    public void setExpiryTime(Instant expiryTime) {
-        this.expiryTime = expiryTime;
+    public boolean isExpired() {
+        return Instant.now().isAfter(expiryTime); // Vérifie si le token est expiré
     }
 }

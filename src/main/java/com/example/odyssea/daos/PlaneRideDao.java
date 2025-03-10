@@ -8,6 +8,7 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.stereotype.Repository;
 
+import java.sql.*;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
@@ -80,10 +81,35 @@ public class PlaneRideDao {
 
     public PlaneRide save(PlaneRide planeRide) {
         String sql = "INSERT INTO planeRide (one_way, totalPrice, currency, created_at) VALUES (?, ?, ?, ?)";
-        jdbcTemplate.update(sql, planeRide.isOneWay(), planeRide.getTotalPrice(), planeRide.getCurrency(), planeRide.getCreatedAt());
+
+        // Utiliser 'Statement.RETURN_GENERATED_KEYS' pour récupérer l'ID généré
+        try (Connection conn = jdbcTemplate.getDataSource().getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
+
+            // Paramétrage des valeurs dans la requête
+            stmt.setBoolean(1, planeRide.isOneWay());
+            stmt.setBigDecimal(2, planeRide.getTotalPrice());
+            stmt.setString(3, planeRide.getCurrency());
+            stmt.setTimestamp(4, Timestamp.valueOf(planeRide.getCreatedAt()));
+
+            // Exécution de l'insertion
+            int rowsAffected = stmt.executeUpdate();
+
+            // Si l'insertion est réussie, récupérer l'ID généré
+            if (rowsAffected > 0) {
+                try (ResultSet generatedKeys = stmt.getGeneratedKeys()) {
+                    if (generatedKeys.next()) {
+                        planeRide.setId(generatedKeys.getInt(1));  // Récupérer l'ID généré
+                    }
+                }
+            }
+        } catch (SQLException e) {
+            throw new RuntimeException("Erreur lors de l'insertion du PlaneRide", e);
+        }
 
         return planeRide;
     }
+
 
     public void saveAll(List<PlaneRide> planeRides) {
         String sql = "INSERT INTO planeRide (one_way, totalPrice, currency, created_at) VALUES (?, ?, ?, ?)";
