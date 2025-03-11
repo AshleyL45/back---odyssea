@@ -47,9 +47,9 @@ public class MySelectionController {
     }
 
     // Met à jour une sélection pour un utilisateur donné
-    @PutMapping("/user/{userId}")
-    public MySelection updateSelection(@PathVariable int userId, @RequestBody MySelection selection) {
-        return mySelectionService.updateSelection(userId, selection);
+    @PutMapping("/user/{userId}/itinerary/{itineraryId}")
+    public MySelection updateSelection(@PathVariable int userId, @PathVariable int itineraryId, @RequestBody MySelection selection) {
+        return mySelectionService.updateSelection(userId, itineraryId, selection);
     }
 
     // Supprime une sélection correspondant à un utilisateur et un itinéraire donnés
