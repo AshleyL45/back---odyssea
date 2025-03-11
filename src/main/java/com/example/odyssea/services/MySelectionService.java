@@ -49,9 +49,8 @@ public class MySelectionService {
     }
 
     // Met à jour une sélection pour un utilisateur donné
-    public MySelection updateSelection(int userId, MySelection selection) {
-
-        return mySelectionDao.update(userId, selection);
+    public MySelection updateSelection(int userId, int itineraryId, MySelection selection) {
+        return mySelectionDao.update(userId, itineraryId, selection);
     }
 
     // Supprime une sélection correspondant à un utilisateur et un itinéraire donnés
@@ -60,7 +59,7 @@ public class MySelectionService {
         boolean deleted = false;
         for (MySelection s : selections) {
             if (s.getIdUser() == userId && s.getIdItinerary() == itineraryId) {
-                deleted = mySelectionDao.delete(itineraryId);
+                deleted = mySelectionDao.delete(userId, itineraryId);
                 break;
             }
         }
