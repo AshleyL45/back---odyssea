@@ -131,7 +131,7 @@ public class UserItineraryService {
                 assignCity(userItineraryDay, userPreferences.getCountrySelection().getLast(), dayNumber);
                 assignActivity(userItineraryDay, userPreferences.getCountrySelection().get(2));
             } else {
-                userItineraryDay.setCountryName(null);
+                assignCity(userItineraryDay, userPreferences.getCountrySelection().getFirst(), dayNumber);
             }
 
             // Déterminer la date de chaque jour
@@ -232,14 +232,19 @@ public class UserItineraryService {
 
         if((dayNumber % 4) <= 2 && (dayNumber % 4) != 0){
             day.setCityName(country.getCitySelection().getFirst().getCityName());
+            System.out.println("City 1" + country.getCitySelection().getFirst().getCityName());
+            System.out.println("Day number 1 :" + dayNumber);
         } else {
             day.setCityName(country.getCitySelection().get(1).getCityName());
+            System.out.println("City 2" + country.getCitySelection().get(1).getCityName());
+            System.out.println("Day number 2 :" + dayNumber);
         }
 
     }
 
     // Assigner un hôtel
     private List<HotelDto> assignHotel(String cityName, int starRating){
+        System.out.println("City name : " + cityName);
         List<Hotel> hotels = hotelService.getHotelsByCityAndStarRating(cityDao.findCityByName(cityName).getId(), starRating);
         if(hotels.isEmpty()){
             return null;
