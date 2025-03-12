@@ -1,8 +1,11 @@
 package com.example.odyssea.daos.userAuth;
 
 import com.example.odyssea.entities.userAuth.User;
+import com.example.odyssea.exceptions.UserNotFoundException;
+import com.example.odyssea.exceptions.UsernameNotFoundException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
@@ -20,7 +23,9 @@ public class UserDao {
             rs.getInt("id"),
             rs.getString("email"),
             rs.getString("password"),
-            rs.getString("role")
+            rs.getString("role"),
+            rs.getString("firstName"),
+            rs.getString("lastName")
     );
 
     public List<User> findAll(){
@@ -33,7 +38,7 @@ public class UserDao {
         return jdbcTemplate.query(sql, userRowMapper, email)
                 .stream()
                 .findFirst()
-                .orElseThrow(() -> new RuntimeException("User Not Found"));
+                .orElseThrow(() -> new UsernameNotFoundException("User Not Found"));
     }
 
     public User findById(int id) {
@@ -41,28 +46,45 @@ public class UserDao {
         return jdbcTemplate.query(sql, userRowMapper, id)
                 .stream()
                 .findFirst()
-                .orElseThrow(() -> new RuntimeException("User with id : " + id + " doesn't exist."));
+                .orElseThrow(() -> new UserNotFoundException("User with id : " + id + " doesn't exist."));
     }
 
     public boolean save(User user) {
-        String sql = "INSERT INTO user (email, password, role) VALUES (?, ?, ?)";
-        int rowsAffected = jdbcTemplate.update(sql, user.getEmail(), user.getPassword(), user.getRole());
+        String sql = "INSERT INTO user (email, password, role, firstName, lastName) VALUES (?, ?, ?, ?, ?)";
+        int rowsAffected = jdbcTemplate.update(sql, user.getEmail(), user.getPassword(), user.getRole(), user.getFirstName(), user.getLastName());
         return rowsAffected > 0;
     }
 
     public User update(int id, User user) {
         if (!userExistsById(id)) {
-            throw new RuntimeException("User with id : " + id + " doesn't exist.");
+            throw new UserNotFoundException("User with id : " + id + " doesn't exist.");
         }
 
-        String sql = "UPDATE user SET email = ?, password = ?, role = ? WHERE id = ?";
-        int rowsAffected = jdbcTemplate.update(sql,user.getEmail(), user.getPassword(), user.getRole(), id);
+        String sql = "UPDATE user SET email = ?, password = ?, role = ?, firstName = ?, lastName = ? WHERE id = ?";
+        int rowsAffected = jdbcTemplate.update(sql,user.getEmail(), user.getPassword(), user.getRole(),  user.getFirstName(), user.getLastName(), id);
 
         if (rowsAffected <= 0) {
             throw new RuntimeException("Failed to update user with id : " + id);
         }
         return this.findById(id);
     }
+
+    public void updatePassword(int id, String newPassword) {
+        if (!userExistsById(id)) {
+            throw new UserNotFoundException("User with id : " + id + " doesn't exist.");
+        }
+
+        BCryptPasswordEncoder encoder = new BCryptPasswordEncoder();
+        String hashedPassword = encoder.encode(newPassword);
+
+        String sql = "UPDATE user SET password = ? WHERE id = ?";
+        int rowsAffected = jdbcTemplate.update(sql, hashedPassword, id);
+
+        if (rowsAffected <= 0) {
+            throw new RuntimeException("Failed to update password for user with id : " + id);
+        }
+    }
+
 
     public boolean delete(int id) {
         String sql = "DELETE FROM user WHERE id = ?";
@@ -81,4 +103,5 @@ public class UserDao {
         String sql = "SELECT COUNT(*) FROM user WHERE email = ?";
         return jdbcTemplate.queryForObject(sql, Integer.class, email) > 0;
     }
+
 }
