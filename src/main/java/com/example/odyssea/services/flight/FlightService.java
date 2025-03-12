@@ -1,6 +1,6 @@
-package com.example.odyssea.services;
+package com.example.odyssea.services.flight;
 
-import com.example.odyssea.daos.FlightDao;
+import com.example.odyssea.daos.flight.FlightDao;
 import com.example.odyssea.dtos.Flight.FlightDataDTO;
 import com.example.odyssea.dtos.Flight.FlightItineraryDTO;
 import com.example.odyssea.dtos.Flight.FlightOffersDTO;
@@ -8,6 +8,7 @@ import com.example.odyssea.dtos.Flight.FlightDTO;
 import com.example.odyssea.dtos.Flight.FlightSegmentDTO;
 import com.example.odyssea.dtos.Flight.DictionnaryDTO;
 import com.example.odyssea.entities.mainTables.Flight;
+import com.example.odyssea.services.TokenService;
 import org.springframework.stereotype.Service;
 import org.springframework.web.reactive.function.client.WebClient;
 import reactor.core.publisher.Mono;
@@ -82,7 +83,7 @@ public class FlightService {
     }
 
     /**
-     * Crée un FlightDTO à partir d'un itinéraire, d'une offre et du dictionnaire fourni par l'API.
+     * Crée un FlightDTO à partir d'un itinéraire, d'une offre et du dictionnaire fourni par l'API
      */
     private FlightDTO createFlightDTO(FlightItineraryDTO itinerary,
                                       FlightOffersDTO flightOffer,
@@ -122,8 +123,8 @@ public class FlightService {
     public Mono<FlightDTO> getFlightDTO(int flightId) {
         return Mono.fromCallable(() -> {
             Flight flight = flightDao.findById(flightId);
-            // Conversion de Flight en FlightDTO (à adapter selon vos besoins)
-            return new FlightDTO(/* initialisation avec flight */);
+            // Conversion de Flight en FlightDTO
+            return new FlightDTO();
         });
     }
 }

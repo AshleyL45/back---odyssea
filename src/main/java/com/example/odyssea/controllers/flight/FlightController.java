@@ -1,7 +1,7 @@
-package com.example.odyssea.controllers;
+package com.example.odyssea.controllers.flight;
 
 import com.example.odyssea.dtos.Flight.FlightItineraryDTO;
-import com.example.odyssea.services.FlightService;
+import com.example.odyssea.services.flight.FlightService;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;

@@ -1,4 +1,4 @@
-package com.example.odyssea.daos;
+package com.example.odyssea.daos.flight;
 
 import com.example.odyssea.entities.mainTables.FlightSegmentRide;
 import org.springframework.jdbc.core.JdbcTemplate;
