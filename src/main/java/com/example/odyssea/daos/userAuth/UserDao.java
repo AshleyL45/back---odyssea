@@ -1,9 +1,11 @@
 package com.example.odyssea.daos.userAuth;
 
 import com.example.odyssea.entities.userAuth.User;
+import com.example.odyssea.exceptions.UserNotFoundException;
 import com.example.odyssea.exceptions.UsernameNotFoundException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
@@ -44,7 +46,7 @@ public class UserDao {
         return jdbcTemplate.query(sql, userRowMapper, id)
                 .stream()
                 .findFirst()
-                .orElseThrow(() -> new RuntimeException("User with id : " + id + " doesn't exist."));
+                .orElseThrow(() -> new UserNotFoundException("User with id : " + id + " doesn't exist."));
     }
 
     public boolean save(User user) {
@@ -55,7 +57,7 @@ public class UserDao {
 
     public User update(int id, User user) {
         if (!userExistsById(id)) {
-            throw new RuntimeException("User with id : " + id + " doesn't exist.");
+            throw new UserNotFoundException("User with id : " + id + " doesn't exist.");
         }
 
         String sql = "UPDATE user SET email = ?, password = ?, role = ?, firstName = ?, lastName = ? WHERE id = ?";
@@ -66,6 +68,23 @@ public class UserDao {
         }
         return this.findById(id);
     }
+
+    public void updatePassword(int id, String newPassword) {
+        if (!userExistsById(id)) {
+            throw new UserNotFoundException("User with id : " + id + " doesn't exist.");
+        }
+
+        BCryptPasswordEncoder encoder = new BCryptPasswordEncoder();
+        String hashedPassword = encoder.encode(newPassword);
+
+        String sql = "UPDATE user SET password = ? WHERE id = ?";
+        int rowsAffected = jdbcTemplate.update(sql, hashedPassword, id);
+
+        if (rowsAffected <= 0) {
+            throw new RuntimeException("Failed to update password for user with id : " + id);
+        }
+    }
+
 
     public boolean delete(int id) {
         String sql = "DELETE FROM user WHERE id = ?";

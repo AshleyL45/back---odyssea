@@ -1,11 +1,19 @@
 package com.example.odyssea.entities.userAuth;
 
+import jakarta.validation.constraints.Email;
+import jakarta.validation.constraints.NotBlank;
+
 public class User {
     private int id;
+    @NotBlank(message = "The email cannot be blank.")
+    @Email(message = "The email must be valid.")
     private String email;
+    @NotBlank(message = "Password cannot be blank.")
     private String password;
     private String role;
+    @NotBlank(message = "Firstname cannot be blank.")
     private String firstName;
+    @NotBlank(message = "Lastname cannot be blank.")
     private String lastName;
 
     public User() {
