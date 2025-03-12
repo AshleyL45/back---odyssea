@@ -1,13 +1,20 @@
 package com.example.odyssea.services;
 
 import com.example.odyssea.daos.FlightDao;
-import com.example.odyssea.dtos.Flight.*;
+import com.example.odyssea.dtos.Flight.FlightDataDTO;
+import com.example.odyssea.dtos.Flight.FlightItineraryDTO;
+import com.example.odyssea.dtos.Flight.FlightOffersDTO;
+import com.example.odyssea.dtos.Flight.FlightDTO;
+import com.example.odyssea.dtos.Flight.FlightSegmentDTO;
+import com.example.odyssea.dtos.Flight.DictionnaryDTO;
+import com.example.odyssea.entities.mainTables.Flight;
 import org.springframework.stereotype.Service;
 import org.springframework.web.reactive.function.client.WebClient;
 import reactor.core.publisher.Mono;
 
+import java.math.BigDecimal;
 import java.time.LocalDate;
-import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 @Service
@@ -22,121 +29,101 @@ public class FlightService {
         this.webClient = webClientBuilder.baseUrl("https://test.api.amadeus.com/").build();
     }
 
-   /*public FlightDTO getFlightDTO(int id){
-        Flight flight = flightDao.findById(id);
-        return new FlightDTO(flight.getId(), flight.getCompanyName(), flight.getDuration(), flight.getDepartureDate(), flight.getDepartureTime(), flight.getDepartureCityIata(), flight.getArrivalDate(), flight.getArrivalTime(), flight.getArrivalCityIata(), flight.getPrice(), flight.getAirplaneName());
-    }*/
-
-
-    // Récupère les vols de l'API Amadeus
-    public Mono<List<FlightItineraryDTO>> getFlights(String departureIata, String arrivalIata, LocalDate departureDate, LocalDate arrivalDate, int totalPeople){
+    public Mono<List<FlightItineraryDTO>> getFlights(String departureIata, String arrivalIata,
+                                                     LocalDate departureDate, LocalDate arrivalDate,
+                                                     int totalPeople) {
         return tokenService.getValidToken()
-                        .flatMap(token -> (
-                                webClient.get()
-                                        .uri(uriBuilder -> uriBuilder
-                                                .path("v2/shopping/flight-offers")
-                                                .queryParam("originLocationCode", departureIata) // A changer plus tard
-                                                .queryParam("destinationLocationCode", arrivalIata) // A changer plus tard
-                                                .queryParam("departureDate", departureDate.toString()) // A changer plus tard
-                                                .queryParam("returnDate", arrivalDate.toString()) // A changer plus tard
-                                                .queryParam("adults", totalPeople) // A changer plus tard
-                                                .queryParam("max", 2) // A changer plus tard
-                                                .build()
-                                        )
-                                        .header("Authorization", "Bearer " + token)
-                                        .retrieve()
-                                        .bodyToMono(FlightDataDTO.class)
-                                ))
-                    .map(this::convertToFlightDTO);
-                        /*.flatMap(flights ->
-                        // Sauvegarde chaque vol dans la BDD de façon asynchrone
-                        Mono.fromRunnable(() -> flights.forEach(flightDao::save))
-                                .thenReturn(flights) // Retourne la liste après sauvegarde
-        );*/
-
+                .flatMap(token ->
+                        webClient.get()
+                                .uri(uriBuilder -> uriBuilder
+                                        .path("v2/shopping/flight-offers")
+                                        .queryParam("originLocationCode", departureIata)
+                                        .queryParam("destinationLocationCode", arrivalIata)
+                                        .queryParam("departureDate", departureDate.toString())
+                                        .queryParam("returnDate", arrivalDate.toString())
+                                        .queryParam("adults", totalPeople)
+                                        .queryParam("max", 2)
+                                        .build()
+                                )
+                                .header("Authorization", "Bearer " + token)
+                                .retrieve()
+                                .bodyToMono(FlightDataDTO.class)
+                )
+                .flatMap(flightDataDTO -> {
+                    // Vérifier qu'il y a au moins une offre et un itinéraire
+                    if (flightDataDTO == null || flightDataDTO.getData() == null || flightDataDTO.getData().isEmpty()) {
+                        return Mono.just(Collections.emptyList());
+                    }
+                    FlightOffersDTO offer = flightDataDTO.getData().get(0);
+                    if (offer.getItineraries() == null || offer.getItineraries().isEmpty()) {
+                        return Mono.just(Collections.emptyList());
+                    }
+                    // On prend uniquement le premier itinéraire pour créer un vol one-way
+                    FlightItineraryDTO itinerary = offer.getItineraries().get(0);
+                    FlightDTO flightDTO = createFlightDTO(itinerary, offer, flightDataDTO.getDictionnary());
+                    if (flightDTO != null) {
+                        Flight flightEntity = new Flight(
+                                0,
+                                flightDTO.getCompanyName(),
+                                flightDTO.getDuration(),
+                                flightDTO.getDepartureDateTime().toLocalDate(),
+                                flightDTO.getDepartureDateTime().toLocalTime(),
+                                flightDTO.getDepartureCityIata(),
+                                flightDTO.getArrivalDateTime().toLocalDate(),
+                                flightDTO.getArrivalDateTime().toLocalTime(),
+                                flightDTO.getArrivalCityIata(),
+                                flightDTO.getPrice(),
+                                flightDTO.getAirplaneName()
+                        );
+                        flightDao.save(flightEntity);
+                    }
+                    return Mono.just(Collections.singletonList(itinerary));
+                });
     }
 
-    // Récupère les vols et le met dans une liste "flightList"
-    private List<FlightItineraryDTO> convertToFlightDTO(FlightDataDTO flightDataDTO) {
-        List<FlightItineraryDTO> itineraryList = new ArrayList<>();
+    /**
+     * Crée un FlightDTO à partir d'un itinéraire, d'une offre et du dictionnaire fourni par l'API.
+     */
+    private FlightDTO createFlightDTO(FlightItineraryDTO itinerary,
+                                      FlightOffersDTO flightOffer,
+                                      DictionnaryDTO dictionaries) {
+        if (itinerary == null || itinerary.getSegments() == null || itinerary.getSegments().isEmpty()) {
+            return null;
+        }
+        // Pour un vol one-way, on utilise uniquement le premier segment
+        FlightSegmentDTO segment = itinerary.getSegments().get(0);
+        if (segment == null) {
+            return null;
+        }
+        FlightDTO flightDTO = new FlightDTO();
+        flightDTO.setDepartureCityIata(segment.getDeparture().getIataCode());
+        flightDTO.setDepartureDateTime(segment.getDeparture().getDateTime());
+        flightDTO.setArrivalCityIata(segment.getArrival().getIataCode());
+        flightDTO.setArrivalDateTime(segment.getArrival().getDateTime());
+        flightDTO.setDuration(itinerary.getDuration());
+        flightDTO.setPrice(flightOffer != null && flightOffer.getPrice() != null
+                ? flightOffer.getPrice().getTotalPrice()
+                : BigDecimal.ZERO);
 
-        if (flightDataDTO == null || flightDataDTO.getData() == null) {
-            return itineraryList;
+        if (dictionaries != null) {
+            String carrierCode = segment.getCarrierCode();
+            flightDTO.setCompanyName(dictionaries.getCarriers().getOrDefault(carrierCode, carrierCode));
+
+            String aircraftCode = segment.getAircraftCode() != null ? segment.getAircraftCode().getCode() : "";
+            flightDTO.setAirplaneName(dictionaries.getAircraft().getOrDefault(aircraftCode, aircraftCode));
+        } else {
+            flightDTO.setCompanyName("Inconnu");
+            flightDTO.setAirplaneName("Modèle inconnu");
         }
 
-        for (FlightOffersDTO offer : flightDataDTO.getData()) {
-            System.out.println("Offer itineraries: " + offer.getItineraries());
-
-            if (offer.getItineraries().size() < 2) {
-                throw new RuntimeException("There isn't a round trip offer.");
-            }
-
-            FlightItineraryDTO outboundItinerary = offer.getItineraries().get(0);
-            FlightItineraryDTO returnItinerary = offer.getItineraries().get(1);
-
-            if (outboundItinerary.getSegments().isEmpty() || returnItinerary.getSegments().isEmpty()) {
-                System.out.println("One of the itineraries has no segments.");
-                continue;
-            }
-
-            FlightDTO outboundFlight = createFlightDTO(outboundItinerary, offer, flightDataDTO.getDictionnary());
-            FlightDTO returnFlight = createFlightDTO(returnItinerary, offer, flightDataDTO.getDictionnary());
-
-            if (outboundFlight == null || returnFlight == null) {
-                System.out.println("Outbound or return flight is null");
-                continue;
-            }
-
-            FlightItineraryDTO itinerary = new FlightItineraryDTO();
-            itinerary.setSegments(outboundItinerary.getSegments());
-            itinerary.setDuration(outboundItinerary.getDuration());
-
-            itineraryList.add(itinerary);
-        }
-
-        return itineraryList;
+        return flightDTO;
     }
 
-
-    // Crée un Flight DTO
-    private FlightDTO createFlightDTO(FlightItineraryDTO itinerary, FlightOffersDTO flightOffer, DictionnaryDTO dictionaries) {
-        /*System.out.println( "Outbound" + itinerary.getOutboundFlight());
-        System.out.println( "Outbound" + itinerary.getReturnFlight());*/
-
-        if (itinerary == null){
-            // System.out.println("Itinerary is null");
-            return null;
-        }
-
-        FlightSegmentDTO outboundFlight = itinerary.getSegments().get(0);
-        FlightSegmentDTO returnFlight = itinerary.getSegments().getLast();
-
-        if (outboundFlight == null || returnFlight == null) {
-            //System.out.println("Outbound Flight or Return Flight is null");
-            return null;
-        }
-
-        FlightDTO flight = new FlightDTO();
-
-
-        flight.setDepartureCityIata(outboundFlight.getDeparture().getIataCode());
-        flight.setArrivalCityIata(returnFlight.getArrival().getIataCode());
-        flight.setDepartureDateTime(outboundFlight.getDeparture().getDateTime());
-        flight.setArrivalDateTime(returnFlight.getArrival().getDateTime());
-
-        flight.setDuration(itinerary.getDuration());
-
-        flight.setPrice(flightOffer.getPrice().getTotalPrice());
-        System.out.println(flightOffer.getPrice().getTotalPrice());
-
-        String carrierCode = outboundFlight.getCarrierCode();  // La compagnie pour l'aller
-        flight.setCompanyName(dictionaries.getCarriers().getOrDefault(carrierCode, "Inconnu"));
-        System.out.println("Dictionnary company : " + dictionaries.getCarriers());
-
-        String aircraftCode = outboundFlight.getAircraftCode().getCode(); // Le modèle de l'avion
-        flight.setAirplaneName(dictionaries.getAircraft().getOrDefault(aircraftCode, "Modèle inconnu"));
-        System.out.println("Dictionnary airplane : " + dictionaries.getAircraft());
-
-        return flight;
+    public Mono<FlightDTO> getFlightDTO(int flightId) {
+        return Mono.fromCallable(() -> {
+            Flight flight = flightDao.findById(flightId);
+            // Conversion de Flight en FlightDTO (à adapter selon vos besoins)
+            return new FlightDTO(/* initialisation avec flight */);
+        });
     }
 }

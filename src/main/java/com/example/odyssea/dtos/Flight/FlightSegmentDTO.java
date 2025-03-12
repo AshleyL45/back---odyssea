@@ -1,15 +1,17 @@
-package com.example.odyssea.dtos.Flight;
 
+package com.example.odyssea.dtos.Flight;//package com.example.odyssea.dtos;
+
+import com.example.odyssea.dtos.Flight.AircraftDTO;
 import com.example.odyssea.dtos.Flight.AirportDTO;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 public class FlightSegmentDTO {
 
-    @JsonProperty("id")
-    private String id;
+@JsonProperty("id")
+private String id;
 
     @JsonProperty("departure")
-    private AirportDTO departure;
+   private AirportDTO departure;
 
     @JsonProperty("arrival")
     private AirportDTO arrival;
@@ -50,5 +52,5 @@ public class FlightSegmentDTO {
     public void setAircraftCode(AircraftDTO aircraftCode) { this.aircraftCode = aircraftCode; }
 
     public String getDuration() { return duration; }
-    public void setDuration(String duration) { this.duration = duration; }
-}
+    public void setDuration(String duration) { this.duration = duration; }}
+
