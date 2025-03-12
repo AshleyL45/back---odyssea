@@ -6,7 +6,7 @@ import java.util.List;
 public class FlightOffersDTO {
 
     @JsonProperty("itineraries")
-    private List<FlightItineraryDTO> itineraries;  // Aller et retour
+    private List<FlightItineraryDTO> itineraries;
 
     @JsonProperty("price")
     private FlightPriceDTO price;
