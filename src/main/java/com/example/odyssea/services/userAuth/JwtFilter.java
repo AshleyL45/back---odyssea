@@ -44,6 +44,7 @@ public class JwtFilter extends OncePerRequestFilter {
             }
         } catch (Exception e) {
             System.out.println("Cannot set user authentication: " + e);
+            e.printStackTrace(); // Affiche la trace de pile complète
         }
         chain.doFilter(request, response);
     }
