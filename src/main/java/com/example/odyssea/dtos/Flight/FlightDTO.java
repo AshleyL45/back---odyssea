@@ -2,9 +2,7 @@ package com.example.odyssea.dtos.Flight;
 
 import java.math.BigDecimal;
 import java.time.Duration;
-import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.time.LocalTime;
 
 public class FlightDTO {
     private int id;
@@ -20,7 +18,8 @@ public class FlightDTO {
     public FlightDTO() {
     }
 
-    public FlightDTO(int id, String companyName, Duration duration, LocalDateTime departureDateTime, String departureCityIata, LocalDateTime arrivalDateTime, String arrivalCityIata, BigDecimal price, String airplaneName) {
+    public FlightDTO(int id, String companyName, Duration duration, LocalDateTime departureDateTime, String departureCityIata,
+                     LocalDateTime arrivalDateTime, String arrivalCityIata, BigDecimal price, String airplaneName) {
         this.id = id;
         this.companyName = companyName;
         this.duration = duration;
@@ -31,77 +30,59 @@ public class FlightDTO {
         this.price = price;
         this.airplaneName = airplaneName;
     }
-
 
     public int getId() {
         return id;
     }
-
     public void setId(int id) {
         this.id = id;
     }
-
     public String getCompanyName() {
         return companyName;
     }
-
     public void setCompanyName(String companyName) {
         this.companyName = companyName;
     }
-
     public Duration getDuration() {
         return duration;
     }
-
     public void setDuration(Duration duration) {
         this.duration = duration;
     }
-
-    public String getDepartureCityIata() {
-        return departureCityIata;
-    }
-
-    public void setDepartureCityIata(String departureCityIata) {
-        this.departureCityIata = departureCityIata;
-    }
-
-    public String getArrivalCityIata() {
-        return arrivalCityIata;
-    }
-
-    public void setArrivalCityIata(String arrivalCityIata) {
-        this.arrivalCityIata = arrivalCityIata;
-    }
-
-    public BigDecimal getPrice() {
-        return price;
-    }
-
-    public void setPrice(BigDecimal price) {
-        this.price = price;
-    }
-
-    public String getAirplaneName() {
-        return airplaneName;
-    }
-
-    public void setAirplaneName(String airplaneName) {
-        this.airplaneName = airplaneName;
-    }
-
     public LocalDateTime getDepartureDateTime() {
         return departureDateTime;
     }
-
     public void setDepartureDateTime(LocalDateTime departureDateTime) {
         this.departureDateTime = departureDateTime;
     }
-
+    public String getDepartureCityIata() {
+        return departureCityIata;
+    }
+    public void setDepartureCityIata(String departureCityIata) {
+        this.departureCityIata = departureCityIata;
+    }
     public LocalDateTime getArrivalDateTime() {
         return arrivalDateTime;
     }
-
     public void setArrivalDateTime(LocalDateTime arrivalDateTime) {
         this.arrivalDateTime = arrivalDateTime;
+    }
+    public String getArrivalCityIata() {
+        return arrivalCityIata;
+    }
+    public void setArrivalCityIata(String arrivalCityIata) {
+        this.arrivalCityIata = arrivalCityIata;
+    }
+    public BigDecimal getPrice() {
+        return price;
+    }
+    public void setPrice(BigDecimal price) {
+        this.price = price;
+    }
+    public String getAirplaneName() {
+        return airplaneName;
+    }
+    public void setAirplaneName(String airplaneName) {
+        this.airplaneName = airplaneName;
     }
 }

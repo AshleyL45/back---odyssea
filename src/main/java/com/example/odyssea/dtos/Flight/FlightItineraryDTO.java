@@ -1,5 +1,6 @@
 package com.example.odyssea.dtos.Flight;
 
+import com.example.odyssea.dtos.Flight.FlightSegmentDTO;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 import java.util.List;
@@ -7,9 +8,11 @@ import java.util.List;
 public class FlightItineraryDTO { // Deux vols: un aller et un retour
 
     @JsonProperty("segments")
+
     private List<FlightSegmentDTO> segments; // Liste de segments de vol
     @JsonProperty("duration") // Durée des vols allers ou retours
     private String duration;
+
 
     public FlightItineraryDTO() {
     }

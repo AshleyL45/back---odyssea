@@ -16,12 +16,14 @@ public class FlightSegment {
     private String carrierName;
     private String aircraftCode;
     private String aircraftName;
+
     private LocalTime duration;
 
     public FlightSegment() {
     }
 
     public FlightSegment(String departureAirportIata, String arrivalAirportIata, LocalDateTime departureDateTime, LocalDateTime arrivalDateTime, String carrierCode, String carrierName, String aircraftCode, String aircraftName, LocalTime duration) {
+
         this.departureAirportIata = departureAirportIata;
         this.arrivalAirportIata = arrivalAirportIata;
         this.departureDateTime = departureDateTime;
@@ -113,4 +115,3 @@ public class FlightSegment {
     public void setId(Integer id) {
         this.id = id;
     }
-}

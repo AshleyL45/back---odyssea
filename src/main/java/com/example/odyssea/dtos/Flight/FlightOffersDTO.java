@@ -8,7 +8,9 @@ public class FlightOffersDTO {
     @JsonProperty("oneWay")
     private boolean oneWay;
     @JsonProperty("itineraries")
+
     private List<FlightItineraryDTO> itineraries;  // Offre de vol
+
     @JsonProperty("price")
     private FlightPriceDTO price;
 

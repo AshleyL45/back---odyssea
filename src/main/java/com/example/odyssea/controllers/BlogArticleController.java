@@ -1,6 +1,6 @@
 package com.example.odyssea.controllers;
 
-import com.example.odyssea.entities.mainTables.BlogArticle;
+import com.example.odyssea.entities.BlogArticle;
 import com.example.odyssea.services.BlogArticleService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;

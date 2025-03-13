@@ -1,11 +1,15 @@
-package com.example.odyssea.dtos.Flight;
 
+package com.example.odyssea.dtos.Flight;//package com.example.odyssea.dtos;
+
+import com.example.odyssea.dtos.Flight.AircraftDTO;
 import com.example.odyssea.dtos.Flight.AirportDTO;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
+
 public class FlightSegmentDTO { // Un seul vol
+
     @JsonProperty("departure")
-    private AirportDTO departure;
+   private AirportDTO departure;
 
     @JsonProperty("arrival")
     private AirportDTO arrival;
@@ -47,6 +51,7 @@ public class FlightSegmentDTO { // Un seul vol
     public void setAircraftCode(AircraftDTO aircraftCode) { this.aircraftCode = aircraftCode; }
 
     public String getDuration() { return duration; }
+
     public void setDuration(String duration) { this.duration = duration; }
 
     public String getCarrierName() {
@@ -65,3 +70,4 @@ public class FlightSegmentDTO { // Un seul vol
         this.aircraftName = aircraftName;
     }
 }
+
