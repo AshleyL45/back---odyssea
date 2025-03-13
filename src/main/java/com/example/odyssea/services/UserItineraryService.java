@@ -153,7 +153,6 @@ public class UserItineraryService {
             double random = Math.random() * userItineraryDayHotels.size();
             userItineraryDay.getHotels().add(userItineraryDayHotels.get((int) random));
 
-            userItineraryDay.setFlights(null);
 
             i += 1;
         }
