@@ -1,33 +1,29 @@
 package com.example.odyssea.entities.userItinerary;
 
 public class UserItineraryStep {
-    private int id;
     private int userId;
     private int userItineraryId;
     private int hotelId;
     private int cityId;
-    private int position;
     private int dayNumber;
     private boolean offDay;
+    private int activityId;
+    private int flightId;
 
-    public UserItineraryStep(int id, int userId, int userItineraryId, int hotelId, int cityId, int position, int dayNumber, boolean offDay) {
-        this.id = id;
+    public UserItineraryStep() {
+    }
+
+    public UserItineraryStep(int userId, int userItineraryId, int hotelId, int cityId, int dayNumber, boolean offDay, int activityId, int flightId) {
         this.userId = userId;
         this.userItineraryId = userItineraryId;
         this.hotelId = hotelId;
         this.cityId = cityId;
-        this.position = position;
         this.dayNumber = dayNumber;
         this.offDay = offDay;
+        this.activityId = activityId;
+        this.flightId = flightId;
     }
 
-    public int getId() {
-        return id;
-    }
-
-    public void setId(int id) {
-        this.id = id;
-    }
 
     public int getUserId() {
         return userId;
@@ -61,14 +57,6 @@ public class UserItineraryStep {
         this.cityId = cityId;
     }
 
-    public int getPosition() {
-        return position;
-    }
-
-    public void setPosition(int position) {
-        this.position = position;
-    }
-
     public int getDayNumber() {
         return dayNumber;
     }
@@ -83,5 +71,21 @@ public class UserItineraryStep {
 
     public void setOffDay(boolean offDay) {
         this.offDay = offDay;
+    }
+
+    public int getActivityId() {
+        return activityId;
+    }
+
+    public void setActivityId(int activityId) {
+        this.activityId = activityId;
+    }
+
+    public int getFlightId() {
+        return flightId;
+    }
+
+    public void setFlightId(int flightId) {
+        this.flightId = flightId;
     }
 }

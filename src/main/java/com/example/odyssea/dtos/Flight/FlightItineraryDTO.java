@@ -3,19 +3,21 @@ package com.example.odyssea.dtos.Flight;
 import com.example.odyssea.dtos.Flight.FlightSegmentDTO;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
-import java.time.Duration;
 import java.util.List;
 
-public class FlightItineraryDTO {
+public class FlightItineraryDTO { // Deux vols: un aller et un retour
 
     @JsonProperty("segments")
-    private List<FlightSegmentDTO> segments;
-    private Duration duration;
+
+    private List<FlightSegmentDTO> segments; // Liste de segments de vol
+    @JsonProperty("duration") // Durée des vols allers ou retours
+    private String duration;
+
 
     public FlightItineraryDTO() {
     }
 
-    public FlightItineraryDTO(List<FlightSegmentDTO> segments, Duration duration) {
+    public FlightItineraryDTO(List<FlightSegmentDTO> segments, String duration) {
         this.segments = segments;
         this.duration = duration;
     }
@@ -28,11 +30,11 @@ public class FlightItineraryDTO {
         this.segments = segments;
     }
 
-    public Duration getDuration() {
+    public String getDuration() {
         return duration;
     }
 
-    public void setDuration(Duration duration) {
+    public void setDuration(String duration) {
         this.duration = duration;
     }
 }

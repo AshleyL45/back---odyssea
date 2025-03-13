@@ -1,27 +1,43 @@
 package com.example.odyssea.entities.userItinerary;
 
 import java.math.BigDecimal;
-import java.time.Duration;
-import java.util.Date;
+import java.sql.Date;
+
 
 public class UserItinerary {
     private int id;
     private int userId;
     private Date startDate;
     private Date endDate;
-    private int numberOfPeople;
     private BigDecimal startingPrice;
-    private Duration totalDuration;
+    private int totalDuration;
+    private String departureCity;
+    private String itineraryName;
+    private int numberOfAdults;
+    private int numberOfKids;
+    private int flightId;
+    private int optionId;
 
-    public UserItinerary(int id, int userId, Date startDate, Date endDate, int numberOfPeople, BigDecimal startingPrice, Duration totalDuration) {
+
+
+    public UserItinerary() {
+    }
+
+    public UserItinerary(int id, int userId, Date startDate, Date endDate, BigDecimal startingPrice, int totalDuration, String departureCity, String itineraryName, int numberOfAdults, int numberOfKids, int flightId, int optionId) {
         this.id = id;
         this.userId = userId;
         this.startDate = startDate;
         this.endDate = endDate;
-        this.numberOfPeople = numberOfPeople;
         this.startingPrice = startingPrice;
         this.totalDuration = totalDuration;
+        this.departureCity = departureCity;
+        this.itineraryName = itineraryName;
+        this.numberOfAdults = numberOfAdults;
+        this.numberOfKids = numberOfKids;
+        this.flightId = flightId;
+        this.optionId = optionId;
     }
+
 
     public int getId() {
         return id;
@@ -55,14 +71,6 @@ public class UserItinerary {
         this.endDate = endDate;
     }
 
-    public int getNumberOfPeople() {
-        return numberOfPeople;
-    }
-
-    public void setNumberOfPeople(int numberOfPeople) {
-        this.numberOfPeople = numberOfPeople;
-    }
-
     public BigDecimal getStartingPrice() {
         return startingPrice;
     }
@@ -71,11 +79,59 @@ public class UserItinerary {
         this.startingPrice = startingPrice;
     }
 
-    public Duration getTotalDuration() {
+    public int getTotalDuration() {
         return totalDuration;
     }
 
-    public void setTotalDuration(Duration totalDuration) {
+    public void setTotalDuration(int totalDuration) {
         this.totalDuration = totalDuration;
+    }
+
+    public String getDepartureCity() {
+        return departureCity;
+    }
+
+    public void setDepartureCity(String departureCity) {
+        this.departureCity = departureCity;
+    }
+
+    public String getItineraryName() {
+        return itineraryName;
+    }
+
+    public void setItineraryName(String itineraryName) {
+        this.itineraryName = itineraryName;
+    }
+
+    public int getNumberOfAdults() {
+        return numberOfAdults;
+    }
+
+    public void setNumberOfAdults(int numberOfAdults) {
+        this.numberOfAdults = numberOfAdults;
+    }
+
+    public int getNumberOfKids() {
+        return numberOfKids;
+    }
+
+    public void setNumberOfKids(int numberOfKids) {
+        this.numberOfKids = numberOfKids;
+    }
+
+    public int getFlightId() {
+        return flightId;
+    }
+
+    public void setFlightId(int flightId) {
+        this.flightId = flightId;
+    }
+
+    public int getOptionId() {
+        return optionId;
+    }
+
+    public void setOptionId(int optionId) {
+        this.optionId = optionId;
     }
 }
