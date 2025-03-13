@@ -97,6 +97,17 @@ public class CountryDao {
     }
 
     /**
+     * Retrouve un pays à partir de son nom
+     */
+    public Country findByName(String countryName){
+        String sql = "SELECT * FROM country WHERE name = ?";
+        return jdbcTemplate.query(sql, new CountryRowMapper(), countryName)
+                .stream()
+                .findFirst()
+                .orElseThrow(() -> new RuntimeException("The country " + countryName + " isn't available"));
+    }
+
+    /**
      * RowMapper pour transformer un ResultSet en objet Country
      */
     private static class CountryRowMapper implements RowMapper<Country> {
@@ -106,7 +117,7 @@ public class CountryDao {
                     rs.getInt("id"),
                     rs.getString("name"),
                     rs.getString("continent"),
-                    rs.getDouble("price")
+                    rs.getBigDecimal("price")
             );
         }
     }

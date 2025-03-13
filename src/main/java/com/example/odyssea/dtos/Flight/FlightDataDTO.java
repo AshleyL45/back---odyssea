@@ -14,18 +14,18 @@ public class FlightDataDTO {
     public FlightDataDTO() {
     }
 
-    public FlightDataDTO(List<FlightOffersDTO> data, DictionnaryDTO dictionnary) {
-        this.data = data;
+    public FlightDataDTO(List<FlightOffersDTO> flightOffers, DictionnaryDTO dictionnary) {
+        this.data = flightOffers;
         this.dictionnary = dictionnary;
     }
 
 
-    public List<FlightOffersDTO> getData() {
+    public List<FlightOffersDTO> getFlightOffers() {
         return data;
     }
 
-    public void setData(List<FlightOffersDTO> data) {
-        this.data = data;
+    public void setFlightOffers(List<FlightOffersDTO> flightOffers) {
+        this.data = this.data;
     }
 
     public DictionnaryDTO getDictionnary() {

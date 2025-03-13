@@ -102,6 +102,18 @@ public class CityDao {
     }
 
     /**
+     * Retrouver le code IATA et l'id en fonction du nom de la ville
+     */
+    public City findCityByName(String cityName){
+        String sql = "SELECT * FROM city WHERE name = ?";
+        return jdbcTemplate.query(sql, new CityRowMapper(), cityName)
+                .stream()
+                .findFirst()
+                .orElseThrow(() -> new RuntimeException("The city " + cityName + " doesn't exist."));
+
+    }
+
+    /**
      * Obtient uniquement les coordonnées (latitude et longitude) d'une ville donnée par son ID
      */
     public Optional<double[]> getCoordinatesByCityId(int id) {

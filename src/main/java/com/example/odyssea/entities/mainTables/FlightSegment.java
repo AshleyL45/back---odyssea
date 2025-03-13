@@ -1,27 +1,29 @@
 package com.example.odyssea.entities.mainTables;
 
+import org.springframework.data.annotation.Id;
+
 import java.time.LocalDateTime;
-import java.time.Duration;
+import java.time.LocalTime;
 
 public class FlightSegment {
-    private int id;
+    @Id
+    private Integer id;
     private String departureAirportIata;
     private String arrivalAirportIata;
     private LocalDateTime departureDateTime;
-    private LocalDateTime arrivalDateTime;
+    private LocalDateTime  arrivalDateTime;
     private String carrierCode;
     private String carrierName;
     private String aircraftCode;
     private String aircraftName;
-    private Duration duration;
 
-    public FlightSegment() {}
+    private LocalTime duration;
 
-    public FlightSegment(int id, String departureAirportIata, String arrivalAirportIata,
-                         LocalDateTime departureDateTime, LocalDateTime arrivalDateTime,
-                         String carrierCode, String carrierName,
-                         String aircraftCode, String aircraftName, Duration duration) {
-        this.id = id;
+    public FlightSegment() {
+    }
+
+    public FlightSegment(String departureAirportIata, String arrivalAirportIata, LocalDateTime departureDateTime, LocalDateTime arrivalDateTime, String carrierCode, String carrierName, String aircraftCode, String aircraftName, LocalTime duration) {
+
         this.departureAirportIata = departureAirportIata;
         this.arrivalAirportIata = arrivalAirportIata;
         this.departureDateTime = departureDateTime;
@@ -33,15 +35,10 @@ public class FlightSegment {
         this.duration = duration;
     }
 
-    // Getters et setters
-
-    public int getId() {
+    public Integer getId() {
         return id;
     }
 
-    public void setId(int id) {
-        this.id = id;
-    }
 
     public String getDepartureAirportIata() {
         return departureAirportIata;
@@ -107,11 +104,14 @@ public class FlightSegment {
         this.aircraftName = aircraftName;
     }
 
-    public Duration getDuration() {
+    public LocalTime getDuration() {
         return duration;
     }
 
-    public void setDuration(Duration duration) {
+    public void setDuration(LocalTime duration) {
         this.duration = duration;
     }
-}
+
+    public void setId(Integer id) {
+        this.id = id;
+    }

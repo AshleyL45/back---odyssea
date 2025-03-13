@@ -1,5 +1,6 @@
 package com.example.odyssea.dtos.UserItinerary;
 
+import com.example.odyssea.dtos.ActivityDto;
 import com.example.odyssea.entities.mainTables.Activity;
 
 import java.util.List;

@@ -5,10 +5,8 @@ import com.example.odyssea.dtos.Flight.AircraftDTO;
 import com.example.odyssea.dtos.Flight.AirportDTO;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
-public class FlightSegmentDTO {
 
-@JsonProperty("id")
-private String id;
+public class FlightSegmentDTO { // Un seul vol
 
     @JsonProperty("departure")
    private AirportDTO departure;
@@ -23,21 +21,22 @@ private String id;
     private AircraftDTO aircraftCode;
 
     @JsonProperty("duration")
-    private String duration;
+    private String duration; // Durée d'un seul vol
+
+    private String carrierName;
+    private String aircraftName;
 
     public FlightSegmentDTO() {}
 
-    public FlightSegmentDTO(String id, AirportDTO departure, AirportDTO arrival, String carrierCode, AircraftDTO aircraftCode, String duration) {
-        this.id = id;
+    public FlightSegmentDTO(AirportDTO departure, AirportDTO arrival, String carrierCode, AircraftDTO aircraftCode, String duration, String carrierName, String aircraftName) {
         this.departure = departure;
         this.arrival = arrival;
         this.carrierCode = carrierCode;
         this.aircraftCode = aircraftCode;
         this.duration = duration;
+        this.carrierName = carrierName;
+        this.aircraftName = aircraftName;
     }
-
-    public String getId() { return id; }
-    public void setId(String id) { this.id = id; }
 
     public AirportDTO getDeparture() { return departure; }
     public void setDeparture(AirportDTO departure) { this.departure = departure; }
@@ -52,5 +51,23 @@ private String id;
     public void setAircraftCode(AircraftDTO aircraftCode) { this.aircraftCode = aircraftCode; }
 
     public String getDuration() { return duration; }
-    public void setDuration(String duration) { this.duration = duration; }}
+
+    public void setDuration(String duration) { this.duration = duration; }
+
+    public String getCarrierName() {
+        return carrierName;
+    }
+
+    public void setCarrierName(String carrierName) {
+        this.carrierName = carrierName;
+    }
+
+    public String getAircraftName() {
+        return aircraftName;
+    }
+
+    public void setAircraftName(String aircraftName) {
+        this.aircraftName = aircraftName;
+    }
+}
 

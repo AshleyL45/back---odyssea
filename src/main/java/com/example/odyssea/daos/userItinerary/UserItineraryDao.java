@@ -1,11 +1,13 @@
 package com.example.odyssea.daos.userItinerary;
 
+import com.example.odyssea.entities.mainTables.Flight;
+import com.example.odyssea.entities.mainTables.Option;
 import com.example.odyssea.entities.userItinerary.UserItinerary;
+import org.springframework.jdbc.core.BeanPropertyRowMapper;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.stereotype.Repository;
 
-import java.time.Duration;
 import java.util.List;
 
 @Repository
@@ -22,10 +24,26 @@ public class UserItineraryDao {
             rs.getInt("userId"),
             rs.getDate("startDate"),
             rs.getDate("endDate"),
-            rs.getInt("numberOfPeople"),
             rs.getBigDecimal("startingPrice"),
-            Duration.ofMillis(rs.getLong("totalDuration"))
+            rs.getInt("totalDuration"),
+            rs.getString("departureCity"),
+            rs.getString("itineraryName"),
+            rs.getInt("numberOfAdults"),
+            rs.getInt("numberOfKids"),
+            rs.getInt("flightId"),
+            rs.getInt("optionId")
     );
+
+    /*public static UserItinerary fromEntity(UserItineraryDTO userItinerary) {
+        return new UserItinerary (
+                userItinerary.getUserId(),
+                userItinerary.getStartDate(),
+                userItinerary.getDepartureCity(),
+                userItinerary.getEndDate(),
+                userItinerary.getDuration(),
+                userItinerary.getStartingPrice()
+        );
+    }*/
 
     public List<UserItinerary> findAll (){
         String sql = "SELECT * FROM userItinerary";
@@ -40,9 +58,14 @@ public class UserItineraryDao {
                 .orElseThrow(() -> new RuntimeException("The user itinerary id " + id + "you are looking for does not exist."));
     }
 
+    public List<UserItinerary> findAllUserItineraries(int userId){
+        String sql = "SELECT * FROM userItinerary WHERE userId = ?";
+        return jdbcTemplate.query(sql, userItineraryRowMapper, userId);
+    }
+
     public UserItinerary save (UserItinerary userItinerary){
-        String sql = "INSERT INTO userItinerary (userId, startDate, endDate, numberOfPeople, startingPrice, totalDuration) VALUES (?, ?, ?, ?, ?, ?)";
-        jdbcTemplate.update(sql, userItinerary.getUserId(), userItinerary.getStartDate(), userItinerary.getEndDate(), userItinerary.getNumberOfPeople(), userItinerary.getStartingPrice(), userItinerary.getTotalDuration());
+        String sql = "INSERT INTO userItinerary (userId, startDate, endDate, startingPrice, totalDuration, departureCity, itineraryName, numberOfAdults, numberOfKids, flightId, optionId) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?,?)";
+        jdbcTemplate.update(sql, userItinerary.getUserId(), userItinerary.getStartDate(), userItinerary.getEndDate(), userItinerary.getTotalDuration(), userItinerary.getDepartureCity(), userItinerary.getItineraryName(), userItinerary.getNumberOfAdults(), userItinerary.getNumberOfKids(), userItinerary.getFlightId(), userItinerary.getOptionId());
 
         String sqlGetId = "SELECT LAST_INSERT_ID()";
         int id = jdbcTemplate.queryForObject(sqlGetId, Integer.class);
@@ -56,8 +79,8 @@ public class UserItineraryDao {
             throw new RuntimeException("The user itinerary you are looking for does not exist.");
         }
 
-        String sql = "UPDATE userItinerary SET userId = ?, startDate = ?, endDate = ?, numberOfPeople = ?, startingPrice = ?, totalDuration = ? WHERE id = ?";
-        int rowsAffected = jdbcTemplate.update(sql, userItinerary.getUserId(), userItinerary.getStartDate(), userItinerary.getEndDate(), userItinerary.getNumberOfPeople(), userItinerary.getStartingPrice(), userItinerary.getTotalDuration(), id);
+        String sql = "UPDATE userItinerary SET userId = ?, startDate = ?, endDate = ?, startingPrice = ?, totalDuration = ?, departureCity = ?, itineraryName = ?, numberOfAdults = ?, numberOfKids = ?, flightId = ?, optionId = ? WHERE id = ?";
+        int rowsAffected = jdbcTemplate.update(sql, userItinerary.getUserId(), userItinerary.getStartDate(), userItinerary.getEndDate(), userItinerary.getTotalDuration(), userItinerary.getDepartureCity(), userItinerary.getItineraryName(), userItinerary.getNumberOfAdults(), userItinerary.getNumberOfKids(), userItinerary.getFlightId(), userItinerary.getOptionId(), id);
 
         if(rowsAffected <= 0){
             throw new RuntimeException("Failed to update the user itinerary with id : " + id);
@@ -67,23 +90,23 @@ public class UserItineraryDao {
 
     }
 
-    public boolean deleteUserItineraryInfo (int id){ // Deletes all information related with this user itinerary
+    public List<Option> getOptions (int userItineraryId){ // Gets options of a userItinerary
+        String sql = "SELECT options.* FROM userItinerary \n" +
+                "INNER JOIN options ON userItinerary.optionId = options.id WHERE userItinerary.id = ?";
+        return jdbcTemplate.query(sql, new Object[]{userItineraryId}, new BeanPropertyRowMapper<>(Option.class));
+    }
+
+    public List<Flight> getFlights (int userItineraryId){ // Gets flights of a userItinerary
+        String sql = "SELECT flight.* FROM userItinerary \n" +
+                "INNER JOIN flight ON userItinerary.flightId = flight.id WHERE userItinerary.id = ?";
+        return jdbcTemplate.query(sql, new Object[]{userItineraryId}, new BeanPropertyRowMapper<>(Flight.class));
+    }
+
+    public boolean deleteUserItinerary (int id){ // Deletes all information related with this user itinerary
         String sql = "DELETE FROM userItinerary WHERE id = ?";
         int rowsAffected = jdbcTemplate.update(sql, id);
 
-        String sqlSteps = "DELETE FROM userItineraryStep WHERE userItineraryId = ?";
-        int rowsAffectedSteps = jdbcTemplate.update(sqlSteps, id);
-
-        String sqlOptions = "DELETE FROM userItineraryOption WHERE userItineraryId = ?";
-        int rowsAffectedOptions = jdbcTemplate.update(sqlOptions, id);
-
-        String sqlFlights = "DELETE FROM userItineraryFlight WHERE userItineraryId = ?";
-        int rowsAffectedFlights = jdbcTemplate.update(sqlFlights, id);
-
-        String sqlActivities = "DELETE FROM userItineraryActivitiesPerDay WHERE userItineraryStepId IN (SELECT id FROM userItineraryStep WHERE userItineraryId = ?)";
-        int rowsActivities = jdbcTemplate.update(sqlActivities, id);
-
-        return rowsAffected > 0 && rowsAffectedSteps > 0 && rowsAffectedOptions > 0 && rowsAffectedFlights > 0 && rowsActivities > 0;
+        return rowsAffected > 0;
     }
 
     public boolean userItineraryExists(int id){
