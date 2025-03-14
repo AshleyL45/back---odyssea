@@ -2,7 +2,6 @@ package com.example.odyssea.dtos.UserItinerary;
 
 import com.example.odyssea.daos.userItinerary.UserItineraryStepDao;
 import com.example.odyssea.dtos.ActivityDto;
-import com.example.odyssea.dtos.Flight.FlightItineraryDTO;
 import com.example.odyssea.dtos.HotelDto;
 import com.example.odyssea.entities.mainTables.Activity;
 import com.example.odyssea.entities.userItinerary.UserItineraryStep;
@@ -15,7 +14,6 @@ public class UserItineraryDayDTO {
 
     private String cityName;
     private String countryName;
-    private List<FlightItineraryDTO> flights;
     private List<HotelDto> hotels;
     private List<Activity> activities;
     private int dayNumber;
@@ -26,10 +24,9 @@ public class UserItineraryDayDTO {
     public UserItineraryDayDTO() {
     }
 
-    public UserItineraryDayDTO(String cityName, String countryName, List<FlightItineraryDTO> flights, List<HotelDto> hotels, List<Activity> activities, int dayNumber, LocalDate date, boolean dayOff) {
+    public UserItineraryDayDTO(String cityName, String countryName, List<HotelDto> hotels, List<Activity> activities, int dayNumber, LocalDate date, boolean dayOff) {
         this.cityName = cityName;
         this.countryName = countryName;
-        this.flights = flights;
         this.hotels = hotels;
         this.activities = activities;
         this.dayNumber = dayNumber;
@@ -53,13 +50,6 @@ public class UserItineraryDayDTO {
         this.countryName = countryName;
     }
 
-    public List<FlightItineraryDTO> getFlights() {
-        return flights;
-    }
-
-    public void setFlights(List<FlightItineraryDTO> flights) {
-        this.flights = flights;
-    }
 
     public int getDayNumber() {
         return dayNumber;

@@ -47,7 +47,7 @@ public class UserDailyPlanService {
         return new UserItineraryDayDTO(
                 cityName,
                 countryName,
-                new ArrayList<>(), // Vols
+                // Add flight later
                 hotelDtos,
                 activities,
                 userItineraryStep.getDayNumber(),

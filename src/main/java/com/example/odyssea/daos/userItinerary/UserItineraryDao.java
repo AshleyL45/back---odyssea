@@ -1,6 +1,5 @@
 package com.example.odyssea.daos.userItinerary;
 
-import com.example.odyssea.entities.mainTables.Flight;
 import com.example.odyssea.entities.mainTables.Option;
 import com.example.odyssea.entities.userItinerary.UserItinerary;
 import org.springframework.jdbc.core.BeanPropertyRowMapper;
@@ -96,11 +95,11 @@ public class UserItineraryDao {
         return jdbcTemplate.query(sql, new Object[]{userItineraryId}, new BeanPropertyRowMapper<>(Option.class));
     }
 
-    public List<Flight> getFlights (int userItineraryId){ // Gets flights of a userItinerary
+    /*public List<Flight> getFlights (int userItineraryId){ // Gets flights of a userItinerary
         String sql = "SELECT flight.* FROM userItinerary \n" +
                 "INNER JOIN flight ON userItinerary.flightId = flight.id WHERE userItinerary.id = ?";
         return jdbcTemplate.query(sql, new Object[]{userItineraryId}, new BeanPropertyRowMapper<>(Flight.class));
-    }
+    }*/
 
     public boolean deleteUserItinerary (int id){ // Deletes all information related with this user itinerary
         String sql = "DELETE FROM userItinerary WHERE id = ?";
