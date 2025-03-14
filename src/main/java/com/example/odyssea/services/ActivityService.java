@@ -3,13 +3,14 @@ package com.example.odyssea.services;
 import com.example.odyssea.daos.ActivityDao;
 import com.example.odyssea.dtos.ActivityDto;
 import com.example.odyssea.entities.mainTables.Activity;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
-import org.springframework.stereotype.Service;
-import org.springframework.web.client.RestTemplate;
+import com.example.odyssea.services.TokenService;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.*;
+import org.springframework.stereotype.Service;
+import org.springframework.web.client.RestTemplate;
+import reactor.core.publisher.Mono;
 
 import java.util.List;
 
@@ -17,10 +18,12 @@ import java.util.List;
 public class ActivityService {
 
     private final ActivityDao activityDao;
+    private final TokenService tokenService;
 
     @Autowired
-    public ActivityService(ActivityDao activityDao) {
+    public ActivityService(ActivityDao activityDao, TokenService tokenService) {
         this.activityDao = activityDao;
+        this.tokenService = tokenService;
     }
 
     /**
@@ -79,19 +82,30 @@ public class ActivityService {
     }
 
     /**
-     * Importe les activités depuis l'API Amadeus pour une ville spécifique
+     * Importe les activités depuis l'API Amadeus pour une ville donnée
+     * en automatisant la récupération du token Amadeus.
      */
     public void importActivitiesFromAmadeus(int cityId) {
         if (!activityDao.cityExists(cityId)) {
             throw new IllegalArgumentException("Le cityId fourni n'existe pas dans la base de données !");
         }
 
+        // Récupère le token via le TokenService de façon synchrone
+        String token = tokenService.getValidToken().block();
+        if (token == null) {
+            throw new IllegalStateException("Impossible de récupérer le token Amadeus.");
+        }
+
+        // Configuration de l'en-tête HTTP avec le token
+        HttpHeaders headers = new HttpHeaders();
+        headers.setBearerAuth(token);
+        HttpEntity<?> entity = new HttpEntity<>(headers);
+
         // URL de l'API Amadeus
         String url = "https://test.api.amadeus.com/v1/shopping/activities";
         RestTemplate restTemplate = new RestTemplate();
-        ResponseEntity<String> response = restTemplate.getForEntity(url, String.class);
+        ResponseEntity<String> response = restTemplate.exchange(url, HttpMethod.GET, entity, String.class);
 
-        // Vérification du statut de la réponse HTTP
         if (response.getStatusCode() == HttpStatus.OK) {
             ObjectMapper mapper = new ObjectMapper();
             try {
