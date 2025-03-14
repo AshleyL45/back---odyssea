@@ -3,9 +3,14 @@ package com.example.odyssea.daos.flight;
 import com.example.odyssea.entities.mainTables.FlightSegment;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
+import org.springframework.jdbc.support.GeneratedKeyHolder;
+import org.springframework.jdbc.support.KeyHolder;
 import org.springframework.stereotype.Repository;
 
+import java.sql.PreparedStatement;
+import java.sql.Statement;
 import java.sql.Time;
+import java.sql.Timestamp;
 import java.time.Duration;
 import java.time.LocalTime;
 import java.util.List;
@@ -50,20 +55,24 @@ public class FlightSegmentDao {
 
     public FlightSegment save(FlightSegment segment) {
         String sql = "INSERT INTO flightSegment (departureAirportIata, arrivalAirportIata, departureDateTime, arrivalDateTime, carrierCode, carrierName, aircraftCode, aircraftName, duration) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)";
-        jdbcTemplate.update(sql,
-                segment.getDepartureAirportIata(),
-                segment.getArrivalAirportIata(),
-                segment.getDepartureDateTime(),
-                segment.getArrivalDateTime(),
-                segment.getCarrierCode(),
-                segment.getCarrierName(),
-                segment.getAircraftCode(),
-                segment.getAircraftName(),
-                convertDurationToSqlTime(segment.getDuration())
-        );
-        String sqlGetId = "SELECT LAST_INSERT_ID()";
-        int id = jdbcTemplate.queryForObject(sqlGetId, Integer.class);
-        segment.setId(id);
+        KeyHolder keyHolder = new GeneratedKeyHolder();
+        jdbcTemplate.update(connection -> {
+            PreparedStatement ps = connection.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS);
+            ps.setString(1, segment.getDepartureAirportIata());
+            ps.setString(2, segment.getArrivalAirportIata());
+            ps.setTimestamp(3, Timestamp.valueOf(segment.getDepartureDateTime()));
+            ps.setTimestamp(4, Timestamp.valueOf(segment.getArrivalDateTime()));
+            ps.setString(5, segment.getCarrierCode());
+            ps.setString(6, segment.getCarrierName());
+            ps.setString(7, segment.getAircraftCode());
+            ps.setString(8, segment.getAircraftName());
+            ps.setTime(9, convertDurationToSqlTime(segment.getDuration()));
+            return ps;
+        }, keyHolder);
+        Number key = keyHolder.getKey();
+        if (key != null) {
+            segment.setId(key.intValue());
+        }
         return segment;
     }
 

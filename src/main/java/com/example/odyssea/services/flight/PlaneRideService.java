@@ -1,12 +1,15 @@
 package com.example.odyssea.services.flight;
 
 import com.example.odyssea.daos.flight.PlaneRideDao;
+import com.example.odyssea.daos.flight.FlightSegmentRideDao;
 import com.example.odyssea.dtos.Flight.DictionnaryDTO;
 import com.example.odyssea.dtos.Flight.FlightDataDTO;
 import com.example.odyssea.dtos.Flight.FlightItineraryDTO;
 import com.example.odyssea.dtos.Flight.FlightOffersDTO;
 import com.example.odyssea.dtos.Flight.FlightSegmentDTO;
 import com.example.odyssea.dtos.Flight.PlaneRideDTO;
+import com.example.odyssea.entities.mainTables.FlightSegmentRide;
+import com.example.odyssea.entities.mainTables.PlaneRide;
 import com.example.odyssea.services.TokenService;
 import org.springframework.stereotype.Service;
 import org.springframework.web.reactive.function.client.WebClient;
@@ -14,6 +17,7 @@ import reactor.core.publisher.Mono;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
@@ -21,15 +25,18 @@ import java.util.List;
 public class PlaneRideService {
 
     private final PlaneRideDao planeRideDao;
+    private final FlightSegmentRideDao flightSegmentRideDao;
     private final TokenService tokenService;
     private final WebClient webClient;
     private final FlightSegmentService flightSegmentService;
 
     public PlaneRideService(PlaneRideDao planeRideDao,
+                            FlightSegmentRideDao flightSegmentRideDao,
                             TokenService tokenService,
                             WebClient.Builder webClientBuilder,
                             FlightSegmentService flightSegmentService) {
         this.planeRideDao = planeRideDao;
+        this.flightSegmentRideDao = flightSegmentRideDao;
         this.tokenService = tokenService;
         this.webClient = webClientBuilder.baseUrl("https://test.api.amadeus.com/").build();
         this.flightSegmentService = flightSegmentService;
@@ -66,7 +73,10 @@ public class PlaneRideService {
                     FlightItineraryDTO itinerary = offer.getItineraries().get(0);
                     DictionnaryDTO dict = flightDataDTO.getDictionnary();
 
-                    // Enrichir chaque segment avec carrierName et aircraftName à partir du dictionnaire
+                    // Liste pour stocker les segments sauvegardés (pour récupérer leurs IDs)
+                    List<Integer> savedSegmentIds = new ArrayList<>();
+
+                    // Enrichir et sauvegarder chaque segment
                     for (FlightSegmentDTO segmentDTO : itinerary.getSegments()) {
                         if (dict != null) {
                             if (dict.getCarriers() != null && dict.getCarriers().containsKey(segmentDTO.getCarrierCode())) {
@@ -77,8 +87,9 @@ public class PlaneRideService {
                                 segmentDTO.setAircraftName(dict.getAircraft().get(segmentDTO.getAircraftCode().getCode()));
                             }
                         }
-                        // Sauvegarde de chaque segment enrichi
-                        flightSegmentService.save(segmentDTO);
+                        // Sauvegarder le segment et récupérer le DTO enrichi avec l'ID généré
+                        FlightSegmentDTO savedSegment = flightSegmentService.save(segmentDTO);
+                        savedSegmentIds.add(Integer.parseInt(savedSegment.getId()));
                     }
 
                     // Utilisation du prix global fourni par l'API Amadeus
@@ -90,15 +101,22 @@ public class PlaneRideService {
                     PlaneRideDTO planeRideDTO = createFlightDTO(offer);
                     if (planeRideDTO != null) {
                         planeRideDTO.setTotalPrice(totalPrice);
-                        // Création de l'entité PlaneRide
-                        com.example.odyssea.entities.mainTables.PlaneRide planeRideEntity = new com.example.odyssea.entities.mainTables.PlaneRide(
+                        // Création de l'entité PlaneRide (one_way à true pour un vol one way)
+                        PlaneRide planeRideEntity = new PlaneRide(
                                 0,
-                                true,                      // one_way
+                                true,
                                 planeRideDTO.getTotalPrice(),
                                 planeRideDTO.getCurrency(),
                                 null
                         );
-                        planeRideDao.save(planeRideEntity);
+                        // Sauvegarder la PlaneRide et récupérer l'ID généré
+                        PlaneRide savedPlaneRide = planeRideDao.save(planeRideEntity);
+
+                        // Pour chaque segment sauvegardé, créer une association dans flightSegmentRide
+                        for (Integer segmentId : savedSegmentIds) {
+                            FlightSegmentRide ride = new FlightSegmentRide(savedPlaneRide.getId(), segmentId);
+                            flightSegmentRideDao.save(ride);
+                        }
                     }
                     return Mono.just(Collections.singletonList(itinerary));
                 });
