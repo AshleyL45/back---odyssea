@@ -1,11 +1,14 @@
 package com.example.odyssea.services.flight;
 
 import com.example.odyssea.daos.flight.FlightSegmentDao;
+import com.example.odyssea.dtos.Flight.AirportDTO;
+import com.example.odyssea.dtos.Flight.AircraftDTO;
 import com.example.odyssea.dtos.Flight.FlightSegmentDTO;
 import com.example.odyssea.entities.mainTables.FlightSegment;
 import org.springframework.stereotype.Service;
 
 import java.time.Duration;
+import java.time.LocalTime;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -32,7 +35,9 @@ public class FlightSegmentService {
     public FlightSegmentDTO save(FlightSegmentDTO dto) {
         FlightSegment segment = convertToEntity(dto);
         FlightSegment saved = flightSegmentDao.save(segment);
-        return convertToDto(saved);
+        FlightSegmentDTO result = convertToDto(saved);
+        System.out.println("Segment enregistré, ID: " + result.getId());
+        return result;
     }
 
     public FlightSegmentDTO update(int id, FlightSegmentDTO dto) {
@@ -47,12 +52,12 @@ public class FlightSegmentService {
 
     private FlightSegmentDTO convertToDto(FlightSegment segment) {
         FlightSegmentDTO dto = new FlightSegmentDTO();
-
         dto.setId(String.valueOf(segment.getId()));
-        dto.setDeparture(new com.example.odyssea.dtos.Flight.AirportDTO(segment.getDepartureAirportIata(), null));
-        dto.setArrival(new com.example.odyssea.dtos.Flight.AirportDTO(segment.getArrivalAirportIata(), null));
+        // Récupérer les informations complètes des aéroports avec leur dateTime
+        dto.setDeparture(new AirportDTO(segment.getDepartureAirportIata(), segment.getDepartureDateTime()));
+        dto.setArrival(new AirportDTO(segment.getArrivalAirportIata(), segment.getArrivalDateTime()));
         dto.setCarrierCode(segment.getCarrierCode());
-        dto.setAircraftCode(new com.example.odyssea.dtos.Flight.AircraftDTO(segment.getAircraftCode()));
+        dto.setAircraftCode(new AircraftDTO(segment.getAircraftCode()));
         dto.setDuration(segment.getDuration().toString());
         return dto;
     }
@@ -60,17 +65,65 @@ public class FlightSegmentService {
     private FlightSegment convertToEntity(FlightSegmentDTO dto) {
         FlightSegment segment = new FlightSegment();
 
-        if(dto.getId() != null) {
-            segment.setId(Integer.parseInt(dto.getId()));
+        // Conversion de l'ID, si présent
+        if(dto.getId() != null && !dto.getId().isEmpty()){
+            try {
+                segment.setId(Integer.parseInt(dto.getId()));
+            } catch (NumberFormatException e){
+                System.err.println("Erreur de conversion de l'ID: " + e.getMessage());
+            }
         }
-        // On récupère le code IATA depuis l'objet AirportDTO contenu dans le DTO
-        segment.setDepartureAirportIata(dto.getDeparture() != null ? dto.getDeparture().getIataCode() : null);
-        segment.setArrivalAirportIata(dto.getArrival() != null ? dto.getArrival().getIataCode() : null);
+
+        // Récupération des informations de départ
+        if(dto.getDeparture() != null){
+            segment.setDepartureAirportIata(dto.getDeparture().getIataCode());
+            segment.setDepartureDateTime(dto.getDeparture().getDateTime());
+        } else {
+            segment.setDepartureAirportIata(null);
+            segment.setDepartureDateTime(null);
+        }
+
+        // Récupération des informations d'arrivée
+        if(dto.getArrival() != null){
+            segment.setArrivalAirportIata(dto.getArrival().getIataCode());
+            segment.setArrivalDateTime(dto.getArrival().getDateTime());
+        } else {
+            segment.setArrivalAirportIata(null);
+            segment.setArrivalDateTime(null);
+        }
+
+        // Transporteur
         segment.setCarrierCode(dto.getCarrierCode());
         segment.setCarrierName("");
-        segment.setAircraftCode(dto.getAircraftCode() != null ? dto.getAircraftCode().getCode() : null);
+
+        // Avion
+        if(dto.getAircraftCode() != null){
+            segment.setAircraftCode(dto.getAircraftCode().getCode());
+        } else {
+            segment.setAircraftCode(null);
+        }
         segment.setAircraftName("");
-        segment.setDuration(Duration.parse(dto.getDuration()));
+
+        // Conversion de la durée
+        String durationStr = dto.getDuration();
+        Duration duration;
+        try {
+            // Format ISO-8601 (ex: "PT8H30M")
+            duration = Duration.parse(durationStr);
+        } catch (Exception e){
+            try{
+                // Format "HH:mm:ss" (ex: "08:00:00")
+                LocalTime lt = LocalTime.parse(durationStr);
+                duration = Duration.ofHours(lt.getHour())
+                        .plusMinutes(lt.getMinute())
+                        .plusSeconds(lt.getSecond());
+            } catch(Exception ex){
+                System.err.println("Erreur de conversion de durée: " + ex.getMessage());
+                duration = Duration.ZERO;
+            }
+        }
+        segment.setDuration(duration);
+
         return segment;
     }
 }

@@ -1,7 +1,7 @@
 package com.example.odyssea.controllers.flight;
 
 import com.example.odyssea.dtos.Flight.FlightItineraryDTO;
-import com.example.odyssea.services.flight.FlightService;
+import com.example.odyssea.services.flight.PlaneRideService;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -13,11 +13,11 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/flights")
-public class FlightController {
-    private final FlightService flightService;
+public class PlaneRideController {
+    private final PlaneRideService planeRideService;
 
-    public FlightController(FlightService flightService) {
-        this.flightService = flightService;
+    public PlaneRideController(PlaneRideService planeRideService) {
+        this.planeRideService = planeRideService;
     }
 
     @GetMapping("/all")
@@ -27,7 +27,7 @@ public class FlightController {
             @RequestParam String departureDate,
             @RequestParam String returnDate,
             @RequestParam int adults) {
-        return flightService.getFlights(
+        return planeRideService.getFlights(
                 departureIata,
                 arrivalIata,
                 LocalDate.parse(departureDate),

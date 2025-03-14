@@ -5,7 +5,7 @@ import com.example.odyssea.dtos.UserItinerary.UserItineraryDTO;
 import com.example.odyssea.dtos.UserItinerary.UserItineraryDayDTO;
 import com.example.odyssea.dtos.UserItinerary.UserPreferencesDTO;
 import com.example.odyssea.entities.mainTables.Option;
-import com.example.odyssea.services.flight.FlightService;
+import com.example.odyssea.services.flight.PlaneRideService;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
@@ -19,16 +19,16 @@ import java.util.stream.Stream;
 public class UserItineraryService {
     private UserItineraryDTO userItineraryDTO;
     private UserItineraryDayDTO userItineraryDayDTO;
-    private FlightService flightService;
+    private PlaneRideService planeRideService;
 
 
     public UserItineraryService() {
     }
 
-    public UserItineraryService(UserItineraryDTO userItineraryDTO, UserItineraryDayDTO userItineraryDayDTO, FlightService flightService) {
+    public UserItineraryService(UserItineraryDTO userItineraryDTO, UserItineraryDayDTO userItineraryDayDTO, PlaneRideService planeRideService) {
         this.userItineraryDTO = userItineraryDTO;
         this.userItineraryDayDTO = userItineraryDayDTO;
-        this.flightService = flightService;
+        this.planeRideService = planeRideService;
     }
 
     public UserItineraryDTO generateUserItinerary(UserPreferencesDTO userPreferences) {
@@ -41,7 +41,7 @@ public class UserItineraryService {
         userItinerary.setArrivalDate(userPreferences.getStartDate().plusDays(12));
         userItinerary.setArrivalCityIata(userPreferences.getDepartureCity());
 
-        List<FlightItineraryDTO> flights = flightService.getFlights(
+        List<FlightItineraryDTO> flights = planeRideService.getFlights(
                 userPreferences.getDepartureCity(),
                 userPreferences.getCountrySelection().getFirst().getCitySelection().getFirst().getCityName(),
                 userPreferences.getStartDate(),
