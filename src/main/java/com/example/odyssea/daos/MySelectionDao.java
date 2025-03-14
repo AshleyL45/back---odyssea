@@ -1,6 +1,8 @@
 package com.example.odyssea.daos;
 
 import com.example.odyssea.entities.MySelection;
+import com.example.odyssea.entities.itinerary.Itinerary;
+import org.springframework.jdbc.core.BeanPropertyRowMapper;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.stereotype.Repository;
@@ -24,22 +26,29 @@ public class MySelectionDao {
 
     // Retourne toutes les sélections de la table myselection
     public List<MySelection> findAll() {
-        String sql = "SELECT * FROM myselection";
+        String sql = "SELECT * FROM mySelection";
         return jdbcTemplate.query(sql, mySelectionRowMapper);
+    }
+
+    // Retourne tous les itinéraires de la séléction d'un user
+    public List<Itinerary> findAllUserFavorites(int userId){
+        String sql = "SELECT itinerary.* FROM mySelection\n" +
+                "INNER JOIN itinerary ON mySelection.itineraryId = itinerary.id WHERE mySelection.userId = ?;";
+        return jdbcTemplate.query(sql, new Object[]{userId}, new BeanPropertyRowMapper<>(Itinerary.class));
     }
 
     // Retourne une sélection identifiée par le couple (userId, itineraryId)
     public MySelection findById(int userId, int itineraryId) {
-        String sql = "SELECT * FROM myselection WHERE userId = ? AND itineraryId = ?";
+        String sql = "SELECT * FROM mySelection WHERE userId = ? AND itineraryId = ?";
         return jdbcTemplate.query(sql, mySelectionRowMapper, userId, itineraryId)
                 .stream()
                 .findFirst()
                 .orElseThrow(() -> new RuntimeException("Selection with userId: " + userId + " and itineraryId: " + itineraryId + " does not exist"));
     }
 
-    // Insère une nouvelle sélection dans la table myselection
+    // Insère une nouvelle sélection dans la table mySelection
     public MySelection save(MySelection mySelection) {
-        String sql = "INSERT INTO myselection (userId, itineraryId) VALUES (?, ?)";
+        String sql = "INSERT INTO mySelection (userId, itineraryId) VALUES (?, ?)";
         jdbcTemplate.update(sql, mySelection.getIdUser(), mySelection.getIdItinerary());
         return mySelection;
     }
@@ -48,7 +57,7 @@ public class MySelectionDao {
     public MySelection update(int userId, int itineraryId, MySelection mySelection) {
         // Vérifie d'abord que la sélection existe
         findById(userId, itineraryId);
-        String sql = "UPDATE myselection SET userId = ?, itineraryId = ? WHERE userId = ? AND itineraryId = ?";
+        String sql = "UPDATE mySelection SET userId = ?, itineraryId = ? WHERE userId = ? AND itineraryId = ?";
         int rowsAffected = jdbcTemplate.update(sql,
                 mySelection.getIdUser(),
                 mySelection.getIdItinerary(),
@@ -63,7 +72,7 @@ public class MySelectionDao {
 
     // Supprime une sélection identifiée par le couple (userId, itineraryId)
     public boolean delete(int userId, int itineraryId) {
-        String sql = "DELETE FROM myselection WHERE userId = ? AND itineraryId = ?";
+        String sql = "DELETE FROM mySelection WHERE userId = ? AND itineraryId = ?";
         int rowsAffected = jdbcTemplate.update(sql, userId, itineraryId);
         return rowsAffected > 0;
     }

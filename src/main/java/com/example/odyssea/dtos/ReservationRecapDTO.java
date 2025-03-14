@@ -1,39 +1,46 @@
-package com.example.odyssea.entities.mainTables;
+package com.example.odyssea.dtos;
 
+import com.example.odyssea.entities.mainTables.Option;
+import com.fasterxml.jackson.annotation.JsonFormat;
+
+import java.math.BigDecimal;
 import java.util.Date;
+import java.util.List;
 
-public class Reservation {
-
+public class ReservationRecapDTO {
     private int idUser;
     private int idItinerary;
     private String status;
+
+    @JsonFormat(pattern = "dd-MM-yyyy")
     private Date departureDate;
+    @JsonFormat(pattern = "dd-MM-yyyy")
     private Date returnDate;
-    private Double totalPrice;
-    private Date purchase;
+    private BigDecimal totalPrice;
+    @JsonFormat(pattern = "dd-MM-yyyy")
+    private Date purchaseDate;
     private int numberOfAdults;
     private int numberOfKids;
-    private int optionId;
-    private int planeRideId;
+    private List<Option> options;
+    // private List<> flights; TODO Ajouter les vols
 
-    public Reservation() {
+    public ReservationRecapDTO() {
+
     }
 
-    public Reservation(int idUser, int idItinerary, String status, Date departureDate, Date returnDate, Double totalPrice, Date purchase, int numberOfAdults, int numberOfKids, int optionId, int planeRideId) {
+
+    public ReservationRecapDTO(int idUser, int idItinerary, String status, Date departureDate, Date returnDate, BigDecimal totalPrice, Date purchaseDate, int numberOfAdults, int numberOfKids, List<Option> options) {
         this.idUser = idUser;
         this.idItinerary = idItinerary;
         this.status = status;
         this.departureDate = departureDate;
         this.returnDate = returnDate;
         this.totalPrice = totalPrice;
-        this.purchase = purchase;
+        this.purchaseDate = purchaseDate;
         this.numberOfAdults = numberOfAdults;
         this.numberOfKids = numberOfKids;
-        this.optionId = optionId;
-        this.planeRideId = planeRideId;
+        this.options = options;
     }
-
-
 
     public int getIdUser() {
         return idUser;
@@ -75,20 +82,20 @@ public class Reservation {
         this.returnDate = returnDate;
     }
 
-    public Double getTotalPrice() {
+    public BigDecimal getTotalPrice() {
         return totalPrice;
     }
 
-    public void setTotalPrice(Double totalPrice) {
+    public void setTotalPrice(BigDecimal totalPrice) {
         this.totalPrice = totalPrice;
     }
 
-    public Date getPurchase() {
-        return purchase;
+    public Date getPurchaseDate() {
+        return purchaseDate;
     }
 
-    public void setPurchase(Date purchase) {
-        this.purchase = purchase;
+    public void setPurchaseDate(Date purchaseDate) {
+        this.purchaseDate = purchaseDate;
     }
 
     public int getNumberOfAdults() {
@@ -99,7 +106,6 @@ public class Reservation {
         this.numberOfAdults = numberOfAdults;
     }
 
-
     public int getNumberOfKids() {
         return numberOfKids;
     }
@@ -108,20 +114,11 @@ public class Reservation {
         this.numberOfKids = numberOfKids;
     }
 
-
-    public int getOptionId() {
-        return optionId;
+    public List<Option> getOptions() {
+        return options;
     }
 
-    public void setOptionId(int optionId) {
-        this.optionId = optionId;
-    }
-
-    public int getPlaneRideId() {
-        return planeRideId;
-    }
-
-    public void setPlaneRideId(int planeRideId) {
-        this.planeRideId = planeRideId;
+    public void setOptions(List<Option> options) {
+        this.options = options;
     }
 }

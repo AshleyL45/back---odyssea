@@ -18,7 +18,7 @@ public class ItineraryDao {
     }
     
     
-    private final RowMapper<Itinerary> itineraryRowMapper =(rs, _) -> new Itinerary(
+    public final RowMapper<Itinerary> itineraryRowMapper =(rs, _) -> new Itinerary(
             rs.getInt("id"),
             rs.getString("name"),
             rs.getString("description"),

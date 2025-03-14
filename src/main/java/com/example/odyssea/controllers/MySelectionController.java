@@ -7,7 +7,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 @RestController
-@RequestMapping("/myselection")
+@RequestMapping("/mySelection")
 public class MySelectionController {
 
     private final MySelectionService mySelectionService;
