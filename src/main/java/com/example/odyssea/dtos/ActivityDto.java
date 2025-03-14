@@ -4,6 +4,7 @@ import com.example.odyssea.entities.mainTables.Activity;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
 import java.time.Duration;
+import java.util.HashMap;
 import java.util.Map;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
@@ -16,6 +17,25 @@ public class ActivityDto {
     private Map<String, Object> price;
 
     public ActivityDto() {}
+
+    public ActivityDto(String name, String description, String minimumDuration, Map<String, Object> price) {
+        this.name = name;
+        this.description = description;
+        this.minimumDuration = minimumDuration;
+        this.price = price;
+    }
+
+    public static ActivityDto fromEntity(Activity activity) {
+        Map<String, Object> priceMap = new HashMap<>();
+        priceMap.put("amount", activity.getPrice());
+
+        return new ActivityDto (
+                activity.getName(),
+                activity.getDescription(),
+                String.valueOf(activity.getDuration()),
+                priceMap
+        );
+    }
 
     /**
      * Convertit le DTO en entité Activity tout en gérant la conversion de durée
