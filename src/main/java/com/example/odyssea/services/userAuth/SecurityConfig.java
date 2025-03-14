@@ -46,6 +46,7 @@ public class SecurityConfig {
                         authorizeRequests
                                 .requestMatchers("/auth/**", "/test/all").permitAll()
                                 .requestMatchers("/user/**").hasRole("USER")
+                                .requestMatchers("/flights/**").permitAll()
                                 .anyRequest().authenticated()
                 );
         http.addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class);

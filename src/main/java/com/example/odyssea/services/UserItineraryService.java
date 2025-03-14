@@ -165,9 +165,9 @@ public class UserItineraryService {
                 .collect(Collectors.toList());
 
         List<BigDecimal> optionsPrices = userPreferences.getOptions()
-                        .stream()
-                                .map(Option::getPrice)
-                                        .collect(Collectors.toList());
+                .stream()
+                .map(Option::getPrice)
+                .collect(Collectors.toList());
 
         userItinerary.setStartingPrice(calculateTotal(countriesPrices, optionsPrices, userPreferences.getNumberOfAdults(), userPreferences.getNumberOfKids()));
         userItinerary.setDuration(13);
@@ -279,7 +279,7 @@ public class UserItineraryService {
         }
 
         if((day.getDayNumber() % 4) == 2){ // Si c'est le deuxième jour dans un pays
-           dayActivities.add(firstCity.getActivities().getFirst());
+            dayActivities.add(firstCity.getActivities().getFirst());
         } else if((day.getDayNumber() % 4) == 3){ // Si c'est le troisième jour dans un pays
             dayActivities.add(secondCity.getActivities().getFirst());
         } else if (day.getDayNumber() % 4 == 0){ // Si c'est le quatrième jour dans un pays

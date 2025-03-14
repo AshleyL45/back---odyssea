@@ -1,7 +1,6 @@
 package com.example.odyssea.dtos;
 
 import com.example.odyssea.entities.mainTables.Activity;
-import com.example.odyssea.entities.mainTables.Hotel;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
 import java.time.Duration;
@@ -50,7 +49,6 @@ public class ActivityDto {
 
         return new Activity(0, cityId, this.name, "Autre", "Faible", duration, this.description, parsedPrice);
     }
-
 
     /**
      * Convertit une durée au format ISO-8601 en minutes
