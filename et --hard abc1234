@@ -1,0 +1,49 @@
+[33m9477575[m[33m ([m[1;36mHEAD[m[33m -> [m[1;32mfeatureA/Flight-feature[m[33m, [m[1;31morigin/development[m[33m, [m[1;32mdevelopment[m[33m)[m HEAD@{0}: pull origin development: Fast-forward
+[33m3cd0b50[m[33m ([m[1;31morigin/featureA/Flight-feature[m[33m)[m HEAD@{1}: checkout: moving from development to featureA/Flight-feature
+[33m9477575[m[33m ([m[1;36mHEAD[m[33m -> [m[1;32mfeatureA/Flight-feature[m[33m, [m[1;31morigin/development[m[33m, [m[1;32mdevelopment[m[33m)[m HEAD@{2}: pull origin development: Fast-forward
+[33m9273e37[m HEAD@{3}: checkout: moving from test to development
+[33m8eab1f4[m[33m ([m[1;31morigin/test[m[33m, [m[1;32mtest[m[33m)[m HEAD@{4}: checkout: moving from development to test
+[33m9273e37[m HEAD@{5}: checkout: moving from test to development
+[33m8eab1f4[m[33m ([m[1;31morigin/test[m[33m, [m[1;32mtest[m[33m)[m HEAD@{6}: pull origin test: Fast-forward
+[33m13822d5[m HEAD@{7}: checkout: moving from featureA/Flight-feature to test
+[33m3cd0b50[m[33m ([m[1;31morigin/featureA/Flight-feature[m[33m)[m HEAD@{8}: commit: planeRideService folders created to help organize
+[33m9f679b3[m HEAD@{9}: rebase (finish): returning to refs/heads/featureA/Flight-feature
+[33m9f679b3[m HEAD@{10}: rebase (pick): Flight retrieval works / problem receiving airline names
+[33m9273e37[m HEAD@{11}: rebase (start): checkout origin/development
+[33ma8a5728[m HEAD@{12}: checkout: moving from development to featureA/Flight-feature
+[33m9273e37[m HEAD@{13}: pull origin development: Fast-forward
+[33m97a8cda[m HEAD@{14}: checkout: moving from featureA/Flight-feature to development
+[33ma8a5728[m HEAD@{15}: commit: Flight retrieval works / problem receiving airline names
+[33m13822d5[m HEAD@{16}: pull origin test: Fast-forward
+[33m2740363[m HEAD@{17}: checkout: moving from test to featureA/Flight-feature
+[33m13822d5[m HEAD@{18}: pull origin test: Fast-forward
+[33m2740363[m HEAD@{19}: checkout: moving from fixA/MySelection to test
+[33m7115a6d[m[33m ([m[1;31morigin/fixA/MySelection[m[33m, [m[1;32mfixA/MySelection[m[33m)[m HEAD@{20}: commit: MySelectionController error fixed
+[33mccb25c4[m HEAD@{21}: commit: MySelection error fixed
+[33m2740363[m HEAD@{22}: checkout: moving from test to fixA/MySelection
+[33m2740363[m HEAD@{23}: checkout: moving from featureA/Flight-feature to test
+[33m2740363[m HEAD@{24}: checkout: moving from test to featureA/Flight-feature
+[33m2740363[m HEAD@{25}: checkout: moving from featureA/Flight-feature to test
+[33m2740363[m HEAD@{26}: checkout: moving from test to featureA/Flight-feature
+[33m2740363[m HEAD@{27}: pull origin test: Fast-forward
+[33m8350842[m HEAD@{28}: checkout: moving from featureA/MaSelection-feature to test
+[33meecde46[m[33m ([m[1;31morigin/featureA/MaSelection-feature[m[33m, [m[1;32mfeatureA/MaSelection-feature[m[33m)[m HEAD@{29}: checkout: moving from development to featureA/MaSelection-feature
+[33m97a8cda[m HEAD@{30}: pull origin development: Fast-forward
+[33mead7593[m HEAD@{31}: checkout: moving from test to development
+[33m8350842[m HEAD@{32}: checkout: moving from featureA/MaSelection-feature to test
+[33meecde46[m[33m ([m[1;31morigin/featureA/MaSelection-feature[m[33m, [m[1;32mfeatureA/MaSelection-feature[m[33m)[m HEAD@{33}: commit: MySelectionService & MySelectionController created / MySelectionDao updated
+[33m8350842[m HEAD@{34}: checkout: moving from test to featureA/MaSelection-feature
+[33m8350842[m HEAD@{35}: commit: ReservationService, Reservation Dto & ReservationController created / ReservationDao updated
+[33me1c0d5c[m HEAD@{36}: pull origin test: Fast-forward
+[33maf3df8e[m HEAD@{37}: checkout: moving from featureA/Hotel-update to test
+[33m52635e3[m[33m ([m[1;31morigin/featureA/Hotel-update[m[33m, [m[1;32mfeatureA/Hotel-update[m[33m)[m HEAD@{38}: commit: hotel feature updated with token retrieval (TokenService)
+[33maf3df8e[m HEAD@{39}: checkout: moving from test to featureA/Hotel-update
+[33maf3df8e[m HEAD@{40}: checkout: moving from featureA/Hotel to test
+[33m9530e93[m[33m ([m[1;31morigin/featureA/Hotel[m[33m, [m[1;32mfeatureA/Hotel[m[33m)[m HEAD@{41}: checkout: moving from featureA/BlogArticle to featureA/Hotel
+[33mc68a5d6[m[33m ([m[1;31morigin/featureA/BlogArticle[m[33m, [m[1;32mfeatureA/BlogArticle[m[33m)[m HEAD@{42}: checkout: moving from test to featureA/BlogArticle
+[33maf3df8e[m HEAD@{43}: checkout: moving from featureA/BlogArticle to test
+[33mc68a5d6[m[33m ([m[1;31morigin/featureA/BlogArticle[m[33m, [m[1;32mfeatureA/BlogArticle[m[33m)[m HEAD@{44}: checkout: moving from test to featureA/BlogArticle
+[33maf3df8e[m HEAD@{45}: checkout: moving from featureA/Theme to test
+[33mb29f73a[m[33m ([m[1;31morigin/featureA/Theme[m[33m, [m[1;32mfeatureA/Theme[m[33m)[m HEAD@{46}: checkout: moving from featureA/Hotel to featureA/Theme
+[33m9530e93[m[33m ([m[1;31morigin/featureA/Hotel[m[33m, [m[1;32mfeatureA/Hotel[m[33m)[m HEAD@{47}: checkout: moving from test to featureA/Hotel
+[33maf3df8e[m HEAD@{48}: checkout: moving from featureA/CityDistance-feature to test
