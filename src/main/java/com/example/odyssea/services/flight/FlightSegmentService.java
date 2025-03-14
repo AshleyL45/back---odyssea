@@ -94,7 +94,8 @@ public class FlightSegmentService {
 
         // Transporteur
         segment.setCarrierCode(dto.getCarrierCode());
-        segment.setCarrierName("");
+        // Utilisation du carrierName enrichi dans le DTO
+        segment.setCarrierName(dto.getCarrierName());
 
         // Avion
         if(dto.getAircraftCode() != null){
@@ -102,17 +103,16 @@ public class FlightSegmentService {
         } else {
             segment.setAircraftCode(null);
         }
-        segment.setAircraftName("");
+        // Utilisation du aircraftName enrichi dans le DTO
+        segment.setAircraftName(dto.getAircraftName());
 
         // Conversion de la durée
         String durationStr = dto.getDuration();
         Duration duration;
         try {
-            // Format ISO-8601 (ex: "PT8H30M")
             duration = Duration.parse(durationStr);
         } catch (Exception e){
             try{
-                // Format "HH:mm:ss" (ex: "08:00:00")
                 LocalTime lt = LocalTime.parse(durationStr);
                 duration = Duration.ofHours(lt.getHour())
                         .plusMinutes(lt.getMinute())
@@ -126,4 +126,5 @@ public class FlightSegmentService {
 
         return segment;
     }
+
 }
