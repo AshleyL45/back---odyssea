@@ -1,20 +1,76 @@
 package com.example.odyssea.services;
 
+import com.example.odyssea.daos.ItineraryDao;
+import com.example.odyssea.daos.OptionDao;
 import com.example.odyssea.daos.ReservationDao;
-import com.example.odyssea.dtos.ItineraryReservationDTO;
-import com.example.odyssea.dtos.ReservationRecapDTO;
+import com.example.odyssea.dtos.reservation.ItineraryReservationDTO;
+import com.example.odyssea.dtos.reservation.ReservationRecapDTO;
+import com.example.odyssea.dtos.reservation.ReservationRequestDTO;
 import com.example.odyssea.entities.itinerary.Itinerary;
 import com.example.odyssea.entities.mainTables.Reservation;
 import org.springframework.stereotype.Service;
+
+import java.math.BigDecimal;
+import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.List;
 
 @Service
 public class ReservationService {
 
     private final ReservationDao reservationDao;
+    private final ItineraryDao itineraryDao;
+    private final OptionDao optionDao;
 
-    public ReservationService(ReservationDao reservationDao) {
+    public ReservationService(ReservationDao reservationDao, ItineraryDao itineraryDao, OptionDao optionDao) {
         this.reservationDao = reservationDao;
+        this.itineraryDao = itineraryDao;
+        this.optionDao = optionDao;
+    }
+
+    private BigDecimal calculateTotalPrice(ReservationRequestDTO reservationRequest) {
+        BigDecimal itineraryPrice = itineraryDao.findById(reservationRequest.getItineraryId()).getPrice();
+        BigDecimal optionPrice = BigDecimal.ZERO;
+
+        for (Integer optionId : reservationRequest.getOptionIds()) {
+            BigDecimal optionItemPrice = optionDao.findById(optionId).getPrice();
+            optionPrice = optionPrice.add(optionItemPrice);
+        }
+
+        BigDecimal totalPrice = itineraryPrice
+                .multiply(BigDecimal.valueOf(reservationRequest.getNumberOfAdults()))
+                .add(itineraryPrice.multiply(BigDecimal.valueOf(reservationRequest.getNumberOfKids())))
+                .add(optionPrice);
+        return totalPrice;
+    }
+
+    public Reservation createReservation(ReservationRequestDTO reservationRequest) {
+
+        BigDecimal totalPrice = calculateTotalPrice(reservationRequest);
+
+        Reservation reservation = new Reservation(
+                reservationRequest.getUserId(),
+                reservationRequest.getItineraryId(),
+                reservationRequest.getStatus(),
+                reservationRequest.getDepartureDate(),
+                reservationRequest.getReturnDate(),
+                totalPrice,
+                LocalDate.now(),
+                reservationRequest.getNumberOfAdults(),
+                reservationRequest.getNumberOfKids(),
+                new ArrayList<>(),
+                reservationRequest.getPlaneRideId()
+        );
+
+        reservationDao.save(reservation);
+
+        if (reservationRequest.getOptionIds() != null && !reservationRequest.getOptionIds().isEmpty()) {
+            for (Integer optionId : reservationRequest.getOptionIds()) {
+                reservationDao.insertOptions(reservation);
+            }
+        }
+
+        return reservationDao.getReservationWithOptions(reservationRequest.getUserId(), reservationRequest.getItineraryId());
     }
 
     public List<Reservation> getAllReservations() {
@@ -35,10 +91,6 @@ public class ReservationService {
 
     public Itinerary getLastDoneReservation(int userId, String status){
         return reservationDao.findLastDoneItinerary(userId, status);
-    }
-
-    public Reservation createReservation(Reservation reservation) {
-        return reservationDao.save(reservation);
     }
 
 

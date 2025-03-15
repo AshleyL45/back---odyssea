@@ -25,7 +25,8 @@ public class ItineraryDao {
             rs.getString("shortDescription"),
             rs.getInt("stock"),
             rs.getBigDecimal("price"),
-            rs.getTime("totalDuration")
+            rs.getInt("totalDuration"),
+            rs.getInt("themeId")
     );
 
 
@@ -61,7 +62,7 @@ public class ItineraryDao {
 
 
 
-    public Itinerary findByDuration(Time totalDuration) {
+    public Itinerary findByDuration(int totalDuration) {
         String sql = "SELECT * FROM itinerary WHERE totalDuration = ?";
         return jdbcTemplate.query(sql, itineraryRowMapper, totalDuration)
                 .stream()
@@ -73,8 +74,8 @@ public class ItineraryDao {
 
 
     public Itinerary save(Itinerary itinerary) {
-        String sql = "INSERT INTO itinerary (name, description, shortDescription, stock, price, totalDuration) VALUES (?, ?, ?, ?, ?, ?)";
-        jdbcTemplate.update(sql, itinerary.getItineraryName(), itinerary.getDescription(), itinerary.getShortDescription(), itinerary.getStock(), itinerary.getPrice(), itinerary.getTotalDuration());
+        String sql = "INSERT INTO itinerary (name, description, shortDescription, stock, price, totalDuration, themeId) VALUES (?, ?, ?, ?, ?, ?,?)";
+        jdbcTemplate.update(sql, itinerary.getItineraryName(), itinerary.getDescription(), itinerary.getShortDescription(), itinerary.getStock(), itinerary.getPrice(), itinerary.getTotalDuration(), itinerary.getThemeId());
 
         String sqlGetId = "SELECT LAST_INSERT_ID()";
         int id = jdbcTemplate.queryForObject(sqlGetId, Integer.class);
@@ -89,8 +90,8 @@ public class ItineraryDao {
             throw new RuntimeException("Itinéraire avec l'ID : " + id + " n'existe pas");
         }
 
-        String sql = "UPDATE itinerary SET name = ?, description = ?, shortDescription = ?, stock = ?, price = ?, totalDuration = ? WHERE id = ?";
-        int rowsAffected = jdbcTemplate.update(sql, itinerary.getItineraryName(), itinerary.getDescription(), itinerary.getShortDescription(), itinerary.getStock(), itinerary.getPrice(), itinerary.getTotalDuration(), id);
+        String sql = "UPDATE itinerary SET name = ?, description = ?, shortDescription = ?, stock = ?, price = ?, totalDuration = ?, themeId = ? WHERE id = ?";
+        int rowsAffected = jdbcTemplate.update(sql, itinerary.getItineraryName(), itinerary.getDescription(), itinerary.getShortDescription(), itinerary.getStock(), itinerary.getPrice(), itinerary.getTotalDuration(), itinerary.getThemeId(), id);
 
         if (rowsAffected <= 0) {
             throw new RuntimeException("Échec de la mise à jour du produit avec l'ID : " + id);

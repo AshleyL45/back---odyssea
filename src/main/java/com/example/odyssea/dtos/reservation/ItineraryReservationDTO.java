@@ -1,4 +1,4 @@
-package com.example.odyssea.dtos;
+package com.example.odyssea.dtos.reservation;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 

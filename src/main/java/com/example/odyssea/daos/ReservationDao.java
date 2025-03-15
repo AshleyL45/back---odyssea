@@ -1,19 +1,16 @@
 package com.example.odyssea.daos;
 
-import com.example.odyssea.dtos.ItineraryReservationDTO;
-import com.example.odyssea.dtos.ReservationRecapDTO;
+import com.example.odyssea.dtos.reservation.ItineraryReservationDTO;
+import com.example.odyssea.dtos.reservation.ReservationRecapDTO;
 import com.example.odyssea.entities.itinerary.Itinerary;
-import com.example.odyssea.entities.mainTables.Option;
 import com.example.odyssea.entities.mainTables.Reservation;
+import com.example.odyssea.exceptions.ReservationNotFoundException;
 import com.example.odyssea.mapper.ReservationRecapDTOMapper;
+import com.example.odyssea.mapper.ReservationRowMapper;
 import org.springframework.jdbc.core.BeanPropertyRowMapper;
 import org.springframework.jdbc.core.JdbcTemplate;
-import org.springframework.jdbc.core.RowMapper;
 import org.springframework.stereotype.Repository;
 
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.util.ArrayList;
 import java.util.List;
 
 @Repository
@@ -22,40 +19,28 @@ public class ReservationDao {
     // JdbcTemplate permet d'accéder à la base de données
     private final JdbcTemplate jdbcTemplate;
     private final ItineraryDao itineraryDao;
+    private final ReservationOptionDao reservationOptionDao;
 
-    public ReservationDao(JdbcTemplate jdbcTemplate, ItineraryDao itineraryDao) {
+    public ReservationDao(JdbcTemplate jdbcTemplate, ItineraryDao itineraryDao, ReservationOptionDao reservationOptionDao) {
         this.jdbcTemplate = jdbcTemplate;
         this.itineraryDao = itineraryDao;
+        this.reservationOptionDao = reservationOptionDao;
     }
-
-    private final RowMapper<Reservation> reservationRowMapper = (rs, rowNum) -> new Reservation(
-            rs.getInt("userId"),
-            rs.getInt("itineraryId"),
-            rs.getString("status"),
-            rs.getDate("departureDate"),
-            rs.getDate("returnDate"),
-            rs.getDouble("totalPrice"),
-            rs.getDate("purchaseDate"),
-            rs.getInt("numberOfAdults"),
-            rs.getInt("numberOfKids"),
-            rs.getInt("optionId"),
-            rs.getInt("planeRideId")
-    );
 
 
     // Récupère la liste de toutes les réservations
     public List<Reservation> findAll() {
         String sql = "SELECT * FROM reservation";
-        return jdbcTemplate.query(sql, reservationRowMapper);
+        return jdbcTemplate.query(sql, new ReservationRowMapper());
     }
 
     // Récupère une réservation
     public Reservation findById(int userId, int itineraryId) {
         String sql = "SELECT * FROM reservation WHERE userId = ? AND itineraryId = ?";
-        return jdbcTemplate.query(sql, reservationRowMapper, userId, itineraryId)
+        return jdbcTemplate.query(sql, new ReservationRowMapper(), userId, itineraryId)
                 .stream()
                 .findFirst()
-                .orElseThrow(() -> new RuntimeException("Reservation of user " + userId + " with itinerary" + itineraryId + "does not exist"));
+                .orElseThrow(() -> new ReservationNotFoundException("Reservation of user " + userId + " with itinerary" + itineraryId + "does not exist"));
     }
 
     //Récupère tous les itinéraires reservés d'un utilisateur avec la date d'achat et le statut
@@ -66,7 +51,7 @@ public class ReservationDao {
         return jdbcTemplate.query(sql, new BeanPropertyRowMapper<>(ItineraryReservationDTO.class), userId);
     }
 
-    // Renvoie une réservation aveinic les details (les options et les vols)
+    // Renvoie une réservation avec les details (les options et les vols)
     public ReservationRecapDTO findReservationDetails(int userId, int itineraryId) {
         String sql = "SELECT reservation.*, options.*, planeRide.* " +
                 "FROM reservation " +
@@ -88,26 +73,58 @@ public class ReservationDao {
         return jdbcTemplate.query(sql, itineraryDao.itineraryRowMapper, userId, status)
                 .stream()
                 .findFirst()
-                .orElseThrow(() -> new RuntimeException("Last done itinerary from user : " + userId + "with status" + status + "cannot be found."));
+                .orElseThrow(() -> new ReservationNotFoundException("Last done itinerary from user : " + userId + "with status" + status + "cannot be found."));
     }
 
 
     // Enregistre une nouvelle réservation dans la base
     public Reservation save(Reservation reservation) {
-        String sql = "INSERT INTO reservation (userId, itineraryId, status, departureDate, returnDate, totalPrice, purchaseDate, numberOfAdults, numberOfKids, optionId, planeRideId) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+        // Insérer la réservation principale (sans les options)
+        String sql = "INSERT INTO reservation (userId, itineraryId, status, departureDate, returnDate, totalPrice, purchaseDate, numberOfAdults, numberOfKids, planeRideId) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+
         jdbcTemplate.update(sql,
-                reservation.getIdUser(),
-                reservation.getIdItinerary(),
+                reservation.getUserId(),
+                reservation.getItineraryId(),
                 reservation.getStatus(),
                 reservation.getDepartureDate(),
                 reservation.getReturnDate(),
                 reservation.getTotalPrice(),
-                reservation.getPurchase(),
+                reservation.getPurchaseDate(),
                 reservation.getNumberOfAdults(),
                 reservation.getNumberOfKids(),
-                reservation.getOptionId(),
                 reservation.getPlaneRideId()
         );
+
+        // Vérifier si optionIds est null ou vide
+        if (reservation.getOptionIds() != null && !reservation.getOptionIds().isEmpty()) {
+            // Une fois la réservation insérée, on récupère les userId et itineraryId pour les insérer dans la table de liaison
+            for (Integer optionId : reservation.getOptionIds()) {
+                reservationOptionDao.insertReservationOption(reservation.getUserId(), reservation.getItineraryId(), optionId);
+            }
+        }
+
+        return reservation;
+    }
+
+
+    // Enregistre les options d'une réservation
+    public void insertOptions(Reservation reservation) {
+        for (Integer optionId : reservation.getOptionIds()) {
+            reservationOptionDao.insertReservationOption(reservation.getUserId(), reservation.getItineraryId(), optionId);
+        }
+    }
+
+    public Reservation getReservationWithOptions(int userId, int itineraryId) {
+        // Récupérer la réservation
+        String sqlReservation = "SELECT * FROM reservation WHERE userId = ? AND itineraryId = ?";
+        Reservation reservation = jdbcTemplate.queryForObject(sqlReservation, new ReservationRowMapper(), userId, itineraryId);
+
+        // Récupérer les options associées à cette réservation
+        String sqlOptions = "SELECT option_id FROM reservationOption WHERE user_id = ? AND itinerary_id = ?";
+        List<Integer> optionIds = jdbcTemplate.queryForList(sqlOptions, Integer.class, reservation.getUserId(), reservation.getItineraryId());
+
+        // Ajouter les options à la réservation
+        reservation.setOptionIds(optionIds);
 
         return reservation;
     }
@@ -115,21 +132,21 @@ public class ReservationDao {
     // Met à jour une réservation existante identifiée par son ID
     public Reservation update(int userId, int itineraryId, Reservation reservation) {
         if (!reservationExists(userId, itineraryId)) {
-            throw new RuntimeException("Reservation of user " + userId + " with itinerary" + itineraryId + "does not exist");
+            throw new ReservationNotFoundException("Reservation of user " + userId + " with itinerary" + itineraryId + "does not exist");
         }
 
         String sql = "UPDATE reservation SET userId = ?, itineraryId = ?, status = ?, departureDate = ?, returnDate = ?, totalPrice = ?, purchaseDate = ?, numberOfAdults = ?, numberOfKids = ? WHERE userId = ? AND itineraryId = ?";
         int rowsAffected = jdbcTemplate.update(sql,
-                reservation.getIdUser(),
-                reservation.getIdItinerary(),
+                reservation.getUserId(),
+                reservation.getItineraryId(),
                 reservation.getStatus(),
                 reservation.getDepartureDate(),
                 reservation.getReturnDate(),
                 reservation.getTotalPrice(),
-                reservation.getPurchase(),
+                reservation.getPurchaseDate(),
                 reservation.getNumberOfAdults(),
                 reservation.getNumberOfKids(),
-                reservation.getOptionId(),
+                reservation.getOptionIds(),
                 reservation.getPlaneRideId(),
                 userId,
                 itineraryId
@@ -145,7 +162,7 @@ public class ReservationDao {
     // Changer le status d'une réservation
     public boolean updateReservationStatus(int userId, int itineraryId, String status){
         if(!reservationExists(userId, itineraryId)) {
-            throw new RuntimeException("Reservation of user " + userId + " with itinerary" + itineraryId + "does not exist");
+            throw new ReservationNotFoundException("Reservation of user " + userId + " with itinerary" + itineraryId + "does not exist");
         }
 
         String sql = "UPDATE reservation SET status = ? WHERE userId = ? AND itineraryId = ?";
@@ -154,7 +171,7 @@ public class ReservationDao {
 
         if(rowsAffected > 0){
             return true;
-        }else {
+        } else {
             throw new RuntimeException("Failed to update reservation with user ID :  " + userId + "with itinerary ID : " + itineraryId);
         }
     }

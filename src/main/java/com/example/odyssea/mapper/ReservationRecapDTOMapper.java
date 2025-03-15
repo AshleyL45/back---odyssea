@@ -1,6 +1,6 @@
 package com.example.odyssea.mapper;
 
-import com.example.odyssea.dtos.ReservationRecapDTO;
+import com.example.odyssea.dtos.reservation.ReservationRecapDTO;
 import com.example.odyssea.entities.mainTables.Option;
 import org.springframework.jdbc.core.RowMapper;
 

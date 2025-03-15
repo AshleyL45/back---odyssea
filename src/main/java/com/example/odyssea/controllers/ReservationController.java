@@ -1,10 +1,12 @@
 package com.example.odyssea.controllers;
 
-import com.example.odyssea.dtos.ItineraryReservationDTO;
-import com.example.odyssea.dtos.ReservationRecapDTO;
+import com.example.odyssea.dtos.reservation.ItineraryReservationDTO;
+import com.example.odyssea.dtos.reservation.ReservationRecapDTO;
+import com.example.odyssea.dtos.reservation.ReservationRequestDTO;
 import com.example.odyssea.entities.itinerary.Itinerary;
 import com.example.odyssea.entities.mainTables.Reservation;
 import com.example.odyssea.services.ReservationService;
+import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -46,23 +48,23 @@ public class ReservationController {
     }
 
     @PostMapping
-    public ResponseEntity<Reservation> createReservation(@RequestBody Reservation reservation) {
-        Reservation createdReservation = reservationService.createReservation(reservation);
-        return ResponseEntity.status(HttpStatus.CREATED).body(reservation);
+    public ResponseEntity<Reservation> createReservation(@Valid @RequestBody ReservationRequestDTO reservationRequest) {
+        Reservation createdReservation = reservationService.createReservation(reservationRequest);
+        return ResponseEntity.status(HttpStatus.CREATED).body(createdReservation);
     }
 
     @PatchMapping("/{userId}/{itineraryId}")
-    public ResponseEntity<String> updateReservationStatus(@PathVariable int userId, @PathVariable int itineraryId, @RequestBody String status){
+    public ResponseEntity<String> updateReservationStatus(@PathVariable int userId, @PathVariable int itineraryId, @Valid @RequestBody String status){
        boolean isUpdated = reservationService.updateReservationStatus(userId, itineraryId, status);
        if(isUpdated){
            return ResponseEntity.ok("Reservation successfully updated.");
        } else {
-           return ResponseEntity.badRequest().body("Cannot update reservation of user id : " + userId + "with itinerary id : " + itineraryId);
+           return ResponseEntity.badRequest().body("Cannot update reservation of user id : " + userId + " with itinerary id : " + itineraryId);
        }
     }
 
     @PutMapping("/{userId}/{itineraryId}")
-    public ResponseEntity<Reservation> updateReservation(@PathVariable int userId, @PathVariable int itineraryId, @RequestBody Reservation reservation) {
+    public ResponseEntity<Reservation> updateReservation(@PathVariable int userId, @PathVariable int itineraryId, @Valid @RequestBody Reservation reservation) {
         return ResponseEntity.ok(reservationService.updateReservation(userId, itineraryId, reservation));
     }
 
