@@ -28,9 +28,9 @@ public class ActivityController {
     }
 
     /**
-     * Récupère une activité spécifique par son identifiant
+     * Récupère une activité spécifique par son identifiant (uniquement numérique)
      */
-    @GetMapping("/{id}")
+    @GetMapping("/{id:\\d+}")
     public Activity getActivityById(@PathVariable int id) {
         return activityService.getActivity(id);
     }
@@ -44,18 +44,18 @@ public class ActivityController {
     }
 
     /**
-     * Met à jour une activité existante
+     * Met à jour une activité existante (identifiant numérique uniquement)
      */
-    @PutMapping("/{id}")
+    @PutMapping("/{id:\\d+}")
     public boolean updateActivity(@PathVariable int id, @RequestBody ActivityDto activityDto, @RequestParam int cityId) {
         Activity activity = activityDto.toActivity(cityId);
         return activityService.updateActivity(id, activity);
     }
 
     /**
-     * Supprime une activité par son identifiant
+     * Supprime une activité par son identifiant (uniquement numérique)
      */
-    @DeleteMapping("/{id}")
+    @DeleteMapping("/{id:\\d+}")
     public boolean deleteActivity(@PathVariable int id) {
         return activityService.deleteActivity(id);
     }
@@ -75,4 +75,16 @@ public class ActivityController {
     public void importActivities(@RequestParam int cityId) {
         activityService.importActivitiesFromAmadeus(cityId);
     }
+
+
+    @PostMapping("/importAndGet")
+    public List<Activity> importAndGetActivities(@RequestParam int cityId) {
+        // Importation des activités depuis Amadeus pour la ville donnée
+        activityService.importActivitiesFromAmadeus(cityId);
+        // Récupération des 5 activités enregistrées dans la base
+        return activityService.getTop5ActivitiesByCityId(cityId);
+    }
+
 }
+
+

@@ -110,7 +110,6 @@ public class CityDao {
                 .stream()
                 .findFirst()
                 .orElseThrow(() -> new RuntimeException("The city " + cityName + " doesn't exist."));
-
     }
 
     /**
@@ -119,6 +118,14 @@ public class CityDao {
     public Optional<double[]> getCoordinatesByCityId(int id) {
         Optional<City> cityOpt = findById(id);
         return cityOpt.map(city -> new double[]{city.getLatitude(), city.getLongitude()});
+    }
+
+    /**
+     * Récupère le code IATA d'une ville à partir de son ID.
+     */
+    public String getIataCodeById(int cityId) {
+        String sql = "SELECT iataCode FROM city WHERE id = ?";
+        return jdbcTemplate.queryForObject(sql, String.class, cityId);
     }
 
     /**
