@@ -1,13 +1,12 @@
 package com.example.odyssea.entities.itinerary;
 
 import java.math.BigDecimal;
-import java.sql.Time;
 
 public class Itinerary {
 
 
-    private int idItinerary;
-    private String itineraryName;
+    private int id;
+    private String name;
     private String description;
     private String shortDescription;
     private int stock;
@@ -18,9 +17,9 @@ public class Itinerary {
 
 
     public Itinerary(){}
-    public Itinerary(int idItinerary, String itineraryName, String description, String shortDescription, int stock, BigDecimal price, int totalDuration, int themeId){
-        this.idItinerary = idItinerary;
-        this.itineraryName = itineraryName;
+    public Itinerary(int id, String name, String description, String shortDescription, int stock, BigDecimal price, int totalDuration, int themeId){
+        this.id = id;
+        this.name = name;
         this.description = description;
         this.shortDescription = shortDescription;
         this.stock = stock;
@@ -30,20 +29,20 @@ public class Itinerary {
     }
 
 
-    public int getIdItinerary() {
-        return idItinerary;
+    public int getId() {
+        return id;
     }
 
-    public void setIdItinerary(int idItinerary) {
-        this.idItinerary = idItinerary;
+    public void setId(int id) {
+        this.id = id;
     }
 
-    public String getItineraryName() {
-        return itineraryName;
+    public String getName() {
+        return name;
     }
 
-    public void setItineraryName(String name) {
-        this.itineraryName = name;
+    public void setName(String name) {
+        this.name = name;
     }
 
     public String getDescription() {

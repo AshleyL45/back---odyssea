@@ -7,22 +7,21 @@ import java.time.LocalDate;
 
 public class ItineraryReservationDTO {
         private int id;
-        private String itineraryName;
+        private String name;
         private String description;
         private String shortDescription;
         private BigDecimal price;
         private int duration;
         private String status;
-
         @JsonFormat(pattern = "dd-MM-yyyy")
         private LocalDate purchaseDate;
 
     public ItineraryReservationDTO() {
     }
 
-    public ItineraryReservationDTO(int id, String itineraryName, String description, String shortDescription, BigDecimal price, int duration, String status, LocalDate purchaseDate) {
+    public ItineraryReservationDTO(int id, String name, String description, String shortDescription, BigDecimal price, int duration, String status, LocalDate purchaseDate) {
         this.id = id;
-        this.itineraryName = itineraryName;
+        this.name = name;
         this.description = description;
         this.shortDescription = shortDescription;
         this.price = price;
@@ -39,12 +38,12 @@ public class ItineraryReservationDTO {
         this.id = id;
     }
 
-    public String getItineraryName() {
-        return itineraryName;
+    public String getName() {
+        return name;
     }
 
-    public void setItineraryName(String itineraryName) {
-        this.itineraryName = itineraryName;
+    public void setName(String name) {
+        this.name = name;
     }
 
     public String getDescription() {

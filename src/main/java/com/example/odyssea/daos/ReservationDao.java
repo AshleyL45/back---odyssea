@@ -45,10 +45,22 @@ public class ReservationDao {
 
     //Récupère tous les itinéraires reservés d'un utilisateur avec la date d'achat et le statut
     public List<ItineraryReservationDTO> findAllUserReservations(int userId){
-        String sql = "SELECT itinerary.*, reservation.purchaseDate, reservation.status FROM reservation\n" +
-                "INNER JOIN itinerary ON reservation.itineraryId = itinerary.id WHERE reservation.userId = ?";
+        String sql = "SELECT itinerary.id, itinerary.name, itinerary.description, itinerary.shortDescription, " +
+                "itinerary.price, itinerary.totalDuration, reservation.status, reservation.purchaseDate " +
+                "FROM reservation " +
+                "INNER JOIN itinerary ON reservation.itineraryId = itinerary.id " +
+                "WHERE reservation.userId = ?";
 
-        return jdbcTemplate.query(sql, new BeanPropertyRowMapper<>(ItineraryReservationDTO.class), userId);
+        return jdbcTemplate.query(sql, (rs, rowNum) -> new ItineraryReservationDTO(
+                rs.getInt("id"),
+                rs.getString("name"),
+                rs.getString("description"),
+                rs.getString("shortDescription"),
+                rs.getBigDecimal("price"),
+                rs.getInt("totalDuration"),
+                rs.getString("status"),
+                rs.getDate("purchaseDate").toLocalDate()
+        ), userId);
     }
 
     // Renvoie une réservation avec les details (les options et les vols)

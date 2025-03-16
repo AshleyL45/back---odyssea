@@ -1,31 +1,35 @@
 package com.example.odyssea.entities;
 
+import jakarta.validation.constraints.NotNull;
+
 public class MySelection {
 
-    private int idUser;
-    private int idItinerary;
+    @NotNull
+    private int userId;
+    @NotNull
+    private int itineraryId;
 
     public MySelection(){}
-    public MySelection(int idUser, int idItinerary){
-        this.idUser = idUser;
-        this.idItinerary = idItinerary;
+    public MySelection(int userId, int itineraryId){
+        this.userId = userId;
+        this.itineraryId = itineraryId;
     }
 
 
-    public int getIdUser() {
-        return idUser;
+    public int getUserId() {
+        return userId;
     }
 
-    public void setIdUser(int idUser) {
-        this.idUser = idUser;
+    public void setUserId(int userId) {
+        this.userId = userId;
     }
 
 
-    public int getIdItinerary() {
-        return idItinerary;
+    public int getItineraryId() {
+        return itineraryId;
     }
 
-    public void setIdItinerary(int idItinerary) {
-        this.idItinerary = idItinerary;
+    public void setItineraryId(int itineraryId) {
+        this.itineraryId = itineraryId;
     }
 }

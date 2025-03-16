@@ -5,7 +5,6 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.stereotype.Repository;
 
-import java.sql.Time;
 import java.util.List;
 
 @Repository
@@ -75,12 +74,12 @@ public class ItineraryDao {
 
     public Itinerary save(Itinerary itinerary) {
         String sql = "INSERT INTO itinerary (name, description, shortDescription, stock, price, totalDuration, themeId) VALUES (?, ?, ?, ?, ?, ?,?)";
-        jdbcTemplate.update(sql, itinerary.getItineraryName(), itinerary.getDescription(), itinerary.getShortDescription(), itinerary.getStock(), itinerary.getPrice(), itinerary.getTotalDuration(), itinerary.getThemeId());
+        jdbcTemplate.update(sql, itinerary.getName(), itinerary.getDescription(), itinerary.getShortDescription(), itinerary.getStock(), itinerary.getPrice(), itinerary.getTotalDuration(), itinerary.getThemeId());
 
         String sqlGetId = "SELECT LAST_INSERT_ID()";
         int id = jdbcTemplate.queryForObject(sqlGetId, Integer.class);
 
-        itinerary.setIdItinerary(id);
+        itinerary.setId(id);
         return itinerary;
     }
 
@@ -91,7 +90,7 @@ public class ItineraryDao {
         }
 
         String sql = "UPDATE itinerary SET name = ?, description = ?, shortDescription = ?, stock = ?, price = ?, totalDuration = ?, themeId = ? WHERE id = ?";
-        int rowsAffected = jdbcTemplate.update(sql, itinerary.getItineraryName(), itinerary.getDescription(), itinerary.getShortDescription(), itinerary.getStock(), itinerary.getPrice(), itinerary.getTotalDuration(), itinerary.getThemeId(), id);
+        int rowsAffected = jdbcTemplate.update(sql, itinerary.getName(), itinerary.getDescription(), itinerary.getShortDescription(), itinerary.getStock(), itinerary.getPrice(), itinerary.getTotalDuration(), itinerary.getThemeId(), id);
 
         if (rowsAffected <= 0) {
             throw new RuntimeException("Échec de la mise à jour du produit avec l'ID : " + id);

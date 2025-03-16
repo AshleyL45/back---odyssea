@@ -34,7 +34,16 @@ public class MySelectionDao {
     public List<Itinerary> findAllUserFavorites(int userId){
         String sql = "SELECT itinerary.* FROM mySelection\n" +
                 "INNER JOIN itinerary ON mySelection.itineraryId = itinerary.id WHERE mySelection.userId = ?;";
-        return jdbcTemplate.query(sql, new Object[]{userId}, new BeanPropertyRowMapper<>(Itinerary.class));
+        return jdbcTemplate.query(sql, (rs, _) -> new Itinerary(
+                rs.getInt("id"),
+                rs.getString("name"),
+                rs.getString("description"),
+                rs.getString("shortDescription"),
+                rs.getInt("stock"),
+                rs.getBigDecimal("price"),
+                rs.getInt("totalDuration"),
+                rs.getInt("themeId")
+        ), userId);
     }
 
     // Retourne une sélection identifiée par le couple (userId, itineraryId)
@@ -49,7 +58,7 @@ public class MySelectionDao {
     // Insère une nouvelle sélection dans la table mySelection
     public MySelection save(MySelection mySelection) {
         String sql = "INSERT INTO mySelection (userId, itineraryId) VALUES (?, ?)";
-        jdbcTemplate.update(sql, mySelection.getIdUser(), mySelection.getIdItinerary());
+        jdbcTemplate.update(sql, mySelection.getUserId(), mySelection.getItineraryId());
         return mySelection;
     }
 
@@ -59,15 +68,15 @@ public class MySelectionDao {
         findById(userId, itineraryId);
         String sql = "UPDATE mySelection SET userId = ?, itineraryId = ? WHERE userId = ? AND itineraryId = ?";
         int rowsAffected = jdbcTemplate.update(sql,
-                mySelection.getIdUser(),
-                mySelection.getIdItinerary(),
+                mySelection.getUserId(),
+                mySelection.getItineraryId(),
                 userId,
                 itineraryId
         );
         if (rowsAffected <= 0) {
             throw new RuntimeException("Failed to update selection with userId: " + userId + " and itineraryId: " + itineraryId);
         }
-        return findById(mySelection.getIdUser(), mySelection.getIdItinerary());
+        return findById(mySelection.getUserId(), mySelection.getItineraryId());
     }
 
     // Supprime une sélection identifiée par le couple (userId, itineraryId)
