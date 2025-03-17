@@ -1,12 +1,15 @@
-package com.example.odyssea.entities.mainTables;
+package com.example.odyssea.dtos.reservation;
 
-import jakarta.validation.constraints.*;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Positive;
+import jakarta.validation.constraints.PositiveOrZero;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.List;
 
-public class Reservation {
+public class ReservationRequestDTO {
 
     @NotNull(message = "User id cannot be null.")
     private int userId;
@@ -20,33 +23,29 @@ public class Reservation {
     private LocalDate returnDate;
     @Positive(message = "Price cannot be negative.")
     private BigDecimal totalPrice;
-    @NotNull(message = "Purchase date cannot be null.")
-    private LocalDate purchaseDate;
     @Positive(message = "Number of adults must be positive.")
     private int numberOfAdults;
     @PositiveOrZero(message = "Number of kids must be positive or equal to zero.")
     private int numberOfKids;
-    private List<Integer> optionId;
+    private List<Integer> optionIds;
     @PositiveOrZero(message = "Flight id cannot be negative.")
     private int planeRideId;
 
-    public Reservation() {
+    public ReservationRequestDTO() {
     }
 
-    public Reservation(int userId, int itineraryId, String status, LocalDate departureDate, LocalDate returnDate, BigDecimal totalPrice, LocalDate purchaseDate, int numberOfAdults, int numberOfKids, List<Integer> optionId, int planeRideId) {
+    public ReservationRequestDTO(int userId, int itineraryId, String status, LocalDate departureDate, LocalDate returnDate, BigDecimal totalPrice, int numberOfAdults, int numberOfKids, List<Integer> optionIds, int planeRideId) {
         this.userId = userId;
         this.itineraryId = itineraryId;
         this.status = status;
         this.departureDate = departureDate;
         this.returnDate = returnDate;
         this.totalPrice = totalPrice;
-        this.purchaseDate = purchaseDate;
         this.numberOfAdults = numberOfAdults;
         this.numberOfKids = numberOfKids;
-        this.optionId = optionId;
+        this.optionIds = optionIds;
         this.planeRideId = planeRideId;
     }
-
 
 
     public int getUserId() {
@@ -97,41 +96,31 @@ public class Reservation {
         this.totalPrice = totalPrice;
     }
 
-    public LocalDate getPurchaseDate() {
-        return purchaseDate;
-    }
-
-    public void setPurchaseDate(LocalDate purchaseDate) {
-        this.purchaseDate = purchaseDate;
-    }
-
     public int getNumberOfAdults() {
         return numberOfAdults;
     }
 
-    public void setNumberOfAdults(int numberOfAdults) {
+    public void setNumberOfAdults(Integer numberOfAdults) {
         this.numberOfAdults = numberOfAdults;
     }
-
 
     public int getNumberOfKids() {
         return numberOfKids;
     }
 
-    public void setNumberOfKids(int numberOfKids) {
+    public void setNumberOfKids(Integer numberOfKids) {
         this.numberOfKids = numberOfKids;
     }
 
-
     public List<Integer> getOptionIds() {
-        return optionId;
+        return optionIds;
     }
 
-    public void setOptionIds(List<Integer> optionId) {
-        this.optionId = optionId;
+    public void setOptionIds(List<Integer> optionIds) {
+        this.optionIds = optionIds;
     }
 
-    public Integer getPlaneRideId() {
+    public int getPlaneRideId() {
         return planeRideId;
     }
 
@@ -139,3 +128,4 @@ public class Reservation {
         this.planeRideId = planeRideId;
     }
 }
+
