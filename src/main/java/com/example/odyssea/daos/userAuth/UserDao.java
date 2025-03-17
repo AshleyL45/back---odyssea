@@ -60,12 +60,21 @@ public class UserDao {
             throw new UserNotFoundException("User with id : " + id + " doesn't exist.");
         }
 
-        String sql = "UPDATE user SET email = ?, password = ?, role = ?, firstName = ?, lastName = ? WHERE id = ?";
-        int rowsAffected = jdbcTemplate.update(sql,user.getEmail(), user.getPassword(), user.getRole(),  user.getFirstName(), user.getLastName(), id);
+        User existingUser = this.findById(id);
+
+        String sql = "UPDATE user SET email = ?, firstName = ?, lastName = ? WHERE id = ?";
+        int rowsAffected = jdbcTemplate.update(
+                sql,
+                user.getEmail() != null ? user.getEmail() : existingUser.getEmail(),
+                user.getFirstName() != null ? user.getFirstName() : existingUser.getFirstName(),
+                user.getLastName() != null ? user.getLastName() : existingUser.getLastName(),
+                id
+        );
 
         if (rowsAffected <= 0) {
             throw new RuntimeException("Failed to update user with id : " + id);
         }
+
         return this.findById(id);
     }
 
