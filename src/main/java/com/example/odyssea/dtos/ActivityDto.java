@@ -42,13 +42,16 @@ public class ActivityDto {
      */
     public Activity toActivity(int cityId) {
         if (this.name == null || this.name.isEmpty()) {
-            throw new IllegalArgumentException("Le champ 'name' est obligatoire !");
+            throw new IllegalArgumentException("The 'name' field is mandatory!");
         }
         int duration = parseDuration(this.minimumDuration);
         Double parsedPrice = parsePrice(this.price);
+        // Utiliser une valeur par défaut si description est null
+        String descriptionNonNull = (this.description != null ? this.description : "No description available");
 
-        return new Activity(0, cityId, this.name, "Autre", "Faible", duration, this.description, parsedPrice);
+        return new Activity(0, cityId, this.name, "Other", "Low", duration, descriptionNonNull, parsedPrice);
     }
+
 
     /**
      * Convertit une durée au format ISO-8601 en minutes
@@ -59,7 +62,7 @@ public class ActivityDto {
                 Duration duration = Duration.parse(isoDuration);
                 return (int) duration.toMinutes();
             } catch (Exception e) {
-                System.out.println("[ActivityDto] Erreur de conversion de la durée : " + e.getMessage());
+                System.out.println("[ActivityDto] Time conversion error: " + e.getMessage());
             }
         }
         return 0;
@@ -73,7 +76,7 @@ public class ActivityDto {
             try {
                 return Double.parseDouble(price.get("amount").toString());
             } catch (NumberFormatException e) {
-                System.out.println("[ActivityDto] Erreur de conversion du prix : " + e.getMessage());
+                System.out.println("[ActivityDto] Price conversion error: " + e.getMessage());
             }
         }
         return 0.0;

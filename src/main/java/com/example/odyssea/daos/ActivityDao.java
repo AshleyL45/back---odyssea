@@ -125,16 +125,21 @@ public class ActivityDao {
     private static class ActivityRowMapper implements RowMapper<Activity> {
         @Override
         public Activity mapRow(ResultSet rs, int rowNum) throws SQLException {
-            return new Activity(
-                    rs.getInt("id"),
-                    rs.getInt("cityId"),
-                    rs.getString("name"),
-                    rs.getString("type"),
-                    rs.getString("physicalEffort"),
-                    rs.getInt("duration"),
-                    rs.getString("description"),
-                    rs.getDouble("price")
-            );
+            int id = rs.getInt("id");
+            int cityId = rs.getInt("cityId");
+            String name = rs.getString("name");
+            String type = rs.getString("type");
+            String physicalEffort = rs.getString("physicalEffort");
+            // Conversion du TIME en minutes
+            java.sql.Time time = rs.getTime("duration");
+            int duration = 0;
+            if (time != null) {
+                duration = time.toLocalTime().getHour() * 60 + time.toLocalTime().getMinute();
+            }
+            String description = rs.getString("description");
+            double price = rs.getDouble("price");
+            return new Activity(id, cityId, name, type, physicalEffort, duration, description, price);
         }
     }
+
 }
