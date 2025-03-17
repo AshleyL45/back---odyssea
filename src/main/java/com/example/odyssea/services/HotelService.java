@@ -4,7 +4,11 @@ import com.example.odyssea.daos.HotelDao;
 import com.example.odyssea.dtos.HotelDto;
 import com.example.odyssea.entities.mainTables.Hotel;
 import com.example.odyssea.exceptions.ResourceNotFoundException;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.stereotype.Service;
+import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import org.springframework.web.reactive.function.client.WebClient;
 import reactor.core.scheduler.Schedulers;
@@ -141,5 +145,64 @@ public class HotelService {
                     createHotel(hotelDto);
                 })
                 .then();
+    }
+
+
+    public Mono<List<HotelDto>> searchHotelsFromAmadeus(String iataCityCode, int starRating) {
+        String checkInDate = "2025-04-01";
+        String checkOutDate = "2025-04-02";
+
+        return tokenService.getValidToken().flatMap(token ->
+                webClient.get()
+                        .uri(uriBuilder -> uriBuilder
+                                .path("/v2/shopping/hotel-offers")
+                                .queryParam("cityCode", iataCityCode)
+                                .queryParam("checkInDate", checkInDate)
+                                .queryParam("checkOutDate", checkOutDate)
+                                .queryParam("ratings", starRating)
+                                .queryParam("page[limit]", 5)
+                                .build()
+                        )
+                        .header("Authorization", "Bearer " + token)
+                        .retrieve()
+                        .onStatus(status -> status.is4xxClientError() || status.is5xxServerError(), clientResponse ->
+                                clientResponse.bodyToMono(String.class)
+                                        .flatMap(error -> Mono.error(new Exception("Erreur Amadeus: " + error)))
+                        )
+                        .bodyToMono(JsonNode.class)
+                        .flatMapMany(jsonNode -> {
+                            if (jsonNode.has("data") && jsonNode.get("data").isArray()) {
+                                return Flux.fromIterable(jsonNode.get("data"))
+                                        .map(node -> {
+                                            try {
+                                                return new ObjectMapper().treeToValue(node, HotelDto.class);
+                                            } catch (JsonProcessingException e) {
+                                                throw new RuntimeException("Erreur de conversion JSON", e);
+                                            }
+                                        });
+                            } else {
+                                return Flux.empty();
+                            }
+                        })
+                        .collectList()
+        );
+    }
+
+    /**
+     * Recherche les hôtels via Amadeus en fonction du code IATA et du classement,
+     * puis enregistre chaque hôtel récupéré dans la base de données.
+     */
+    public Mono<List<HotelDto>> fetchAndSaveHotelsFromAmadeus(String iataCityCode, int starRating) {
+        return searchHotelsFromAmadeus(iataCityCode, starRating)
+                .flatMapMany(Flux::fromIterable)
+                .flatMap(hotelDto -> Mono.fromCallable(() -> {
+                    createHotel(hotelDto);
+                    return hotelDto;
+                }).subscribeOn(Schedulers.boundedElastic()))
+                .collectList()
+                .onErrorResume(e -> {
+                    System.err.println("Erreur lors du fetch et enregistrement d'hôtels: " + e.getMessage());
+                    return Mono.error(e);
+                });
     }
 }

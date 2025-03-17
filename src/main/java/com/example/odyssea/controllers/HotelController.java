@@ -58,27 +58,17 @@ public class HotelController {
         return hotelService.deleteHotel(id);
     }
 
-    /**
-     * Récupère tous les hôtels situés dans une ville spécifique
-     */
-    @GetMapping("/by-city")
-    public List<Hotel> getHotelsByCity(@RequestParam int cityId) {
-        return hotelService.getHotelsByCityId(cityId);
-    }
 
     /**
      * Récupère les hôtels d'une ville spécifique avec un certain standing (nombre d'étoiles)
      */
-    @GetMapping("/by-city-and-star")
-    public List<Hotel> getHotelsByCityAndStar(@RequestParam int cityId, @RequestParam int starRating) {
-        return hotelService.getHotelsByCityAndStarRating(cityId, starRating);
+    @GetMapping("/from-amadeus/by-iata-and-save")
+    public Mono<List<HotelDto>> fetchAndSaveHotelsByIataAndStar(@RequestParam String iataCityCode,
+                                                                @RequestParam int starRating) {
+        System.out.println("Requête fetchAndSaveHotelsByIataAndStar reçue avec iataCityCode: "
+                + iataCityCode + ", starRating: " + starRating);
+        return hotelService.fetchAndSaveHotelsFromAmadeus(iataCityCode, starRating);
     }
 
-    /**
-     * Crée un hôtel à partir de l'API Amadeus et l'enregistre en base
-     */
-    @PostMapping("/from-amadeus")
-    public Mono<Void> createHotelFromAmadeus(@RequestParam String amadeusHotelId) {
-        return hotelService.createHotelFromAmadeus(amadeusHotelId);
-    }
+
 }
