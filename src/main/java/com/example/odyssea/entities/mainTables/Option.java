@@ -8,6 +8,9 @@ public class Option {
     private String description;
     private BigDecimal price;
 
+    public Option() {
+    }
+
     public Option(int id, String name,String description, BigDecimal price) {
         this.id = id;
         this.name = name;

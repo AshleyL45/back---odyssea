@@ -1,20 +1,12 @@
 package com.example.odyssea.entities;
 
-import jakarta.validation.constraints.NotNull;
-
-public class MySelection {
-
-    @NotNull
+public class ReservationOption {
     private int userId;
-    @NotNull
     private int itineraryId;
+    private int optionId;
 
-    public MySelection(){}
-    public MySelection(int userId, int itineraryId){
-        this.userId = userId;
-        this.itineraryId = itineraryId;
+    public ReservationOption() {
     }
-
 
     public int getUserId() {
         return userId;
@@ -24,12 +16,19 @@ public class MySelection {
         this.userId = userId;
     }
 
-
     public int getItineraryId() {
         return itineraryId;
     }
 
     public void setItineraryId(int itineraryId) {
         this.itineraryId = itineraryId;
+    }
+
+    public int getOptionId() {
+        return optionId;
+    }
+
+    public void setOptionId(int optionId) {
+        this.optionId = optionId;
     }
 }

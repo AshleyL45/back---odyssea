@@ -2,6 +2,7 @@ package com.example.odyssea.services;
 
 import com.example.odyssea.daos.MySelectionDao;
 import com.example.odyssea.entities.MySelection;
+import com.example.odyssea.entities.itinerary.Itinerary;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -24,21 +25,26 @@ public class MySelectionService {
     // Retourne les sélections pour un utilisateur donné
     public List<MySelection> getSelectionsByUserId(int userId) {
         return mySelectionDao.findAll().stream()
-                .filter(selection -> selection.getIdUser() == userId)
+                .filter(selection -> selection.getUserId() == userId)
                 .collect(Collectors.toList());
+    }
+
+    // Retourne les sélections d'un utilisateur sous forme de liste d'itinéraires
+    public List<Itinerary> getUserFavorites(int userId){
+        return mySelectionDao.findAllUserFavorites(userId);
     }
 
     // Retourne les sélections pour un itinéraire donné
     public List<MySelection> getSelectionsByItineraryId(int itineraryId) {
         return mySelectionDao.findAll().stream()
-                .filter(selection -> selection.getIdItinerary() == itineraryId)
+                .filter(selection -> selection.getItineraryId() == itineraryId)
                 .collect(Collectors.toList());
     }
 
     // Retourne la sélection correspondant à un utilisateur et un itinéraire donnés
     public MySelection getSelection(int userId, int itineraryId) {
         return mySelectionDao.findAll().stream()
-                .filter(selection -> selection.getIdUser() == userId && selection.getIdItinerary() == itineraryId)
+                .filter(selection -> selection.getUserId() == userId && selection.getItineraryId() == itineraryId)
                 .findFirst()
                 .orElseThrow(() -> new RuntimeException("Selection with userId: " + userId + " and itineraryId: " + itineraryId + " does not exist"));
     }
@@ -58,7 +64,7 @@ public class MySelectionService {
         List<MySelection> selections = mySelectionDao.findAll();
         boolean deleted = false;
         for (MySelection s : selections) {
-            if (s.getIdUser() == userId && s.getIdItinerary() == itineraryId) {
+            if (s.getUserId() == userId && s.getItineraryId() == itineraryId) {
                 deleted = mySelectionDao.delete(userId, itineraryId);
                 break;
             }
