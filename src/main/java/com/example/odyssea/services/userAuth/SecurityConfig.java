@@ -46,6 +46,7 @@ public class SecurityConfig {
                         authorizeRequests
                                 .requestMatchers("/auth/**", "/test/all").permitAll()
                                 .requestMatchers("/user/**").hasRole("USER")
+                                .requestMatchers("/flights/**").permitAll()
                                 .requestMatchers("/reservations/**").hasRole("USER")
                                 .anyRequest().authenticated()
                 );
