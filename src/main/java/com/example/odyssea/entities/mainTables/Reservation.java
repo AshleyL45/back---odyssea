@@ -27,13 +27,11 @@ public class Reservation {
     @PositiveOrZero(message = "Number of kids must be positive or equal to zero.")
     private int numberOfKids;
     private List<Integer> optionId;
-    @PositiveOrZero(message = "Flight id cannot be negative.")
-    private int planeRideId;
 
     public Reservation() {
     }
 
-    public Reservation(int userId, int itineraryId, String status, LocalDate departureDate, LocalDate returnDate, BigDecimal totalPrice, LocalDate purchaseDate, int numberOfAdults, int numberOfKids, List<Integer> optionId, int planeRideId) {
+    public Reservation(int userId, int itineraryId, String status, LocalDate departureDate, LocalDate returnDate, BigDecimal totalPrice, LocalDate purchaseDate, int numberOfAdults, int numberOfKids, List<Integer> optionId) {
         this.userId = userId;
         this.itineraryId = itineraryId;
         this.status = status;
@@ -44,7 +42,6 @@ public class Reservation {
         this.numberOfAdults = numberOfAdults;
         this.numberOfKids = numberOfKids;
         this.optionId = optionId;
-        this.planeRideId = planeRideId;
     }
 
 
@@ -131,11 +128,4 @@ public class Reservation {
         this.optionId = optionId;
     }
 
-    public Integer getPlaneRideId() {
-        return planeRideId;
-    }
-
-    public void setPlaneRideId(int planeRideId) {
-        this.planeRideId = planeRideId;
-    }
 }

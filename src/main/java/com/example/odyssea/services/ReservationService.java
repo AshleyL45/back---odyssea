@@ -12,6 +12,7 @@ import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -46,20 +47,25 @@ public class ReservationService {
 
     public Reservation createReservation(ReservationRequestDTO reservationRequest) {
 
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd-MM-yyyy");
+
+        LocalDate departureDate = LocalDate.parse(reservationRequest.getDepartureDate(), formatter);
+        LocalDate returnDate = LocalDate.parse(reservationRequest.getReturnDate(), formatter);
+
+
         BigDecimal totalPrice = calculateTotalPrice(reservationRequest);
 
         Reservation reservation = new Reservation(
                 reservationRequest.getUserId(),
                 reservationRequest.getItineraryId(),
                 reservationRequest.getStatus(),
-                reservationRequest.getDepartureDate(),
-                reservationRequest.getReturnDate(),
+                departureDate,
+                returnDate,
                 totalPrice,
                 LocalDate.now(),
                 reservationRequest.getNumberOfAdults(),
                 reservationRequest.getNumberOfKids(),
-                new ArrayList<>(),
-                reservationRequest.getPlaneRideId()
+                new ArrayList<>()
         );
 
         reservationDao.save(reservation);

@@ -15,7 +15,7 @@ public class UserItinerary {
     private String itineraryName;
     private int numberOfAdults;
     private int numberOfKids;
-    private int flightId;
+//    private int flightId;
     private int optionId;
 
 
@@ -23,7 +23,7 @@ public class UserItinerary {
     public UserItinerary() {
     }
 
-    public UserItinerary(int id, int userId, Date startDate, Date endDate, BigDecimal startingPrice, int totalDuration, String departureCity, String itineraryName, int numberOfAdults, int numberOfKids, int flightId, int optionId) {
+    public UserItinerary(int id, int userId, Date startDate, Date endDate, BigDecimal startingPrice, int totalDuration, String departureCity, String itineraryName, int numberOfAdults, int numberOfKids, int optionId) {
         this.id = id;
         this.userId = userId;
         this.startDate = startDate;
@@ -34,7 +34,7 @@ public class UserItinerary {
         this.itineraryName = itineraryName;
         this.numberOfAdults = numberOfAdults;
         this.numberOfKids = numberOfKids;
-        this.flightId = flightId;
+       // this.flightId = flightId;
         this.optionId = optionId;
     }
 
@@ -119,13 +119,13 @@ public class UserItinerary {
         this.numberOfKids = numberOfKids;
     }
 
-    public int getFlightId() {
-        return flightId;
-    }
-
-    public void setFlightId(int flightId) {
-        this.flightId = flightId;
-    }
+//    public int getFlightId() {
+//        return flightId;
+//    }
+//
+//    public void setFlightId(int flightId) {
+//        this.flightId = flightId;
+//    }
 
     public int getOptionId() {
         return optionId;

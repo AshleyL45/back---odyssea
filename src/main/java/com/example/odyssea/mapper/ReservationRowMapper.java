@@ -28,7 +28,6 @@ public class ReservationRowMapper implements RowMapper<Reservation> {
         int numberOfKids = rs.getInt("numberOfKids");
 
         Integer optionId = rs.getObject("optionId") != null ? rs.getInt("optionId") : null;
-        int planeRideId = rs.getInt("planeRideId");
 
         return new Reservation(
                 userId,
@@ -40,8 +39,7 @@ public class ReservationRowMapper implements RowMapper<Reservation> {
                 purchaseDate,
                 numberOfAdults,
                 numberOfKids,
-                null,
-                planeRideId
+                null
         );
     }
 }

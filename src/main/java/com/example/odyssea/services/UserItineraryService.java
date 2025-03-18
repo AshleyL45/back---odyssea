@@ -2,19 +2,22 @@ package com.example.odyssea.services;
 
 import com.example.odyssea.daos.CityDao;
 import com.example.odyssea.daos.CountryDao;
+import com.example.odyssea.daos.flight.PlaneRideDao;
 import com.example.odyssea.daos.userItinerary.UserItineraryDao;
 import com.example.odyssea.daos.userItinerary.UserItineraryStepDao;
+import com.example.odyssea.dtos.Flight.FlightItineraryDTO;
+import com.example.odyssea.dtos.Flight.FlightOffersDTO;
 import com.example.odyssea.dtos.HotelDto;
 import com.example.odyssea.dtos.UserItinerary.*;
-import com.example.odyssea.entities.mainTables.Activity;
-import com.example.odyssea.entities.mainTables.Country;
-import com.example.odyssea.entities.mainTables.Hotel;
-import com.example.odyssea.entities.mainTables.Option;
+import com.example.odyssea.entities.mainTables.*;
 
 import com.example.odyssea.entities.userItinerary.UserItinerary;
 import com.example.odyssea.entities.userItinerary.UserItineraryStep;
+import com.example.odyssea.services.flight.PlaneRideService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+import reactor.core.publisher.Mono;
 
 import java.math.BigDecimal;
 import java.sql.Date;
@@ -32,19 +35,23 @@ public class UserItineraryService {
     private UserItineraryDao userItineraryDao;
     private UserItineraryStepDao userItineraryStepDao;
     private UserDailyPlanService userDailyPlanService;
+    private PlaneRideService planeRideService;
+    private PlaneRideDao planeRideDao;
 
-    public UserItineraryService(UserItineraryStepDao userItineraryStepDao) {
+    public UserItineraryService() {
 
     }
 
     @Autowired
-    public UserItineraryService(CityDao cityDao, HotelService hotelService, CountryDao countryDao, UserItineraryDao userItineraryDao, UserItineraryStepDao userItineraryStepDao, UserDailyPlanService userDailyPlanService) {
+    public UserItineraryService(CityDao cityDao, HotelService hotelService, CountryDao countryDao, UserItineraryDao userItineraryDao, UserItineraryStepDao userItineraryStepDao, UserDailyPlanService userDailyPlanService, PlaneRideService planeRideService, PlaneRideDao planeRideDao) {
         this.cityDao = cityDao;
         this.hotelService = hotelService;
         this.countryDao = countryDao;
         this.userItineraryDao = userItineraryDao;
         this.userItineraryStepDao = userItineraryStepDao;
         this.userDailyPlanService = userDailyPlanService;
+        this.planeRideService = planeRideService;
+        this.planeRideDao = planeRideDao;
     }
 
     private LocalDate convertToLocalDate(Date date) {
@@ -54,13 +61,77 @@ public class UserItineraryService {
         return date.toLocalDate();
     }
 
+    private void assignFlight(UserItineraryDayDTO day, String departureIata, String arrivalIata,
+                              LocalDate departureDate, LocalDate arrivalDate, int totalPeople) {
+        if (day.getDayNumber() == 1 || day.getDayNumber() == 5 || day.getDayNumber() == 9 || day.getDayNumber() == 13) {
+            // Récupérer les vols pour ce jour
+            Mono<List<FlightItineraryDTO>> flightsMono = planeRideService.getFlights(
+                    departureIata, arrivalIata, departureDate, arrivalDate, totalPeople
+            );
+
+            // Bloquer pour obtenir le résultat
+            List<FlightItineraryDTO> flights = flightsMono.block();
+
+            if (flights != null && !flights.isEmpty()) {
+                day.setPlaneRide(flights.get(0));
+            }
+        }
+    }
+
+    private PlaneRide saveFlight(FlightItineraryDTO flightItinerary, FlightOffersDTO flightOffersDTO) {
+        // Convertir FlightItineraryDTO en PlaneRide
+        PlaneRide planeRide = new PlaneRide();
+        planeRide.setOneWay(true);
+        planeRide.setTotalPrice(flightOffersDTO.getPrice().getTotalPrice());
+        planeRide.setCurrency("EUR");
+
+        // Sauvegarder l'entité PlaneRide dans la base de données
+        return planeRideDao.save(planeRide);
+    }
+
+    public UserItinerary saveUserItinerary(UserItineraryDTO userItineraryDTO) {
+        UserItinerary userItinerary = new UserItinerary();
+        userItinerary.setUserId(userItineraryDTO.getUserId());
+        userItinerary.setStartDate(Date.valueOf(userItineraryDTO.getStartDate()));
+        userItinerary.setEndDate(Date.valueOf(userItineraryDTO.getEndDate()));
+        userItinerary.setTotalDuration(userItineraryDTO.getDuration());
+        userItinerary.setDepartureCity(userItineraryDTO.getDepartureCity());
+        userItinerary.setStartingPrice(userItineraryDTO.getStartingPrice());
+        userItinerary.setItineraryName(userItineraryDTO.getItineraryName());
+        userItinerary.setNumberOfAdults(userItineraryDTO.getNumberOfAdults());
+        userItinerary.setNumberOfKids(userItineraryDTO.getNumberOfKids());
+
+        return userItineraryDao.save(userItinerary);
+    }
+
+    // Enregistrer chaque journée dans la BDD
+    public void saveUserDailyPlans(UserItinerary userItinerary, List<UserItineraryDayDTO> days) {
+        for (UserItineraryDayDTO dayDTO : days) {
+            UserItineraryStep userItineraryStep = new UserItineraryStep();
+            userItineraryStep.setUserId(userItinerary.getUserId());
+            userItineraryStep.setUserItineraryId(userItinerary.getId());
+            userItineraryStep.setHotelId(dayDTO.getHotel().getId());
+            userItineraryStep.setCityId(cityDao.findCityByName(dayDTO.getCityName()).getId());
+            userItineraryStep.setDayNumber(dayDTO.getDayNumber());
+            userItineraryStep.setOffDay(dayDTO.isDayOff());
+            userItineraryStep.setActivityId(dayDTO.getActivity().getId());
+
+            // Sauvegarder l'ID du vol si présent
+            if (dayDTO.getPlaneRide() != null) {
+                userItineraryStep.setFlightId(dayDTO.getPlaneRide().getId());
+            }
+
+            // Sauvegarder le jour dans la base de données
+            userItineraryStepDao.save(userItineraryStep);
+        }
+    }
+
 
     public UserItineraryDTO toUserItineraryDTO (UserItinerary userItinerary){
         LocalDate startDate = convertToLocalDate(userItinerary.getStartDate());
         LocalDate endDate = convertToLocalDate(userItinerary.getEndDate());
 
         List<UserItineraryStep> daysEntities = userItineraryStepDao.findDailyPlansOfAnItinerary(userItinerary.getId());
-        System.out.println("Steps found for itinerary " + userItinerary.getId() + ": " + daysEntities.size());
         List<UserItineraryDayDTO> days = new ArrayList<>();
         for(UserItineraryStep day : daysEntities){
             days.add( userDailyPlanService.toUserItineraryStep(userItinerary, day));
@@ -86,6 +157,7 @@ public class UserItineraryService {
 
     }
 
+    @Transactional
     public UserItineraryDTO generateUserItinerary(UserPreferencesDTO userPreferences) {
         UserItineraryDTO userItinerary = new UserItineraryDTO();
         userItinerary.setUserId(userPreferences.getUserId());
@@ -93,18 +165,9 @@ public class UserItineraryService {
         userItinerary.setDepartureCity(cityDao.findCityByName(userPreferences.getDepartureCity()).getIataCode());
         userItinerary.setEndDate(userPreferences.getStartDate().plusDays(13));
 
-        // Renvoyer les vols
-       /* List<FlightItineraryDTO> flights = flightService.getFlights(
-                userPreferences.getDepartureCity(),
-                userPreferences.getCountrySelection().getFirst().getCitySelection().getFirst().getCityName(),
-                userPreferences.getStartDate(),
-                userPreferences.getStartDate(),
-                userPreferences.getNumberOfAdults() + userPreferences.getNumberOfKids()
-        ).block();*/
-
 
         // Créer les 12 jours du voyage
-        List<UserItineraryDayDTO> userItineraryDays = IntStream.range(0, 13)
+        List<UserItineraryDayDTO> userItineraryDays = IntStream.range(0, 14)
                 .mapToObj(i -> new UserItineraryDayDTO())
                 .collect(Collectors.toList());
 
@@ -141,18 +204,45 @@ public class UserItineraryService {
             // Vérifier si c'est un jour off (sans activités)
             if(userItineraryDay.getDayNumber() == 1 || userItineraryDay.getDayNumber() == 5 || userItineraryDay.getDayNumber() == 9){
                 userItineraryDay.setDayOff(true);
-                userItineraryDay.setActivities(null);
+                userItineraryDay.setActivity(null);
             }
 
             // Assigner un hôtel
             List<HotelDto> userItineraryDayHotels = assignHotel(userItineraryDay.getCityName(), userPreferences.getHotelStanding());
-            if(userItineraryDay.getHotels() == null){
-                userItineraryDay.setHotels(new ArrayList<>());
+            if(userItineraryDay.getHotel() == null){
+                userItineraryDay.setHotel(new HotelDto());
             }
 
             double random = Math.random() * userItineraryDayHotels.size();
-            userItineraryDay.getHotels().add(userItineraryDayHotels.get((int) random));
+            userItineraryDay.setHotel(userItineraryDayHotels.get((int) random));
 
+            // Assigner les vols
+            if (i == 1 || i == 5 || i == 9 || i == 13) {
+                String departureIata = userItinerary.getDepartureCity();
+                String arrivalIata = cityDao.findCityByName(userItineraryDay.getCityName()).getIataCode();
+                LocalDate departureDate = userItineraryDay.getDate();
+                LocalDate arrivalDate = departureDate;
+                int totalPeople = userPreferences.getNumberOfAdults() + userPreferences.getNumberOfKids();
+
+                // Récupérer les vols
+                Mono<List<FlightItineraryDTO>> flightsMono = planeRideService.getFlights(
+                        departureIata, arrivalIata, departureDate, arrivalDate, totalPeople
+                );
+
+                // Bloquer pour obtenir le résultat
+                List<FlightItineraryDTO> flights = flightsMono.block();
+
+                if (flights != null && !flights.isEmpty()) {
+                    // On récupère simplement l'entité PlaneRide associée
+                    FlightItineraryDTO flightItinerary = flights.get(0);
+
+                    // Supposons que PlaneRideService retourne l'ID du PlaneRide sauvegardé
+                    PlaneRide planeRide = planeRideDao.findById(flights.getFirst()); // Adaptez cette ligne selon votre implémentation
+
+                    // Assigner le vol au jour
+                    userItineraryDay.setPlaneRide(planeRide);
+                }
+            }
 
             i += 1;
         }
@@ -173,7 +263,14 @@ public class UserItineraryService {
         userItinerary.setDuration(13);
         userItinerary.setItineraryDays(userItineraryDays);
 
-        // Sauvegarder dans la BDD puis récupérer l'id
+        // Sauvegarder l'itinéraire principal
+        UserItinerary userItinerarySaved = saveUserItinerary(userItinerary);
+
+        // Sauvegarder chaque jour du voyage
+        saveUserDailyPlans(userItinerarySaved, userItinerary.getItineraryDays());
+
+        // Retourner l'itinéraire DTO avec l'ID généré
+        userItinerary.setId(userItinerarySaved.getId());
 
         return userItinerary;
     }
@@ -255,39 +352,37 @@ public class UserItineraryService {
     }
 
     // Assigner une activité
-    private List<Activity> assignActivity(UserItineraryDayDTO day, CountrySelectionDTO countrySelection){
-        if(day.isDayOff()){
-            return null;
-        }
-
-        // Les activités du jour
-        List<Activity> dayActivities = day.getActivities();
-        //System.out.println("Day activities 1: " + dayActivities);
-        if(dayActivities == null){
-            dayActivities = new ArrayList<>();
-            day.setActivities(dayActivities);
+    private Activity assignActivity(UserItineraryDayDTO day, CountrySelectionDTO countrySelection) {
+        if (day.isDayOff()) {
+            return null; // Aucune activité pour les jours de repos
         }
 
         // Les villes du pays en question
         List<CitySelectionDTO> cities = countrySelection.getCitySelection();
-        CitySelectionDTO firstCity = cities.getFirst();
+        CitySelectionDTO firstCity = cities.get(0);
         CitySelectionDTO secondCity = cities.get(1);
 
         // Vérifier s'il y a plus de deux activités dans une ville
-        if(firstCity.getActivities().size() > 2 || secondCity.getActivities().size() > 2){
-            throw new RuntimeException("There can't be more then 2 activities per city.");
+        if (firstCity.getActivities().size() > 2 || secondCity.getActivities().size() > 2) {
+            throw new RuntimeException("There can't be more than 2 activities per city.");
         }
 
-        if((day.getDayNumber() % 4) == 2){ // Si c'est le deuxième jour dans un pays
-            dayActivities.add(firstCity.getActivities().getFirst());
-        } else if((day.getDayNumber() % 4) == 3){ // Si c'est le troisième jour dans un pays
-            dayActivities.add(secondCity.getActivities().getFirst());
-        } else if (day.getDayNumber() % 4 == 0){ // Si c'est le quatrième jour dans un pays
-            dayActivities.add(secondCity.getActivities().get(1));
+        // Déterminer le jour dans le pays (1er, 2e, 3e ou 4e jour)
+        int dayInCountry = (day.getDayNumber() - 1) % 4 + 1;
+
+        // Assigner une activité en fonction du jour dans le pays
+        Activity activity = null;
+        if (dayInCountry == 2) {
+            activity = firstCity.getActivities().getFirst();
+        } else if (dayInCountry == 3) {
+            activity = secondCity.getActivities().getFirst();
+        } else if (dayInCountry == 4) {
+            activity = secondCity.getActivities().get(1);
         }
 
-        return dayActivities;
-
+        // Assigner l'activité au jour
+        day.setActivity(activity);
+        return activity;
     }
 
 

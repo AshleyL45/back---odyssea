@@ -2,6 +2,7 @@ package com.example.odyssea.services;
 
 import com.example.odyssea.daos.CityDao;
 import com.example.odyssea.daos.CountryDao;
+import com.example.odyssea.daos.flight.PlaneRideDao;
 import com.example.odyssea.daos.userItinerary.UserItineraryStepDao;
 import com.example.odyssea.dtos.HotelDto;
 import com.example.odyssea.dtos.UserItinerary.UserItineraryDayDTO;
@@ -23,12 +24,14 @@ public class UserDailyPlanService {
     private final UserItineraryStepDao userItineraryStepDao;
     private final CityDao cityDao;
     private final CountryDao countryDao;
+    private PlaneRideDao planeRideDao;
 
 
-    public UserDailyPlanService(UserItineraryStepDao userItineraryStepDao, CityDao cityDao, CountryDao countryDao) {
+    public UserDailyPlanService(UserItineraryStepDao userItineraryStepDao, CityDao cityDao, CountryDao countryDao, PlaneRideDao planeRideDao) {
         this.userItineraryStepDao = userItineraryStepDao;
         this.cityDao = cityDao;
         this.countryDao = countryDao;
+        this.planeRideDao = planeRideDao;
     }
 
     public UserItineraryDayDTO toUserItineraryStep(UserItinerary userItinerary, UserItineraryStep userItineraryStep){
@@ -47,12 +50,12 @@ public class UserDailyPlanService {
         return new UserItineraryDayDTO(
                 cityName,
                 countryName,
-                // Add flight later
-                hotelDtos,
-                activities,
+                hotelDtos.getFirst(),
+                activities.getFirst(),
                 userItineraryStep.getDayNumber(),
                 date,
-                userItineraryStep.isOffDay()
+                userItineraryStep.isOffDay(),
+                planeRideDao.findById(userItineraryStep.getFlightId())
         );
     }
 }

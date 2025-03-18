@@ -29,7 +29,7 @@ public class UserItineraryDao {
             rs.getString("itineraryName"),
             rs.getInt("numberOfAdults"),
             rs.getInt("numberOfKids"),
-            rs.getInt("flightId"),
+            //rs.getInt("flightId"),
             rs.getInt("optionId")
     );
 
@@ -64,7 +64,7 @@ public class UserItineraryDao {
 
     public UserItinerary save (UserItinerary userItinerary){
         String sql = "INSERT INTO userItinerary (userId, startDate, endDate, startingPrice, totalDuration, departureCity, itineraryName, numberOfAdults, numberOfKids, flightId, optionId) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?,?)";
-        jdbcTemplate.update(sql, userItinerary.getUserId(), userItinerary.getStartDate(), userItinerary.getEndDate(), userItinerary.getTotalDuration(), userItinerary.getDepartureCity(), userItinerary.getItineraryName(), userItinerary.getNumberOfAdults(), userItinerary.getNumberOfKids(), userItinerary.getFlightId(), userItinerary.getOptionId());
+        jdbcTemplate.update(sql, userItinerary.getUserId(), userItinerary.getStartDate(), userItinerary.getEndDate(), userItinerary.getTotalDuration(), userItinerary.getDepartureCity(), userItinerary.getItineraryName(), userItinerary.getNumberOfAdults(), userItinerary.getNumberOfKids(), userItinerary.getOptionId());
 
         String sqlGetId = "SELECT LAST_INSERT_ID()";
         int id = jdbcTemplate.queryForObject(sqlGetId, Integer.class);
@@ -79,7 +79,7 @@ public class UserItineraryDao {
         }
 
         String sql = "UPDATE userItinerary SET userId = ?, startDate = ?, endDate = ?, startingPrice = ?, totalDuration = ?, departureCity = ?, itineraryName = ?, numberOfAdults = ?, numberOfKids = ?, flightId = ?, optionId = ? WHERE id = ?";
-        int rowsAffected = jdbcTemplate.update(sql, userItinerary.getUserId(), userItinerary.getStartDate(), userItinerary.getEndDate(), userItinerary.getTotalDuration(), userItinerary.getDepartureCity(), userItinerary.getItineraryName(), userItinerary.getNumberOfAdults(), userItinerary.getNumberOfKids(), userItinerary.getFlightId(), userItinerary.getOptionId(), id);
+        int rowsAffected = jdbcTemplate.update(sql, userItinerary.getUserId(), userItinerary.getStartDate(), userItinerary.getEndDate(), userItinerary.getTotalDuration(), userItinerary.getDepartureCity(), userItinerary.getItineraryName(), userItinerary.getNumberOfAdults(), userItinerary.getNumberOfKids(), userItinerary.getOptionId(), id);
 
         if(rowsAffected <= 0){
             throw new RuntimeException("Failed to update the user itinerary with id : " + id);

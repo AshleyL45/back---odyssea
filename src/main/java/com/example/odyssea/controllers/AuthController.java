@@ -8,6 +8,7 @@ import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -49,17 +50,30 @@ public class AuthController {
     }
 
     @PostMapping("/login")
-    public ResponseEntity<JwtToken> authenticateUser(@RequestBody User user) {
-        Authentication authentication = authenticationManager.authenticate(
-                new UsernamePasswordAuthenticationToken(
-                        user.getEmail(),
-                        user.getPassword()
-                )
-        );
-        UserDetails userDetails = (UserDetails) authentication.getPrincipal();
-        User userWithId = userDao.findByEmail(user.getEmail());
-        JwtToken jwtToken = jwtUtils.generateToken(userDetails.getUsername(), userWithId.getId(), userWithId.getFirstName(), userWithId.getLastName());
-        return ResponseEntity.ok(jwtToken);
+    public ResponseEntity<?> authenticateUser(@RequestBody User user) {
+        try {
+            // Authentification avec Spring Security
+            Authentication authentication = authenticationManager.authenticate(
+                    new UsernamePasswordAuthenticationToken(
+                            user.getEmail(),
+                            user.getPassword()
+                    )
+            );
+
+            // Récupération des détails de l'utilisateur
+            UserDetails userDetails = (UserDetails) authentication.getPrincipal();
+            User userWithId = userDao.findByEmail(user.getEmail());
+
+            // Générer le JWT
+            JwtToken jwtToken = jwtUtils.generateToken(userDetails.getUsername(), userWithId.getId(), userWithId.getFirstName(), userWithId.getLastName());
+
+            // Retourner le token JWT
+            return ResponseEntity.ok(jwtToken);
+
+        } catch (BadCredentialsException ex) {
+            // Identifiants invalides
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Invalid username or password.");
+        }
     }
 
     @PutMapping("/{id}/update")

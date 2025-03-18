@@ -5,17 +5,20 @@ import java.math.BigDecimal;
 public class Option {
     private int id;
     private String name;
-    private String description;
     private BigDecimal price;
+    private String description;
+    private String category;
+
 
     public Option() {
     }
 
-    public Option(int id, String name,String description, BigDecimal price) {
+    public Option(int id, String name,String description, BigDecimal price, String category) {
         this.id = id;
         this.name = name;
         this.price = price;
         this.description = description;
+        this.category = category;
     }
 
     public int getId() {
@@ -48,5 +51,13 @@ public class Option {
 
     public void setDescription(String description) {
         this.description = description;
+    }
+
+    public String getCategory() {
+        return category;
+    }
+
+    public void setCategory(String category) {
+        this.category = category;
     }
 }
