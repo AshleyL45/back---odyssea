@@ -3,7 +3,6 @@ package com.example.odyssea.controllers;
 import com.example.odyssea.dtos.ActivityDto;
 import com.example.odyssea.entities.mainTables.Activity;
 import com.example.odyssea.services.ActivityService;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -14,7 +13,6 @@ public class ActivityController {
 
     private final ActivityService activityService;
 
-    @Autowired
     public ActivityController(ActivityService activityService) {
         this.activityService = activityService;
     }
@@ -52,31 +50,6 @@ public class ActivityController {
         return activityService.updateActivity(id, activity);
     }
 
-    /**
-     * Supprime une activité par son identifiant (uniquement numérique)
-     */
-    @DeleteMapping("/{id:\\d+}")
-    public boolean deleteActivity(@PathVariable int id) {
-        return activityService.deleteActivity(id);
-    }
-
-    /**
-     * Récupère les 5 meilleures activités d'une ville spécifique
-     */
-    @GetMapping("/top5")
-    public List<Activity> getTop5ActivitiesByCityId(@RequestParam int cityId) {
-        return activityService.getTop5ActivitiesByCityId(cityId);
-    }
-
-    /**
-     * Importe les activités depuis l'API Amadeus pour une ville donnée
-     */
-    @PostMapping("/import")
-    public void importActivities(@RequestParam int cityId) {
-        activityService.importActivitiesFromAmadeus(cityId);
-    }
-
-
     @PostMapping("/importAndGet")
     public List<Activity> importAndGetActivities(@RequestParam int cityId) {
         // Importation des activités depuis Amadeus pour la ville donnée
@@ -84,7 +57,6 @@ public class ActivityController {
         // Récupération des 5 activités enregistrées dans la base
         return activityService.getTop5ActivitiesByCityId(cityId);
     }
-
 }
 
 
