@@ -36,7 +36,7 @@ public class FlightSegmentService {
         FlightSegment segment = convertToEntity(dto);
         FlightSegment saved = flightSegmentDao.save(segment);
         FlightSegmentDTO result = convertToDto(saved);
-        System.out.println("Segment enregistré, ID: " + result.getId());
+        System.out.println("Registered segment, ID: " + result.getId());
         return result;
     }
 
@@ -70,7 +70,7 @@ public class FlightSegmentService {
             try {
                 segment.setId(Integer.parseInt(dto.getId()));
             } catch (NumberFormatException e){
-                System.err.println("Erreur de conversion de l'ID: " + e.getMessage());
+                System.err.println("ID conversion error: " + e.getMessage());
             }
         }
 
@@ -106,6 +106,7 @@ public class FlightSegmentService {
         // Utilisation du aircraftName enrichi dans le DTO
         segment.setAircraftName(dto.getAircraftName());
 
+
         // Conversion de la durée
         String durationStr = dto.getDuration();
         Duration duration;
@@ -118,7 +119,7 @@ public class FlightSegmentService {
                         .plusMinutes(lt.getMinute())
                         .plusSeconds(lt.getSecond());
             } catch(Exception ex){
-                System.err.println("Erreur de conversion de durée: " + ex.getMessage());
+                System.err.println("Time conversion error: " + ex.getMessage());
                 duration = Duration.ZERO;
             }
         }

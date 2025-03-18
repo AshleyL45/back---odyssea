@@ -2,6 +2,7 @@ package com.example.odyssea.daos.flight;
 
 import com.example.odyssea.entities.mainTables.PlaneRide;
 import com.example.odyssea.dtos.Flight.PlaneRideDTO;
+import com.example.odyssea.exceptions.ResourceNotFoundException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.jdbc.support.GeneratedKeyHolder;
@@ -17,6 +18,7 @@ import java.util.List;
 
 @Repository
 public class PlaneRideDao {
+
     private final JdbcTemplate jdbcTemplate;
 
     public PlaneRideDao(JdbcTemplate jdbcTemplate) {
@@ -33,19 +35,28 @@ public class PlaneRideDao {
         return new PlaneRide(id, oneWay, totalPrice, currency, createdAt);
     };
 
+    /**
+     * Retourne tous les vols enregistrés.
+     */
     public List<PlaneRide> findAll() {
         String sql = "SELECT * FROM planeRide";
         return jdbcTemplate.query(sql, planeRideRowMapper);
     }
 
+    /**
+     * Retourne le vol correspondant à l'id, ou lève une exception si introuvable.
+     */
     public PlaneRide findById(int id) {
         String sql = "SELECT * FROM planeRide WHERE id = ?";
         return jdbcTemplate.query(sql, planeRideRowMapper, id)
                 .stream()
                 .findFirst()
-                .orElseThrow(() -> new RuntimeException("Le vol recherché n'existe pas."));
+                .orElseThrow(() -> new ResourceNotFoundException("This flight doesn't exist."));
     }
 
+    /**
+     * Enregistre un nouveau vol et retourne l'entité avec son id généré.
+     */
     public PlaneRide save(PlaneRide planeRide) {
         String sql = "INSERT INTO planeRide (one_way, totalPrice, currency) VALUES (?, ?, ?)";
         KeyHolder keyHolder = new GeneratedKeyHolder();
@@ -65,9 +76,12 @@ public class PlaneRideDao {
         return planeRide;
     }
 
+    /**
+     * Met à jour un vol existant. Si le vol n'existe pas ou si la mise à jour échoue, lève une ResourceNotFoundException.
+     */
     public PlaneRide update(int id, PlaneRide planeRide) {
         if (!flightExists(id)) {
-            throw new RuntimeException("Le vol recherché n'existe pas.");
+            throw new ResourceNotFoundException("This flight doesn't exist.");
         }
         String sql = "UPDATE planeRide SET one_way = ?, totalPrice = ?, currency = ? WHERE id = ?";
         int rowsAffected = jdbcTemplate.update(sql,
@@ -76,17 +90,23 @@ public class PlaneRideDao {
                 planeRide.getCurrency(),
                 id);
         if (rowsAffected <= 0) {
-            throw new RuntimeException("La mise à jour du vol avec l'id " + id + " a échoué.");
+            throw new ResourceNotFoundException("Flight update with id " + id + " failed.");
         }
         return this.findById(id);
     }
 
+    /**
+     * Supprime un vol par son identifiant.
+     */
     public boolean delete(int id) {
         String sql = "DELETE FROM planeRide WHERE id = ?";
         int rowsAffected = jdbcTemplate.update(sql, id);
         return rowsAffected > 0;
     }
 
+    /**
+     * Vérifie si un vol existe dans la base.
+     */
     public boolean flightExists(int id) {
         String sqlCheck = "SELECT COUNT(*) FROM planeRide WHERE id = ?";
         int count = jdbcTemplate.queryForObject(sqlCheck, Integer.class, id);
@@ -94,7 +114,7 @@ public class PlaneRideDao {
     }
 
     /**
-     * Méthode de sauvegarde pour PlaneRideDTO, si nécessaire.
+     * Méthode de sauvegarde pour PlaneRideDTO si nécessaire.
      */
     public PlaneRideDTO save(PlaneRideDTO flight) {
         String sql = "INSERT INTO planeRide (one_way, totalPrice, currency) VALUES (?, ?, ?)";
