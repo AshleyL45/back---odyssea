@@ -19,7 +19,7 @@ public class HotelController {
     }
 
     /**
-     * Récupère tous les hôtels disponibles (mode bloquant)
+     * Récupère tous les hôtels disponiblesnt)
      */
     @GetMapping
     public List<Hotel> getAllHotels() {
@@ -58,17 +58,20 @@ public class HotelController {
         return hotelService.deleteHotel(id);
     }
 
-
     /**
-     * Récupère les hôtels d'une ville spécifique avec un certain standing (nombre d'étoiles)
+     * Récupère les hôtels d'une ville via l'API Amadeus en fonction du code IATA,
+     * vérifie s'ils existent déjà dans la base de données et enregistre jusqu'à 5 nouveaux hôtels s'ils ne sont pas encore présents.
      */
     @GetMapping("/from-amadeus/by-iata-and-save")
     public Mono<List<HotelDto>> fetchAndSaveHotelsByIataAndStar(@RequestParam String iataCityCode,
-                                                                @RequestParam int starRating) {
-        System.out.println("Requête fetchAndSaveHotelsByIataAndStar reçue avec iataCityCode: "
-                + iataCityCode + ", starRating: " + starRating);
-        return hotelService.fetchAndSaveHotelsFromAmadeus(iataCityCode, starRating);
+                                                                @RequestParam int cityId) {
+        System.out.println("fetchAndSaveHotelsByIataAndStar request received with iataCityCode: "
+                + iataCityCode + ", cityId: " + cityId);
+        return hotelService.fetchAndSaveHotelsFromAmadeusByCity(iataCityCode, cityId);
     }
+
+
+
 
 
 }
