@@ -11,7 +11,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.http.*;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
-import reactor.core.publisher.Mono;
+
 
 import java.util.List;
 
@@ -48,7 +48,7 @@ public class ActivityService {
      */
     public void createActivity(ActivityDto activityDto, int cityId) {
         if (!activityDao.cityExists(cityId)) {
-            throw new IllegalArgumentException("Le cityId fourni n'existe pas dans la base de données !");
+            throw new IllegalArgumentException("The cityId supplied does not exist in the database!");
         }
         Activity activity = activityDto.toActivity(cityId);
         activityDao.save(activity);
