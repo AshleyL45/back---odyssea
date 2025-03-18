@@ -5,6 +5,7 @@ import com.example.odyssea.entities.userAuth.JwtToken;
 import com.example.odyssea.entities.userAuth.User;
 import com.example.odyssea.services.userAuth.JwtUtil;
 import jakarta.validation.Valid;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -57,8 +58,18 @@ public class AuthController {
         );
         UserDetails userDetails = (UserDetails) authentication.getPrincipal();
         User userWithId = userDao.findByEmail(user.getEmail());
-        JwtToken jwtToken = jwtUtils.generateToken(userDetails.getUsername(), userWithId.getId(), userWithId.getFirstName());
+        JwtToken jwtToken = jwtUtils.generateToken(userDetails.getUsername(), userWithId.getId(), userWithId.getFirstName(), userWithId.getLastName());
         return ResponseEntity.ok(jwtToken);
+    }
+
+    @PutMapping("/{id}/update")
+    public ResponseEntity<String> changeUserInformation(@PathVariable int id, @RequestBody User user){
+        User userToUpdate = userDao.update(id, user);
+        if (userToUpdate != null) {
+            return ResponseEntity.ok("Account successfully updated.");
+        } else {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("User not found or update failed.");
+        }
     }
 
     @PatchMapping("/{id}/password")
