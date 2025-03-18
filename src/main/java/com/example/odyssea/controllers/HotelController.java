@@ -19,7 +19,7 @@ public class HotelController {
     }
 
     /**
-     * Récupère tous les hôtels disponibles (mode bloquant)
+     * Récupère tous les hôtels disponiblesnt)
      */
     @GetMapping
     public List<Hotel> getAllHotels() {
@@ -59,26 +59,19 @@ public class HotelController {
     }
 
     /**
-     * Récupère tous les hôtels situés dans une ville spécifique
+     * Récupère les hôtels d'une ville via l'API Amadeus en fonction du code IATA,
+     * vérifie s'ils existent déjà dans la base de données et enregistre jusqu'à 5 nouveaux hôtels s'ils ne sont pas encore présents.
      */
-    @GetMapping("/by-city")
-    public List<Hotel> getHotelsByCity(@RequestParam int cityId) {
-        return hotelService.getHotelsByCityId(cityId);
+    @GetMapping("/from-amadeus/by-iata-and-save")
+    public Mono<List<HotelDto>> fetchAndSaveHotelsByIataAndStar(@RequestParam String iataCityCode,
+                                                                @RequestParam int cityId) {
+        System.out.println("fetchAndSaveHotelsByIataAndStar request received with iataCityCode: "
+                + iataCityCode + ", cityId: " + cityId);
+        return hotelService.fetchAndSaveHotelsFromAmadeusByCity(iataCityCode, cityId);
     }
 
-    /**
-     * Récupère les hôtels d'une ville spécifique avec un certain standing (nombre d'étoiles)
-     */
-    @GetMapping("/by-city-and-star")
-    public List<Hotel> getHotelsByCityAndStar(@RequestParam int cityId, @RequestParam int starRating) {
-        return hotelService.getHotelsByCityAndStarRating(cityId, starRating);
-    }
 
-    /**
-     * Crée un hôtel à partir de l'API Amadeus et l'enregistre en base
-     */
-    @PostMapping("/from-amadeus")
-    public Mono<Void> createHotelFromAmadeus(@RequestParam String amadeusHotelId) {
-        return hotelService.createHotelFromAmadeus(amadeusHotelId);
-    }
+
+
+
 }
