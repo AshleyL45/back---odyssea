@@ -88,17 +88,8 @@ public class UserItineraryService {
         return null;
     }
 
-    public UserItinerary saveUserItinerary(UserItineraryDTO userItineraryDTO) {
-        System.out.println("Id: " + userItineraryDTO.getId());
-        System.out.println("userId: " + userItineraryDTO.getUserId());
-        System.out.println("startDate: " + userItineraryDTO.getStartDate());
-        System.out.println("endDate: " + userItineraryDTO.getEndDate());
-        System.out.println("startingPrice: " + userItineraryDTO.getStartingPrice());
-        System.out.println("totalDuration: " + userItineraryDTO.getTotalDuration());
-        System.out.println("departureCity: " + userItineraryDTO.getDepartureCity());
-        System.out.println("itineraryName: " + userItineraryDTO.getItineraryName());
-        System.out.println("numberOfAdults: " + userItineraryDTO.getNumberOfAdults());
-        System.out.println("numberOfKids: " + userItineraryDTO.getNumberOfKids());
+    @Transactional
+    public UserItinerary saveUserItinerary(UserItineraryDTO userItineraryDTO) throws Exception {
 
         UserItinerary userItinerary = new UserItinerary();
 
@@ -128,25 +119,55 @@ public class UserItineraryService {
 
     // Enregistrer chaque journée dans la BDD
     public void saveUserDailyPlans(UserItinerary userItinerary, List<UserItineraryDayDTO> days) {
+        UserItinerary userItinerarySaved = userItineraryDao.findById(userItinerary.getId());
+        System.out.println("Starting save user daily plan : " );
 
+        int day = 1;
         for (UserItineraryDayDTO dayDTO : days) {
+
             UserItineraryStep userItineraryStep = new UserItineraryStep();
-            userItineraryStep.setUserId(userItinerary.getUserId());
-            userItineraryStep.setUserItineraryId(userItinerary.getId());
+            userItineraryStep.setUserId(userItinerarySaved.getUserId());
+            userItineraryStep.setUserItineraryId(userItinerarySaved.getId());
             userItineraryStep.setHotelId(dayDTO.getHotel().getId());
-            userItineraryStep.setCityId(cityDao.findCityByName(dayDTO.getCityName()).getId());
+
+            int cityId = cityDao.findCityByName(dayDTO.getCityName()).getId();
+            System.out.println("City ID: " + cityId);
+            userItineraryStep.setCityId(cityId);
+
+            System.out.println("Processing day: " + dayDTO.getDayNumber());
             userItineraryStep.setDayNumber(dayDTO.getDayNumber());
+
+            System.out.println("Is off day: " + dayDTO.isDayOff());
             userItineraryStep.setOffDay(dayDTO.isDayOff());
-            userItineraryStep.setActivityId(dayDTO.getActivity().getId());
+
+            System.out.println("Plane ride of the day :" + dayDTO.getPlaneRide().getId());
+
+            if (!dayDTO.isDayOff()) {
+                if (dayDTO.getActivity() != null) {
+                    System.out.println("Activity ID: " + dayDTO.getActivity().getId());
+                    userItineraryStep.setActivityId(dayDTO.getActivity().getId());
+                    userItineraryStep.setPlaneRideId(0);
+                } else {
+                    System.out.println("No activity for this day.");
+                }
+            }
 
             // Sauvegarder l'ID du vol si présent
-            if (dayDTO.getPlaneRide() != null) {
-                userItineraryStep.setFlightId(dayDTO.getPlaneRide().getId());
+            if (dayDTO.isDayOff()) {
+                System.out.println("Plane ride present: " + dayDTO.getPlaneRide().getId());
+                userItineraryStep.setPlaneRideId(dayDTO.getPlaneRide().getId());
+            } else {
+                System.out.println("No plane ride for this day.");
+                userItineraryStep.setPlaneRideId(0);
             }
 
             // Sauvegarder le jour dans la base de données
+            System.out.println("Saving userItineraryStep: " + userItineraryStep);
             userItineraryStepDao.save(userItineraryStep);
+
+            day++;
         }
+
     }
 
 
@@ -185,7 +206,7 @@ public class UserItineraryService {
     }
 
     @Transactional
-    public UserItineraryDTO generateUserItinerary(UserPreferencesDTO userPreferences) {
+    public UserItineraryDTO generateUserItinerary(UserPreferencesDTO userPreferences) throws Exception {
         UserItineraryDTO userItinerary = new UserItineraryDTO();
         userItinerary.setUserId(userPreferences.getUserId());
         userItinerary.setStartDate(userPreferences.getStartDate());
@@ -194,7 +215,7 @@ public class UserItineraryService {
 
 
         // Créer les 12 jours du voyage
-        List<UserItineraryDayDTO> userItineraryDays = IntStream.range(0, 14)
+        List<UserItineraryDayDTO> userItineraryDays = IntStream.range(0, 13)
                 .mapToObj(i -> new UserItineraryDayDTO())
                 .collect(Collectors.toList());
 
@@ -229,7 +250,7 @@ public class UserItineraryService {
             userItineraryDay.setDate(userItinerary.getStartDate().plusDays(userItineraryDay.getDayNumber()));
 
             // Vérifier si c'est un jour off (sans activités)
-            if(userItineraryDay.getDayNumber() == 1 || userItineraryDay.getDayNumber() == 5 || userItineraryDay.getDayNumber() == 9){
+            if(userItineraryDay.getDayNumber() == 1 || userItineraryDay.getDayNumber() == 5 || userItineraryDay.getDayNumber() == 9 || userItineraryDay.getDayNumber() == 13){
                 userItineraryDay.setDayOff(true);
                 userItineraryDay.setActivity(null);
             }
@@ -244,17 +265,19 @@ public class UserItineraryService {
             userItineraryDay.setHotel(userItineraryDayHotels.get((int) random));
 
             // Assigner les vols
-            if (i == 1 || i == 5 || i == 9 || i == 13) {
+            if (userItineraryDay.isDayOff()) {
                 String departureIata = userItinerary.getDepartureCity();
                 String arrivalIata = cityDao.findCityByName(userItineraryDay.getCityName()).getIataCode();
 
                 LocalDate departureDate = userItineraryDay.getDate();
                 LocalDate arrivalDate = departureDate;
 
+                System.out.println("Processing flight for day: " + i);
                 System.out.println("Departure IATA: " + departureIata + ", Arrival IATA: " + arrivalIata);
-                System.out.println("Departure IATA: " + departureDate + ", Arrival Date: " + arrivalDate);
+                System.out.println("Departure Date: " + departureDate + ", Arrival Date: " + arrivalDate);
 
                 int totalPeople = userPreferences.getNumberOfAdults() + userPreferences.getNumberOfKids();
+                System.out.println("Total number of people: " + totalPeople);
 
                 // Récupérer les vols via PlaneRideService
                 Mono<List<FlightItineraryDTO>> flightsMono = planeRideService.getFlights(
@@ -264,16 +287,26 @@ public class UserItineraryService {
                 // Bloquer pour obtenir le résultat
                 List<FlightItineraryDTO> flights = flightsMono.block();
 
+                if (flights != null) {
+                    System.out.println("Flights sans block : " + flightsMono);
+                    System.out.println("Number of flights found: " + flights.size());
+                } else {
+                    System.out.println("No flights found.");
+                }
+
                 if (flights != null && !flights.isEmpty()) {
                     // Trouver le PlaneRide correspondant dans la base de données
                     PlaneRide planeRide = findPlaneRideByItinerary(flights.get(0));
 
-                    // Assigner le vol au jour
                     if (planeRide != null) {
+                        System.out.println("Plane ride assigned for day " + i + ": " + planeRide.getId());
                         userItineraryDay.setPlaneRide(planeRide);
+                    } else {
+                        System.out.println("No matching PlaneRide found in the database for day " + i);
                     }
                 }
             }
+
 
             i += 1;
         }

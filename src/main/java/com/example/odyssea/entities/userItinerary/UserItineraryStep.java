@@ -8,12 +8,12 @@ public class UserItineraryStep {
     private int dayNumber;
     private boolean offDay;
     private int activityId;
-    private int flightId;
+    private int planeRideId;
 
     public UserItineraryStep() {
     }
 
-    public UserItineraryStep(int userId, int userItineraryId, int hotelId, int cityId, int dayNumber, boolean offDay, int activityId, int flightId) {
+    public UserItineraryStep(int userId, int userItineraryId, int hotelId, int cityId, int dayNumber, boolean offDay, int activityId, int planeRideId) {
         this.userId = userId;
         this.userItineraryId = userItineraryId;
         this.hotelId = hotelId;
@@ -21,7 +21,7 @@ public class UserItineraryStep {
         this.dayNumber = dayNumber;
         this.offDay = offDay;
         this.activityId = activityId;
-        this.flightId = flightId;
+        this.planeRideId = planeRideId;
     }
 
 
@@ -81,11 +81,11 @@ public class UserItineraryStep {
         this.activityId = activityId;
     }
 
-    public int getFlightId() {
-        return flightId;
+    public int getPlaneRideId() {
+        return planeRideId;
     }
 
-    public void setFlightId(int flightId) {
-        this.flightId = flightId;
+    public void setPlaneRideId(int planeRideId) {
+        this.planeRideId = planeRideId;
     }
 }

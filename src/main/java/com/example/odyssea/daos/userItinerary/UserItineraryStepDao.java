@@ -26,7 +26,7 @@ public class UserItineraryStepDao {
             rs.getInt("dayNumber"),
             rs.getBoolean("offDay"),
             rs.getInt("activityId"),
-            rs.getInt("flightId")
+            rs.getInt("planeRideId")
     );
 
     public List<UserItineraryStep> findAll (){
@@ -57,8 +57,8 @@ public class UserItineraryStepDao {
     }*/
 
     public UserItineraryStep save (UserItineraryStep userItineraryStep){
-        String sql = "INSERT INTO userDailyPlan (userId, userItineraryId, hotelId, cityId, dayNumber, offDay, activityId, flightId) VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
-        jdbcTemplate.update(sql, userItineraryStep.getUserId(), userItineraryStep.getUserItineraryId(), userItineraryStep.getHotelId(), userItineraryStep.getCityId(), userItineraryStep.getDayNumber(), userItineraryStep.isOffDay(), userItineraryStep.getActivityId(), userItineraryStep.getActivityId());
+        String sql = "INSERT INTO userDailyPlan (userId, userItineraryId, hotelId, cityId, dayNumber, offDay, activityId, planeRideId) VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
+        jdbcTemplate.update(sql, userItineraryStep.getUserId(), userItineraryStep.getUserItineraryId(), userItineraryStep.getHotelId(), userItineraryStep.getCityId(), userItineraryStep.getDayNumber(), userItineraryStep.isOffDay(), userItineraryStep.getActivityId(), userItineraryStep.getPlaneRideId());
 
         return userItineraryStep;
     }
@@ -82,8 +82,8 @@ public class UserItineraryStepDao {
             throw new RuntimeException("The daily itinerary you are looking for does not exist.");
         }
 
-        String sql = "UPDATE userDailyPlan SET userId = ?, userItineraryId = ?, hotelId = ?, cityId = ?, dayNumber = ?, offDay = ?, activityId = ?, flightId = ? WHERE userId = ? AND userItineraryId = ? AND dayNumber = ?";
-        int rowsAffected = jdbcTemplate.update(sql, userItineraryStep.getUserId(), userItineraryStep.getUserItineraryId(), userItineraryStep.getHotelId(), userItineraryStep.getCityId(), userItineraryStep.getDayNumber(), userItineraryStep.isOffDay(), userItineraryStep.getActivityId(), userItineraryStep.getFlightId(), userId, userItineraryId, dayNumber);
+        String sql = "UPDATE userDailyPlan SET userId = ?, userItineraryId = ?, hotelId = ?, cityId = ?, dayNumber = ?, offDay = ?, activityId = ?, planeRideId = ? WHERE userId = ? AND userItineraryId = ? AND dayNumber = ?";
+        int rowsAffected = jdbcTemplate.update(sql, userItineraryStep.getUserId(), userItineraryStep.getUserItineraryId(), userItineraryStep.getHotelId(), userItineraryStep.getCityId(), userItineraryStep.getDayNumber(), userItineraryStep.isOffDay(), userItineraryStep.getActivityId(), userItineraryStep.getPlaneRideId(), userId, userItineraryId, dayNumber);
 
         if(rowsAffected <= 0){
             throw new RuntimeException("Failed to update the daily plan with id from the (user) itinerary : " + userItineraryId + " day number " + dayNumber + ".");

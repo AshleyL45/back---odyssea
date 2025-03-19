@@ -15,7 +15,6 @@ import com.example.odyssea.entities.userItinerary.UserItineraryStep;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
-import java.time.ZoneId;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -55,7 +54,7 @@ public class UserDailyPlanService {
                 userItineraryStep.getDayNumber(),
                 date,
                 userItineraryStep.isOffDay(),
-                planeRideDao.findById(userItineraryStep.getFlightId())
+                planeRideDao.findById(userItineraryStep.getPlaneRideId())
         );
     }
 }

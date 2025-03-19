@@ -35,7 +35,6 @@ public class UserItineraryDao {
             rs.getString("itineraryName"),
             rs.getInt("numberOfAdults"),
             rs.getInt("numberOfKids")
-            //rs.getInt("flightId"),
     );
 
     /*public static UserItinerary fromEntity(UserItineraryDTO userItinerary) {
@@ -67,26 +66,30 @@ public class UserItineraryDao {
         return jdbcTemplate.query(sql, userItineraryRowMapper, userId);
     }
 
-    public UserItinerary save (UserItinerary userItinerary){
+    public UserItinerary save(UserItinerary userItinerary) throws Exception {
 
-        String sql = "INSERT INTO userItinerary (userId, startDate, endDate, startingPrice, totalDuration, departureCity, itineraryName, numberOfAdults, numberOfKids) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)";
-        log.info("Insertion des données : userId={}, startDate={}, endDate={}, startingPrice={}, totalDuration={}, departureCity={}, itineraryName={}, numberOfAdults={}, numberOfKids={}",
-                userItinerary.getUserId(), userItinerary.getStartDate(), userItinerary.getEndDate(),
-                userItinerary.getStartingPrice(), userItinerary.getTotalDuration(), userItinerary.getDepartureCity(),
-                userItinerary.getItineraryName(), userItinerary.getNumberOfAdults(), userItinerary.getNumberOfKids());
-
-        jdbcTemplate.update(sql, userItinerary.getUserId(), userItinerary.getStartDate(), userItinerary.getEndDate(), userItinerary.getTotalDuration(), userItinerary.getDepartureCity(), userItinerary.getItineraryName(), userItinerary.getNumberOfAdults(), userItinerary.getNumberOfKids());
-
-        String sqlGetId = "SELECT LAST_INSERT_ID()";
-        Integer id = jdbcTemplate.queryForObject(sqlGetId, Integer.class);
-        if (id == null) {
-            log.error("Erreur lors de la récupération de l'ID de l'insertion.");
-        } else {
-            log.info("ID inséré : {}", id);
+        try {
+            String sql = "INSERT INTO userItinerary (userId, startDate, endDate, startingPrice, totalDuration, departureCity, itineraryName, numberOfAdults, numberOfKids) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)";
+            log.info("Insertion des données : userId={}, startDate={}, endDate={}, startingPrice={}, totalDuration={}, departureCity={}, itineraryName={}, numberOfAdults={}, numberOfKids={}",
+                    userItinerary.getUserId(), userItinerary.getStartDate(), userItinerary.getEndDate(),
+                    userItinerary.getStartingPrice(), userItinerary.getTotalDuration(), userItinerary.getDepartureCity(),
+                    userItinerary.getItineraryName(), userItinerary.getNumberOfAdults(), userItinerary.getNumberOfKids());
+             jdbcTemplate.update(sql, userItinerary.getUserId(), userItinerary.getStartDate(), userItinerary.getEndDate(), userItinerary.getStartingPrice(), userItinerary.getTotalDuration(), userItinerary.getDepartureCity(), userItinerary.getItineraryName(), userItinerary.getNumberOfAdults(), userItinerary.getNumberOfKids());
+        } catch (Exception e) {
+            log.info(e.getMessage().toUpperCase());
+            throw new Exception(e);
         }
+            String sqlGetId = "SELECT LAST_INSERT_ID()";
+            Integer id = jdbcTemplate.queryForObject(sqlGetId, Integer.class);
+            if (id == null) {
+                log.error("Erreur lors de la récupération de l'ID de l'insertion.");
+            } else {
+                log.info("ID inséré : {}", id);
+            }
 
-        userItinerary.setId(id);
-        return userItinerary;
+            userItinerary.setId(id);
+            return userItinerary;
+
     }
 
     public UserItinerary update(int id, UserItinerary userItinerary){

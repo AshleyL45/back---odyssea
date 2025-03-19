@@ -122,11 +122,11 @@ public class UserItinerary {
         this.numberOfKids = numberOfKids;
     }
 
-//    public int getFlightId() {
+//    public int getPlaneRideId() {
 //        return flightId;
 //    }
 //
-//    public void setFlightId(int flightId) {
+//    public void setPlaneRideId(int flightId) {
 //        this.flightId = flightId;
 //    }
 
