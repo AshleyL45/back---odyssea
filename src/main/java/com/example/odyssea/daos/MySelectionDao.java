@@ -2,7 +2,7 @@ package com.example.odyssea.daos;
 
 import com.example.odyssea.entities.MySelection;
 import com.example.odyssea.entities.itinerary.Itinerary;
-import org.springframework.jdbc.core.BeanPropertyRowMapper;
+import com.example.odyssea.exceptions.ResourceNotFoundException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.stereotype.Repository;
@@ -30,7 +30,7 @@ public class MySelectionDao {
         return jdbcTemplate.query(sql, mySelectionRowMapper);
     }
 
-    // Retourne tous les itinéraires de la séléction d'un user
+    // Retourne tous les itinéraires de la sélection d'un user
     public List<Itinerary> findAllUserFavorites(int userId){
         String sql = "SELECT itinerary.* FROM mySelection\n" +
                 "INNER JOIN itinerary ON mySelection.itineraryId = itinerary.id WHERE mySelection.userId = ?;";
@@ -52,7 +52,7 @@ public class MySelectionDao {
         return jdbcTemplate.query(sql, mySelectionRowMapper, userId, itineraryId)
                 .stream()
                 .findFirst()
-                .orElseThrow(() -> new RuntimeException("Selection with userId: " + userId + " and itineraryId: " + itineraryId + " does not exist"));
+                .orElseThrow(() -> new ResourceNotFoundException("Selection with userId: " + userId + " and itineraryId: " + itineraryId + " does not exist"));
     }
 
     // Insère une nouvelle sélection dans la table mySelection
@@ -74,7 +74,7 @@ public class MySelectionDao {
                 itineraryId
         );
         if (rowsAffected <= 0) {
-            throw new RuntimeException("Failed to update selection with userId: " + userId + " and itineraryId: " + itineraryId);
+            throw new ResourceNotFoundException("Failed to update selection with userId: " + userId + " and itineraryId: " + itineraryId);
         }
         return findById(mySelection.getUserId(), mySelection.getItineraryId());
     }

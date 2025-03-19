@@ -1,11 +1,12 @@
 package com.example.odyssea.daos;
+
 import com.example.odyssea.entities.mainTables.Option;
+import com.example.odyssea.exceptions.ResourceNotFoundException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
-
 
 @Repository
 public class OptionDao {
@@ -32,7 +33,7 @@ public class OptionDao {
         return jdbcTemplate.query(sql, optionRowMapper, optionId)
                 .stream()
                 .findFirst()
-                .orElseThrow(() -> new RuntimeException("The option you are looking for does not exist."));
+                .orElseThrow(() -> new ResourceNotFoundException("The option you are looking for does not exist."));
     }
 
     public Option findPrice (int optionId){
@@ -40,12 +41,12 @@ public class OptionDao {
         return jdbcTemplate.query(sql, optionRowMapper, optionId)
                 .stream()
                 .findFirst()
-                .orElseThrow(() -> new RuntimeException("The option you are looking for does not exist."));
+                .orElseThrow(() -> new ResourceNotFoundException("The option you are looking for does not exist."));
     }
 
     public Option save (Option option){
         String sql = "INSERT INTO options (name, description, price) VALUES (?, ?, ?)";
-        jdbcTemplate.update(sql, option.getName(), option.getPrice());
+        jdbcTemplate.update(sql, option.getName(), option.getDescription(), option.getPrice());
 
         String sqlGetId = "SELECT LAST_INSERT_ID()";
         int id = jdbcTemplate.queryForObject(sqlGetId, Integer.class);
@@ -56,18 +57,17 @@ public class OptionDao {
 
     public Option update(int id, Option option){
         if(!optionExists(id)){
-            throw new RuntimeException("The option you are looking for does not exist.");
+            throw new ResourceNotFoundException("The option you are looking for does not exist.");
         }
 
         String sql = "UPDATE options SET name = ?, description = ?, price = ? WHERE id = ?";
         int rowsAffected = jdbcTemplate.update(sql, option.getName(), option.getDescription(), option.getPrice(), id);
 
         if(rowsAffected <= 0){
-            throw new RuntimeException("Failed to update the option with id : " + id);
+            throw new ResourceNotFoundException("Failed to update the option with id : " + id);
         }
 
         return this.findById(id);
-
     }
 
     public boolean delete(int id) {
@@ -75,7 +75,6 @@ public class OptionDao {
         int rowsAffected = jdbcTemplate.update(sql, id);
         return rowsAffected > 0;
     }
-
 
     public boolean optionExists(int id){
         String sqlCheck = "SELECT COUNT(*) FROM options WHERE id = ?";

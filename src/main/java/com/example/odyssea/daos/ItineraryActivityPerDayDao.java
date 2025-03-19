@@ -2,7 +2,6 @@ package com.example.odyssea.daos;
 
 import com.example.odyssea.entities.itinerary.ItineraryActivityPerDay;
 import com.example.odyssea.exceptions.ResourceNotFoundException;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.stereotype.Repository;
@@ -17,7 +16,6 @@ public class ItineraryActivityPerDayDao {
 
     private final JdbcTemplate jdbcTemplate;
 
-    @Autowired
     public ItineraryActivityPerDayDao(JdbcTemplate jdbcTemplate) {
         this.jdbcTemplate = jdbcTemplate;
     }

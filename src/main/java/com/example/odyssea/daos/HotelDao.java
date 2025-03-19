@@ -119,7 +119,7 @@ public class HotelDao {
     public List<Hotel> findByCityId(int cityId) {
         String sql = "SELECT * FROM hotel WHERE cityId = ?";
         List<Hotel> hotels = jdbcTemplate.query(sql, new HotelRowMapper(), cityId);
-        // Retourne la liste, même si elle est vide (ne lance pas d'exception)
+
         return hotels;
     }
 

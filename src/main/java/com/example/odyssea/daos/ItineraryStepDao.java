@@ -2,6 +2,7 @@ package com.example.odyssea.daos;
 
 
 import com.example.odyssea.entities.itinerary.ItineraryStep;
+import com.example.odyssea.exceptions.ResourceNotFoundException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.stereotype.Repository;
@@ -43,7 +44,7 @@ public class ItineraryStepDao {
         return jdbcTemplate.query(sql, itineraryStepRowMapper, idItineraryStep)
                 .stream()
                 .findFirst()
-                .orElseThrow(() -> new RuntimeException("Itinéraire avec l'ID : " + idItineraryStep + " n'existe pas"));
+                .orElseThrow(() -> new ResourceNotFoundException("Itinéraire avec l'ID : " + idItineraryStep + " n'existe pas"));
     }
 
 

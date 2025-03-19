@@ -1,7 +1,6 @@
 package com.example.odyssea.daos;
 
 import com.example.odyssea.entities.CityDistance;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.stereotype.Repository;
@@ -16,7 +15,6 @@ import java.util.Optional;
 public class CityDistanceDao {
     private final JdbcTemplate jdbcTemplate;
 
-    @Autowired
     public CityDistanceDao(JdbcTemplate jdbcTemplate) {
         this.jdbcTemplate = jdbcTemplate;
     }

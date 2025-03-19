@@ -2,7 +2,6 @@ package com.example.odyssea.daos;
 
 import com.example.odyssea.entities.mainTables.Country;
 import com.example.odyssea.exceptions.ResourceNotFoundException;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.stereotype.Repository;
@@ -17,7 +16,6 @@ public class CountryDao {
 
     private final JdbcTemplate jdbcTemplate;
 
-    @Autowired
     public CountryDao(JdbcTemplate jdbcTemplate) {
         this.jdbcTemplate = jdbcTemplate;
     }
@@ -104,7 +102,7 @@ public class CountryDao {
         return jdbcTemplate.query(sql, new CountryRowMapper(), countryName)
                 .stream()
                 .findFirst()
-                .orElseThrow(() -> new RuntimeException("The country " + countryName + " isn't available"));
+                .orElseThrow(() -> new ResourceNotFoundException("The country " + countryName + " isn't available"));
     }
 
     /**

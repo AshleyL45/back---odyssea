@@ -2,7 +2,6 @@ package com.example.odyssea.daos;
 
 import com.example.odyssea.entities.mainTables.City;
 import com.example.odyssea.exceptions.ResourceNotFoundException;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.stereotype.Repository;
@@ -12,12 +11,12 @@ import java.sql.SQLException;
 import java.util.List;
 import java.util.Optional;
 
+
 @Repository
 public class CityDao {
 
     private final JdbcTemplate jdbcTemplate;
 
-    @Autowired
     public CityDao(JdbcTemplate jdbcTemplate) {
         this.jdbcTemplate = jdbcTemplate;
     }
@@ -104,12 +103,12 @@ public class CityDao {
     /**
      * Retrouver le code IATA et l'id en fonction du nom de la ville
      */
-    public City findCityByName(String cityName){
+    public City findCityByName(String cityName) {
         String sql = "SELECT * FROM city WHERE name = ?";
         return jdbcTemplate.query(sql, new CityRowMapper(), cityName)
                 .stream()
                 .findFirst()
-                .orElseThrow(() -> new RuntimeException("The city " + cityName + " doesn't exist."));
+                .orElseThrow(() -> new ResourceNotFoundException("The city " + cityName + " doesn't exist."));
     }
 
     /**
@@ -122,10 +121,15 @@ public class CityDao {
 
     /**
      * Récupère le code IATA d'une ville à partir de son ID.
+     * Ajout d'une ResourceNotFoundException en cas d'absence du code.
      */
     public String getIataCodeById(int cityId) {
         String sql = "SELECT iataCode FROM city WHERE id = ?";
-        return jdbcTemplate.queryForObject(sql, String.class, cityId);
+        try {
+            return jdbcTemplate.queryForObject(sql, String.class, cityId);
+        } catch (Exception e) {
+            throw new ResourceNotFoundException("City with id " + cityId + " not found (IATA code).");
+        }
     }
 
     /**

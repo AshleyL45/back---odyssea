@@ -1,6 +1,7 @@
 package com.example.odyssea.daos;
 
 import com.example.odyssea.entities.mainTables.Image;
+import com.example.odyssea.exceptions.ResourceNotFoundException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.stereotype.Repository;
@@ -25,28 +26,23 @@ public class ImageDao {
             rs.getString("altText")
     );
 
-
     public List<Image> findAll() {
         String sql = "SELECT * FROM images";
         return jdbcTemplate.query(sql, imageRowMapper);
     }
 
-
-    public List<Image> searchImage(String query){
+    public List<Image> searchImage(String query) {
         String sql = "SELECT * FROM images WHERE LOWER(entityType) LIKE LOWER(?) ";
         return jdbcTemplate.query(sql, imageRowMapper, "%" + query + "%");
     }
-
-
 
     public Image findById(int idImage) {
         String sql = "SELECT * FROM images WHERE id = ?";
         return jdbcTemplate.query(sql, imageRowMapper, idImage)
                 .stream()
                 .findFirst()
-                .orElseThrow(() -> new RuntimeException("Image avec l'ID : " + idImage + " n'existe pas"));
+                .orElseThrow(() -> new ResourceNotFoundException("Image with ID: " + idImage + " not found"));
     }
-
 
     public Image save(Image image) {
         String sql = "INSERT INTO images (entityId, entityType, sizeType, link, altText) VALUES (?, ?, ?, ?, ?)";
@@ -59,24 +55,20 @@ public class ImageDao {
         return image;
     }
 
-
-
     public Image update(int id, Image image) {
         if (!imageExists(id)) {
-            throw new RuntimeException("Image avec l'ID : " + id + " n'existe pas");
+            throw new ResourceNotFoundException("Image with ID: " + id + " not found");
         }
 
         String sql = "UPDATE images SET entityId = ?, entityType = ?, sizeType = ?, link = ?, altText = ? WHERE id = ?";
         int rowsAffected = jdbcTemplate.update(sql, image.getIdEntity(), image.getEntityType(), image.getSizeType(), image.getLink(), image.getAltText(), id);
 
         if (rowsAffected <= 0) {
-            throw new RuntimeException("Échec de la mise à jour de l'mage avec l'ID : " + id);
+            throw new ResourceNotFoundException("Failed to update image with ID: " + id);
         }
 
         return this.findById(id);
     }
-
-
 
     private boolean imageExists(int id) {
         String checkSql = "SELECT COUNT(*) FROM images WHERE id = ?";
@@ -84,10 +76,12 @@ public class ImageDao {
         return count > 0;
     }
 
-
     public boolean delete(int id) {
         String sql = "DELETE FROM images WHERE id = ?";
         int rowsAffected = jdbcTemplate.update(sql, id);
+        if (rowsAffected == 0) {
+            throw new ResourceNotFoundException("Image with ID: " + id + " not found for deletion");
+        }
         return rowsAffected > 0;
     }
 }

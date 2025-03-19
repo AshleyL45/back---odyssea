@@ -1,6 +1,7 @@
 package com.example.odyssea.daos;
 
 import com.example.odyssea.entities.mainTables.Theme;
+import com.example.odyssea.exceptions.ResourceNotFoundException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.stereotype.Repository;
@@ -41,7 +42,7 @@ public class ThemeDao {
         return jdbcTemplate.query(sql, themeRowMapper, idTheme)
                 .stream()
                 .findFirst()
-                .orElseThrow(() -> new RuntimeException("Theme with ID: " + idTheme + " not found"));
+                .orElseThrow(() -> new ResourceNotFoundException("Theme with ID: " + idTheme + " not found"));
     }
 
     // Sauvegarde un nouveau thème dans la base de données et renvoie l'objet avec l'ID généré
@@ -60,14 +61,14 @@ public class ThemeDao {
     // Met à jour un thème existant identifié par son ID
     public Theme update(int idTheme, Theme theme) {
         if (!themeExists(idTheme)) {
-            throw new RuntimeException("Theme with ID: " + idTheme + " not found");
+            throw new ResourceNotFoundException("Theme with ID: " + idTheme + " not found");
         }
 
         String sql = "UPDATE theme SET name = ? WHERE id = ?";
         int rowsAffected = jdbcTemplate.update(sql, theme.getThemeName(), idTheme);
 
         if (rowsAffected <= 0) {
-            throw new RuntimeException("Failed to update theme with ID: " + idTheme);
+            throw new ResourceNotFoundException("Failed to update theme with ID: " + idTheme);
         }
 
         return this.findById(idTheme);
