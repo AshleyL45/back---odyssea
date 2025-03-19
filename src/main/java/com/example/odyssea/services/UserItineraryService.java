@@ -140,13 +140,12 @@ public class UserItineraryService {
             System.out.println("Is off day: " + dayDTO.isDayOff());
             userItineraryStep.setOffDay(dayDTO.isDayOff());
 
-            System.out.println("Plane ride of the day :" + dayDTO.getPlaneRide().getId());
 
             if (!dayDTO.isDayOff()) {
                 if (dayDTO.getActivity() != null) {
                     System.out.println("Activity ID: " + dayDTO.getActivity().getId());
                     userItineraryStep.setActivityId(dayDTO.getActivity().getId());
-                    userItineraryStep.setPlaneRideId(0);
+                    userItineraryStep.setPlaneRideId(null);
                 } else {
                     System.out.println("No activity for this day.");
                 }
@@ -156,10 +155,13 @@ public class UserItineraryService {
             if (dayDTO.isDayOff()) {
                 System.out.println("Plane ride present: " + dayDTO.getPlaneRide().getId());
                 userItineraryStep.setPlaneRideId(dayDTO.getPlaneRide().getId());
+                userItineraryStep.setActivityId(null);
             } else {
                 System.out.println("No plane ride for this day.");
-                userItineraryStep.setPlaneRideId(0);
+                userItineraryStep.setPlaneRideId(null);
             }
+
+            //System.out.println("Plane ride of the day :" + dayDTO.getPlaneRide().getId());
 
             // Sauvegarder le jour dans la base de données
             System.out.println("Saving userItineraryStep: " + userItineraryStep);

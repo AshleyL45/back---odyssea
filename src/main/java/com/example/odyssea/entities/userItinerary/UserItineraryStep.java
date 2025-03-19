@@ -1,19 +1,23 @@
 package com.example.odyssea.entities.userItinerary;
 
+import org.springframework.data.relational.core.sql.In;
+
 public class UserItineraryStep {
+    private int id;
     private int userId;
     private int userItineraryId;
     private int hotelId;
     private int cityId;
     private int dayNumber;
     private boolean offDay;
-    private int activityId;
-    private int planeRideId;
+    private Integer activityId;
+    private Integer planeRideId;
 
     public UserItineraryStep() {
     }
 
-    public UserItineraryStep(int userId, int userItineraryId, int hotelId, int cityId, int dayNumber, boolean offDay, int activityId, int planeRideId) {
+    public UserItineraryStep(int id, int userId, int userItineraryId, int hotelId, int cityId, int dayNumber, boolean offDay, Integer activityId, Integer planeRideId) {
+        this.id = id;
         this.userId = userId;
         this.userItineraryId = userItineraryId;
         this.hotelId = hotelId;
@@ -73,19 +77,27 @@ public class UserItineraryStep {
         this.offDay = offDay;
     }
 
-    public int getActivityId() {
+    public Integer getActivityId() {
         return activityId;
     }
 
-    public void setActivityId(int activityId) {
+    public void setActivityId(Integer activityId) {
         this.activityId = activityId;
     }
 
-    public int getPlaneRideId() {
+    public Integer getPlaneRideId() {
         return planeRideId;
     }
 
-    public void setPlaneRideId(int planeRideId) {
+    public void setPlaneRideId(Integer planeRideId) {
         this.planeRideId = planeRideId;
+    }
+
+    public int getId() {
+        return id;
+    }
+
+    public void setId(int id) {
+        this.id = id;
     }
 }

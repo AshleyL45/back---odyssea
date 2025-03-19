@@ -19,6 +19,7 @@ public class UserItineraryStepDao {
     }
 
     private final RowMapper<UserItineraryStep> userItineraryStepRowMapper = (rs, _) -> new UserItineraryStep(
+            rs.getInt("id"),
             rs.getInt("userId"),
             rs.getInt("userItineraryId"),
             rs.getInt("hotelId"),
