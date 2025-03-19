@@ -1,7 +1,13 @@
 package com.example.odyssea.entities.mainTables;
 
+import jakarta.validation.constraints.Min;
+
 public class FlightSegmentRide {
+
+    @Min(value = 1, message = "Plane Ride ID must be greater than or equal to 1")
     private int planeRideId;
+
+    @Min(value = 1, message = "Flight Segment ID must be greater than or equal to 1")
     private int flightSegmentId;
 
     public FlightSegmentRide() {}
@@ -11,8 +17,7 @@ public class FlightSegmentRide {
         this.flightSegmentId = flightSegmentId;
     }
 
-    // Getters et setters
-
+    // Getters and setters
     public int getPlaneRideId() {
         return planeRideId;
     }
