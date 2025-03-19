@@ -1,7 +1,7 @@
 package com.example.odyssea.controllers;
 
 import com.example.odyssea.entities.itinerary.Itinerary;
-import com.example.odyssea.services.ItineraryService;
+import com.example.odyssea.services.InteractiveMapService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -12,39 +12,39 @@ import java.util.List;
 @RequestMapping("/api/itineraries")
 public class ItineraryController {
 
-    private final ItineraryService itineraryService;
+    private final InteractiveMapService interactiveMapService;
 
-    public ItineraryController(ItineraryService itineraryService) {
-        this.itineraryService = itineraryService;
+    public ItineraryController(InteractiveMapService interactiveMapService) {
+        this.interactiveMapService = interactiveMapService;
     }
 
     @GetMapping
     public ResponseEntity<List<Itinerary>> getAllItineraries() {
-        List<Itinerary> itineraries = itineraryService.getAllItineraries();
+        List<Itinerary> itineraries = interactiveMapService.getAllItineraries();
         return new ResponseEntity<>(itineraries, HttpStatus.OK);
     }
 
     @GetMapping("/{id}")
     public ResponseEntity<Itinerary> getItineraryById(@PathVariable int id) {
-        Itinerary itinerary = itineraryService.getItineraryById(id);
+        Itinerary itinerary = interactiveMapService.getItineraryById(id);
         return new ResponseEntity<>(itinerary, HttpStatus.OK);
     }
 
     @PostMapping
     public ResponseEntity<Itinerary> createItinerary(@RequestBody Itinerary itinerary) {
-        Itinerary created = itineraryService.createItinerary(itinerary);
+        Itinerary created = interactiveMapService.createItinerary(itinerary);
         return new ResponseEntity<>(created, HttpStatus.CREATED);
     }
 
     @PutMapping("/{id}")
     public ResponseEntity<Itinerary> updateItinerary(@PathVariable int id, @RequestBody Itinerary itinerary) {
-        Itinerary updated = itineraryService.updateItinerary(id, itinerary);
+        Itinerary updated = interactiveMapService.updateItinerary(id, itinerary);
         return new ResponseEntity<>(updated, HttpStatus.OK);
     }
 
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteItinerary(@PathVariable int id) {
-        boolean deleted = itineraryService.deleteItinerary(id);
+        boolean deleted = interactiveMapService.deleteItinerary(id);
         return deleted ? new ResponseEntity<>(HttpStatus.NO_CONTENT)
                 : new ResponseEntity<>(HttpStatus.NOT_FOUND);
     }
