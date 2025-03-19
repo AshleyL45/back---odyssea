@@ -1,10 +1,13 @@
 package com.example.odyssea.entities.userItinerary;
 
+import org.springframework.data.annotation.Id;
+
 import java.math.BigDecimal;
 import java.sql.Date;
 
 
 public class UserItinerary {
+    @Id
     private int id;
     private int userId;
     private Date startDate;
@@ -16,14 +19,14 @@ public class UserItinerary {
     private int numberOfAdults;
     private int numberOfKids;
 //    private int flightId;
-    private int optionId;
+    //private int optionId;
 
 
 
     public UserItinerary() {
     }
 
-    public UserItinerary(int id, int userId, Date startDate, Date endDate, BigDecimal startingPrice, int totalDuration, String departureCity, String itineraryName, int numberOfAdults, int numberOfKids, int optionId) {
+    public UserItinerary(int id, int userId, Date startDate, Date endDate, BigDecimal startingPrice, int totalDuration, String departureCity, String itineraryName, int numberOfAdults, int numberOfKids) {
         this.id = id;
         this.userId = userId;
         this.startDate = startDate;
@@ -35,7 +38,7 @@ public class UserItinerary {
         this.numberOfAdults = numberOfAdults;
         this.numberOfKids = numberOfKids;
        // this.flightId = flightId;
-        this.optionId = optionId;
+       // this.optionId = optionId;
     }
 
 
@@ -127,11 +130,11 @@ public class UserItinerary {
 //        this.flightId = flightId;
 //    }
 
-    public int getOptionId() {
-        return optionId;
-    }
-
-    public void setOptionId(int optionId) {
-        this.optionId = optionId;
-    }
+//    public int getOptionId() {
+//        return optionId;
+//    }
+//
+//    public void setOptionId(int optionId) {
+//        this.optionId = optionId;
+//    }
 }

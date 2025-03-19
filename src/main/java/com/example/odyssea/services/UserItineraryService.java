@@ -4,9 +4,10 @@ import com.example.odyssea.daos.CityDao;
 import com.example.odyssea.daos.CountryDao;
 import com.example.odyssea.daos.flight.PlaneRideDao;
 import com.example.odyssea.daos.userItinerary.UserItineraryDao;
+import com.example.odyssea.daos.userItinerary.UserItineraryOptionDao;
 import com.example.odyssea.daos.userItinerary.UserItineraryStepDao;
 import com.example.odyssea.dtos.Flight.FlightItineraryDTO;
-import com.example.odyssea.dtos.Flight.FlightOffersDTO;
+import com.example.odyssea.dtos.Flight.FlightSegmentDTO;
 import com.example.odyssea.dtos.HotelDto;
 import com.example.odyssea.dtos.UserItinerary.*;
 import com.example.odyssea.entities.mainTables.*;
@@ -37,13 +38,14 @@ public class UserItineraryService {
     private UserDailyPlanService userDailyPlanService;
     private PlaneRideService planeRideService;
     private PlaneRideDao planeRideDao;
+    private UserItineraryOptionDao userItineraryOptionDao;
 
     public UserItineraryService() {
 
     }
 
     @Autowired
-    public UserItineraryService(CityDao cityDao, HotelService hotelService, CountryDao countryDao, UserItineraryDao userItineraryDao, UserItineraryStepDao userItineraryStepDao, UserDailyPlanService userDailyPlanService, PlaneRideService planeRideService, PlaneRideDao planeRideDao) {
+    public UserItineraryService(CityDao cityDao, HotelService hotelService, CountryDao countryDao, UserItineraryDao userItineraryDao, UserItineraryStepDao userItineraryStepDao, UserDailyPlanService userDailyPlanService, PlaneRideService planeRideService, PlaneRideDao planeRideDao, UserItineraryOptionDao userItineraryOptionDao) {
         this.cityDao = cityDao;
         this.hotelService = hotelService;
         this.countryDao = countryDao;
@@ -52,6 +54,7 @@ public class UserItineraryService {
         this.userDailyPlanService = userDailyPlanService;
         this.planeRideService = planeRideService;
         this.planeRideDao = planeRideDao;
+        this.userItineraryOptionDao = userItineraryOptionDao;
     }
 
     private LocalDate convertToLocalDate(Date date) {
@@ -61,51 +64,71 @@ public class UserItineraryService {
         return date.toLocalDate();
     }
 
-    private void assignFlight(UserItineraryDayDTO day, String departureIata, String arrivalIata,
-                              LocalDate departureDate, LocalDate arrivalDate, int totalPeople) {
-        if (day.getDayNumber() == 1 || day.getDayNumber() == 5 || day.getDayNumber() == 9 || day.getDayNumber() == 13) {
-            // Récupérer les vols pour ce jour
-            Mono<List<FlightItineraryDTO>> flightsMono = planeRideService.getFlights(
-                    departureIata, arrivalIata, departureDate, arrivalDate, totalPeople
-            );
 
-            // Bloquer pour obtenir le résultat
-            List<FlightItineraryDTO> flights = flightsMono.block();
-
-            if (flights != null && !flights.isEmpty()) {
-                day.setPlaneRide(flights.get(0));
-            }
+    private PlaneRide findPlaneRideByItinerary(FlightItineraryDTO flightItinerary) {
+        if (flightItinerary.getSegments() == null || flightItinerary.getSegments().isEmpty()) {
+            return null;
         }
-    }
 
-    private PlaneRide saveFlight(FlightItineraryDTO flightItinerary, FlightOffersDTO flightOffersDTO) {
-        // Convertir FlightItineraryDTO en PlaneRide
-        PlaneRide planeRide = new PlaneRide();
-        planeRide.setOneWay(true);
-        planeRide.setTotalPrice(flightOffersDTO.getPrice().getTotalPrice());
-        planeRide.setCurrency("EUR");
+        // Prendre le premier segment pour la recherche (vous pouvez adapter cette logique)
+        FlightSegmentDTO firstSegment = flightItinerary.getSegments().get(0);
 
-        // Sauvegarder l'entité PlaneRide dans la base de données
-        return planeRideDao.save(planeRide);
+        // Rechercher le PlaneRide correspondant dans la base de données
+        List<PlaneRide> planeRides = planeRideDao.findBySegmentDetails(
+                firstSegment.getDeparture().getIataCode(),
+                firstSegment.getArrival().getIataCode(),
+                firstSegment.getDeparture().getDateTime(),
+                firstSegment.getArrival().getDateTime()
+        );
+
+        if (!planeRides.isEmpty()) {
+            return planeRides.getFirst();
+        }
+
+        return null;
     }
 
     public UserItinerary saveUserItinerary(UserItineraryDTO userItineraryDTO) {
+        System.out.println("Id: " + userItineraryDTO.getId());
+        System.out.println("userId: " + userItineraryDTO.getUserId());
+        System.out.println("startDate: " + userItineraryDTO.getStartDate());
+        System.out.println("endDate: " + userItineraryDTO.getEndDate());
+        System.out.println("startingPrice: " + userItineraryDTO.getStartingPrice());
+        System.out.println("totalDuration: " + userItineraryDTO.getTotalDuration());
+        System.out.println("departureCity: " + userItineraryDTO.getDepartureCity());
+        System.out.println("itineraryName: " + userItineraryDTO.getItineraryName());
+        System.out.println("numberOfAdults: " + userItineraryDTO.getNumberOfAdults());
+        System.out.println("numberOfKids: " + userItineraryDTO.getNumberOfKids());
+
         UserItinerary userItinerary = new UserItinerary();
+
         userItinerary.setUserId(userItineraryDTO.getUserId());
         userItinerary.setStartDate(Date.valueOf(userItineraryDTO.getStartDate()));
         userItinerary.setEndDate(Date.valueOf(userItineraryDTO.getEndDate()));
-        userItinerary.setTotalDuration(userItineraryDTO.getDuration());
+        userItinerary.setTotalDuration(userItineraryDTO.getTotalDuration());
         userItinerary.setDepartureCity(userItineraryDTO.getDepartureCity());
         userItinerary.setStartingPrice(userItineraryDTO.getStartingPrice());
         userItinerary.setItineraryName(userItineraryDTO.getItineraryName());
         userItinerary.setNumberOfAdults(userItineraryDTO.getNumberOfAdults());
         userItinerary.setNumberOfKids(userItineraryDTO.getNumberOfKids());
+        if (userItineraryDTO.getOptions() != null) {
+            for (Option optionDTO : userItineraryDTO.getOptions()) {
+                Option option = new Option();
+                option.setName(optionDTO.getName());
+                option.setPrice(optionDTO.getPrice());
+                option.setDescription(optionDTO.getDescription());
+                option.setCategory(optionDTO.getCategory());
+
+                userItineraryOptionDao.save(userItinerary.getId(), option.getId());
+            }
+        }
 
         return userItineraryDao.save(userItinerary);
     }
 
     // Enregistrer chaque journée dans la BDD
     public void saveUserDailyPlans(UserItinerary userItinerary, List<UserItineraryDayDTO> days) {
+
         for (UserItineraryDayDTO dayDTO : days) {
             UserItineraryStep userItineraryStep = new UserItineraryStep();
             userItineraryStep.setUserId(userItinerary.getUserId());
@@ -138,7 +161,9 @@ public class UserItineraryService {
 
         }
 
-        System.out.println("Itinerary ID: " + userItinerary.getId() + ", Days: " + days.size());
+        List<Option> options = userItineraryOptionDao.findOptionsByUserItineraryId(userItinerary.getId());
+
+        //System.out.println("Itinerary ID: " + userItinerary.getId() + ", Days: " + days.size());
 
 
         return new UserItineraryDTO(
@@ -152,7 +177,9 @@ public class UserItineraryService {
                 userItinerary.getItineraryName(),
                 userItinerary.getNumberOfAdults(),
                 userItinerary.getNumberOfKids(),
-                days
+                days,
+                options
+
         );
 
     }
@@ -220,11 +247,16 @@ public class UserItineraryService {
             if (i == 1 || i == 5 || i == 9 || i == 13) {
                 String departureIata = userItinerary.getDepartureCity();
                 String arrivalIata = cityDao.findCityByName(userItineraryDay.getCityName()).getIataCode();
+
                 LocalDate departureDate = userItineraryDay.getDate();
                 LocalDate arrivalDate = departureDate;
+
+                System.out.println("Departure IATA: " + departureIata + ", Arrival IATA: " + arrivalIata);
+                System.out.println("Departure IATA: " + departureDate + ", Arrival Date: " + arrivalDate);
+
                 int totalPeople = userPreferences.getNumberOfAdults() + userPreferences.getNumberOfKids();
 
-                // Récupérer les vols
+                // Récupérer les vols via PlaneRideService
                 Mono<List<FlightItineraryDTO>> flightsMono = planeRideService.getFlights(
                         departureIata, arrivalIata, departureDate, arrivalDate, totalPeople
                 );
@@ -233,14 +265,13 @@ public class UserItineraryService {
                 List<FlightItineraryDTO> flights = flightsMono.block();
 
                 if (flights != null && !flights.isEmpty()) {
-                    // On récupère simplement l'entité PlaneRide associée
-                    FlightItineraryDTO flightItinerary = flights.get(0);
-
-                    // Supposons que PlaneRideService retourne l'ID du PlaneRide sauvegardé
-                    PlaneRide planeRide = planeRideDao.findById(flights.getFirst()); // Adaptez cette ligne selon votre implémentation
+                    // Trouver le PlaneRide correspondant dans la base de données
+                    PlaneRide planeRide = findPlaneRideByItinerary(flights.get(0));
 
                     // Assigner le vol au jour
-                    userItineraryDay.setPlaneRide(planeRide);
+                    if (planeRide != null) {
+                        userItineraryDay.setPlaneRide(planeRide);
+                    }
                 }
             }
 
@@ -260,8 +291,11 @@ public class UserItineraryService {
                 .collect(Collectors.toList());
 
         userItinerary.setStartingPrice(calculateTotal(countriesPrices, optionsPrices, userPreferences.getNumberOfAdults(), userPreferences.getNumberOfKids()));
-        userItinerary.setDuration(13);
+        userItinerary.setTotalDuration(13);
         userItinerary.setItineraryDays(userItineraryDays);
+        userItinerary.setNumberOfAdults(userPreferences.getNumberOfAdults());
+        userItinerary.setNumberOfKids(userPreferences.getNumberOfKids());
+        userItinerary.setItineraryName(userPreferences.getItineraryName());
 
         // Sauvegarder l'itinéraire principal
         UserItinerary userItinerarySaved = saveUserItinerary(userItinerary);

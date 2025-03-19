@@ -48,6 +48,7 @@ public class SecurityConfig {
                                 .requestMatchers("/user/**").hasRole("USER")
                                 .requestMatchers("/flights/**").permitAll()
                                 .requestMatchers("/reservations/**").hasRole("USER")
+                                .requestMatchers("/userItinerary/**").permitAll()
                                 .anyRequest().authenticated()
                 );
         http.addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class);
