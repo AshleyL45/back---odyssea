@@ -23,7 +23,7 @@ public class UserDailyPlanService {
     private final UserItineraryStepDao userItineraryStepDao;
     private final CityDao cityDao;
     private final CountryDao countryDao;
-    private PlaneRideDao planeRideDao;
+    private final PlaneRideDao planeRideDao;
 
 
     public UserDailyPlanService(UserItineraryStepDao userItineraryStepDao, CityDao cityDao, CountryDao countryDao, PlaneRideDao planeRideDao) {
