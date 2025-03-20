@@ -22,7 +22,6 @@ public class Option {
     @Digits(integer = 8, fraction = 2, message = "Price must be a valid monetary amount with up to 2 decimal places")
 
     private BigDecimal price;
-    private String description;
     private String category;
 
 

@@ -4,6 +4,7 @@ import com.example.odyssea.daos.ActivityDao;
 import com.example.odyssea.daos.CityDao;
 import com.example.odyssea.dtos.ActivityDto;
 import com.example.odyssea.entities.mainTables.Activity;
+import com.example.odyssea.entities.mainTables.City;
 import com.example.odyssea.exceptions.ResourceNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;

@@ -5,6 +5,7 @@ import jakarta.validation.constraints.Min;
 
 
 public class UserItineraryStep {
+    private Integer id;
 
     @Min(value = 1, message = "User ID must be greater than or equal to 1")
     private Integer userId;
