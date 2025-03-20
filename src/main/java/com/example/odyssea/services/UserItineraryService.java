@@ -102,6 +102,10 @@ public class UserItineraryService {
         userItinerary.setItineraryName(userItineraryDTO.getItineraryName());
         userItinerary.setNumberOfAdults(userItineraryDTO.getNumberOfAdults());
         userItinerary.setNumberOfKids(userItineraryDTO.getNumberOfKids());
+
+
+        userItineraryDao.save(userItinerary);
+
         if (userItineraryDTO.getOptions() != null) {
             for (Option optionDTO : userItineraryDTO.getOptions()) {
                 Option option = new Option();
@@ -114,7 +118,7 @@ public class UserItineraryService {
             }
         }
 
-        return userItineraryDao.save(userItinerary);
+        return userItinerary;
     }
 
     // Enregistrer chaque journée dans la BDD
@@ -249,15 +253,13 @@ public class UserItineraryService {
             itineraryDay.setDate(userItinerary.getStartDate().plusDays(itineraryDay.getDayNumber()));
 
             // Assigner un hôtel
-
             Object result = assignHotel(itineraryDay.getCityName(), userRequest.getHotelStanding());
 
             if (result instanceof Map) {
                 // Si c'est un message d'erreur
                 Map<String, String> errorResponse = (Map<String, String>) result;
                 String message = errorResponse.get("message");
-                // Gérer l'affichage du message d'erreur ou autre logique
-                // Exemple : afficher un message d'erreur dans le frontend
+
             } else if (result instanceof List) {
                 // Si c'est une liste d'hôtels
                 List<HotelDto> hotels = (List<HotelDto>) result;
@@ -283,13 +285,6 @@ public class UserItineraryService {
 
                 // Bloquer pour obtenir le résultat
                 List<FlightItineraryDTO> flights = flightsMono.block();
-
-                /*if (flights != null) {
-                    System.out.println("Flights sans block : " + flightsMono);
-                    System.out.println("Number of flights found: " + flights.size());
-                } else {
-                    System.out.println("No flights found.");
-                }*/
 
                 if (flights != null && !flights.isEmpty()) {
                     // Trouver le PlaneRide correspondant dans la base de données
@@ -327,6 +322,17 @@ public class UserItineraryService {
         userItinerary.setNumberOfKids(userRequest.getNumberOfKids());
         userItinerary.setItineraryName(userRequest.getItineraryName());
 
+        // Assigner les options
+        List<Option> options = userRequest.getOptions();
+        List<Option> itineraryOptions = new ArrayList<>();
+        if(options.isEmpty()){
+            userItinerary.setOptions(new ArrayList<>());
+        } else {
+            for(Option option : options){
+                itineraryOptions.add(option);
+            }
+        }
+
         // Sauvegarder l'itinéraire principal en BDD
         UserItinerary userItinerarySaved = saveUserItinerary(userItinerary);
 
@@ -335,6 +341,7 @@ public class UserItineraryService {
 
         // Retourner l'itinéraire DTO avec l'ID généré
         userItinerary.setId(userItinerarySaved.getId());
+        userItinerary.setOptions(itineraryOptions);
 
         return userItinerary;
     }

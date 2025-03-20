@@ -44,7 +44,7 @@ public class UserItineraryOptionDao {
     }
 
     public UserItineraryOption save(int userItineraryId, int optionId) {
-        String sql = "INSERT INTO user_itinerary_option (user_itinerary_id, option_id) VALUES (?, ?)";
+        String sql = "INSERT INTO userItineraryOption (userItineraryId, optionId) VALUES (?, ?)";
 
         jdbcTemplate.update(sql, userItineraryId, optionId);
 
