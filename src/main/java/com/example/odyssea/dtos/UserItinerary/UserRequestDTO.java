@@ -5,7 +5,7 @@ import com.example.odyssea.entities.mainTables.Option;
 import java.time.LocalDate;
 import java.util.List;
 
-public class UserPreferencesDTO {
+public class UserRequestDTO {
     private int userId;
     private LocalDate startDate;
     private String departureCity;
@@ -16,10 +16,10 @@ public class UserPreferencesDTO {
     private List<Option> options;
     private String itineraryName;
 
-    public UserPreferencesDTO() {
+    public UserRequestDTO() {
     }
 
-    public UserPreferencesDTO(int userId, LocalDate startDate, String departureCity, List<CountrySelectionDTO> countrySelection, int numberOfAdults, int numberOfKids, int hotelStanding, List<Option> options, String itineraryName) {
+    public UserRequestDTO(int userId, LocalDate startDate, String departureCity, List<CountrySelectionDTO> countrySelection, int numberOfAdults, int numberOfKids, int hotelStanding, List<Option> options, String itineraryName) {
         this.userId = userId;
         this.startDate = startDate;
         this.departureCity = departureCity;

@@ -123,6 +123,7 @@ public class HotelDao {
         if (hotels.isEmpty()) {
             throw new ResourceNotFoundException("No hotels found for city id " + cityId);
         }
+
         return hotels;
     }
 

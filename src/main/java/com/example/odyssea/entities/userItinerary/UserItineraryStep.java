@@ -3,12 +3,12 @@ package com.example.odyssea.entities.userItinerary;
 import org.springframework.data.relational.core.sql.In;
 
 public class UserItineraryStep {
-    private int id;
-    private int userId;
-    private int userItineraryId;
-    private int hotelId;
-    private int cityId;
-    private int dayNumber;
+    private Integer id;
+    private Integer userId;
+    private Integer userItineraryId;
+    private Integer hotelId;
+    private Integer cityId;
+    private Integer dayNumber;
     private boolean offDay;
     private Integer activityId;
     private Integer planeRideId;
@@ -16,7 +16,7 @@ public class UserItineraryStep {
     public UserItineraryStep() {
     }
 
-    public UserItineraryStep(int id, int userId, int userItineraryId, int hotelId, int cityId, int dayNumber, boolean offDay, Integer activityId, Integer planeRideId) {
+    public UserItineraryStep(Integer id, Integer userId, Integer userItineraryId, Integer hotelId, Integer cityId, Integer dayNumber, boolean offDay, Integer activityId, Integer planeRideId) {
         this.id = id;
         this.userId = userId;
         this.userItineraryId = userItineraryId;
@@ -29,43 +29,43 @@ public class UserItineraryStep {
     }
 
 
-    public int getUserId() {
+    public Integer getUserId() {
         return userId;
     }
 
-    public void setUserId(int userId) {
+    public void setUserId(Integer userId) {
         this.userId = userId;
     }
 
-    public int getUserItineraryId() {
+    public Integer getUserItineraryId() {
         return userItineraryId;
     }
 
-    public void setUserItineraryId(int userItineraryId) {
+    public void setUserItineraryId(Integer userItineraryId) {
         this.userItineraryId = userItineraryId;
     }
 
-    public int getHotelId() {
+    public Integer getHotelId() {
         return hotelId;
     }
 
-    public void setHotelId(int hotelId) {
+    public void setHotelId(Integer hotelId) {
         this.hotelId = hotelId;
     }
 
-    public int getCityId() {
+    public Integer getCityId() {
         return cityId;
     }
 
-    public void setCityId(int cityId) {
+    public void setCityId(Integer cityId) {
         this.cityId = cityId;
     }
 
-    public int getDayNumber() {
+    public Integer getDayNumber() {
         return dayNumber;
     }
 
-    public void setDayNumber(int dayNumber) {
+    public void setDayNumber(Integer dayNumber) {
         this.dayNumber = dayNumber;
     }
 
@@ -93,11 +93,11 @@ public class UserItineraryStep {
         this.planeRideId = planeRideId;
     }
 
-    public int getId() {
+    public Integer getId() {
         return id;
     }
 
-    public void setId(int id) {
+    public void setId(Integer id) {
         this.id = id;
     }
 }

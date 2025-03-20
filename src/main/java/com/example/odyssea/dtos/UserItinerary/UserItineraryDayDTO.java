@@ -4,7 +4,6 @@ import com.example.odyssea.dtos.Flight.FlightItineraryDTO;
 import com.example.odyssea.dtos.HotelDto;
 import com.example.odyssea.entities.mainTables.Activity;
 import com.example.odyssea.entities.mainTables.PlaneRide;
-import com.example.odyssea.services.flight.PlaneRideService;
 
 import java.time.LocalDate;
 
@@ -17,13 +16,13 @@ public class UserItineraryDayDTO {
     private int dayNumber;
     private LocalDate date;
     private boolean dayOff;
-    private PlaneRide planeRide;
+    private PlaneRide flightItineraryDTO;
 
 
     public UserItineraryDayDTO() {
     }
 
-    public UserItineraryDayDTO(String cityName, String countryName, HotelDto hotel, Activity activity, int dayNumber, LocalDate date, boolean dayOff, PlaneRide planeRide) {
+    public UserItineraryDayDTO(String cityName, String countryName, HotelDto hotel, Activity activity, int dayNumber, LocalDate date, boolean dayOff, PlaneRide flightItineraryDTO) {
         this.cityName = cityName;
         this.countryName = countryName;
         this.hotel = hotel;
@@ -31,7 +30,7 @@ public class UserItineraryDayDTO {
         this.dayNumber = dayNumber;
         this.date = date;
         this.dayOff = dayOff;
-        this.planeRide = planeRide;
+        this.flightItineraryDTO = flightItineraryDTO;
     }
 
     public String getCityName() {
@@ -91,11 +90,11 @@ public class UserItineraryDayDTO {
         this.dayOff = dayOff;
     }
 
-    public PlaneRide getPlaneRide() {
-        return planeRide;
+    public PlaneRide getFlightItineraryDTO() {
+        return flightItineraryDTO;
     }
 
-    public void setPlaneRide(PlaneRide planeRide) {
-        this.planeRide = planeRide;
+    public void setFlightItineraryDTO(PlaneRide flightItineraryDTO) {
+        this.flightItineraryDTO = flightItineraryDTO;
     }
 }

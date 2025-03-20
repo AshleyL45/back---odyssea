@@ -111,12 +111,17 @@ public class HotelService {
      * Récupère les hôtels d'une ville en fonction de leur standing (nombre d'étoiles)
      */
     public List<Hotel> getHotelsByCityAndStarRating(int cityId, int starRating) {
-        List<Hotel> hotels = hotelDao.findByCityIdAndStarRating(cityId, starRating);
-        if (hotels.isEmpty()) {
-            throw new ResourceNotFoundException("No hotels found for city id: " + cityId
-                    + " with star rating: " + starRating);
+        try  {
+            List<Hotel> hotels = hotelDao.findByCityIdAndStarRating(cityId, starRating);
+            if (hotels.isEmpty()) {
+                throw new ResourceNotFoundException("No hotels found for city id: " + cityId
+                        + " with star rating: " + starRating);
+            }
+            return hotels;
+        } catch (ResourceNotFoundException e){
+            return null;
         }
-        return hotels;
+
     }
 
     /**

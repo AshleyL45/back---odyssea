@@ -128,7 +128,11 @@ public class UserItineraryService {
             UserItineraryStep userItineraryStep = new UserItineraryStep();
             userItineraryStep.setUserId(userItinerarySaved.getUserId());
             userItineraryStep.setUserItineraryId(userItinerarySaved.getId());
-            userItineraryStep.setHotelId(dayDTO.getHotel().getId());
+            if (dayDTO.getHotel() != null && dayDTO.getHotel().getId() != null) {
+                userItineraryStep.setHotelId(dayDTO.getHotel().getId());
+            } else {
+                userItineraryStep.setHotelId(null);
+            }
 
             int cityId = cityDao.findCityByName(dayDTO.getCityName()).getId();
             System.out.println("City ID: " + cityId);
@@ -153,15 +157,15 @@ public class UserItineraryService {
 
             // Sauvegarder l'ID du vol si présent
             if (dayDTO.isDayOff()) {
-                System.out.println("Plane ride present: " + dayDTO.getPlaneRide().getId());
-                userItineraryStep.setPlaneRideId(dayDTO.getPlaneRide().getId());
+                System.out.println("Plane ride present: " + dayDTO.getFlightItineraryDTO().getId());
+                userItineraryStep.setPlaneRideId(dayDTO.getFlightItineraryDTO().getId());
                 userItineraryStep.setActivityId(null);
             } else {
                 System.out.println("No plane ride for this day.");
                 userItineraryStep.setPlaneRideId(null);
             }
 
-            //System.out.println("Plane ride of the day :" + dayDTO.getPlaneRide().getId());
+            //System.out.println("Plane ride of the day :" + dayDTO.getFlightItineraryDTO().getId());
 
             // Sauvegarder le jour dans la base de données
             System.out.println("Saving userItineraryStep: " + userItineraryStep);
@@ -208,78 +212,69 @@ public class UserItineraryService {
     }
 
     @Transactional
-    public UserItineraryDTO generateUserItinerary(UserPreferencesDTO userPreferences) throws Exception {
+    public UserItineraryDTO generateUserItinerary(UserRequestDTO userRequest) throws Exception {
         UserItineraryDTO userItinerary = new UserItineraryDTO();
-        userItinerary.setUserId(userPreferences.getUserId());
-        userItinerary.setStartDate(userPreferences.getStartDate());
-        userItinerary.setDepartureCity(cityDao.findCityByName(userPreferences.getDepartureCity()).getIataCode());
-        userItinerary.setEndDate(userPreferences.getStartDate().plusDays(13));
+        userItinerary.setUserId(userRequest.getUserId());
+        userItinerary.setStartDate(userRequest.getStartDate());
+        userItinerary.setDepartureCity(cityDao.findCityByName(userRequest.getDepartureCity()).getIataCode());
+        userItinerary.setEndDate(userRequest.getStartDate().plusDays(13));
 
 
-        // Créer les 12 jours du voyage
-        List<UserItineraryDayDTO> userItineraryDays = IntStream.range(0, 13)
+        // Créer les 13 jours du voyage
+        List<UserItineraryDayDTO> itineraryDays = IntStream.range(0, 13)
                 .mapToObj(i -> new UserItineraryDayDTO())
                 .collect(Collectors.toList());
 
 
         // Constituer le programme du jour
         int i = 1;
-        for(UserItineraryDayDTO userItineraryDay : userItineraryDays){
-            userItineraryDay.setDayNumber(i);
+        for(UserItineraryDayDTO itineraryDay : itineraryDays){
+            itineraryDay.setDayNumber(i);
 
-            if (userPreferences.getCountrySelection().size() < 3) {
+            if (userRequest.getCountrySelection().size() < 3) {
                 throw new IllegalArgumentException("Il faut au moins 3 pays sélectionnés.");
             }
 
-            // Déterminer le pays et la ville en fonction du jour
-            int dayNumber = userItineraryDay.getDayNumber();
-
-            if(dayNumber <=  4){
-                // Assigner une activité
-                assignCity(userItineraryDay, userPreferences.getCountrySelection().getFirst(), dayNumber);
-                assignActivity(userItineraryDay, userPreferences.getCountrySelection().getFirst());
-            } else if (dayNumber <= 8){
-                assignCity(userItineraryDay, userPreferences.getCountrySelection().get(1), dayNumber);
-                assignActivity(userItineraryDay, userPreferences.getCountrySelection().get(1));
-            } else if (dayNumber <= 12){
-                assignCity(userItineraryDay, userPreferences.getCountrySelection().getLast(), dayNumber);
-                assignActivity(userItineraryDay, userPreferences.getCountrySelection().get(2));
-            } else {
-                assignCity(userItineraryDay, userPreferences.getCountrySelection().getFirst(), dayNumber);
+            // Vérifier si c'est un jour off (sans activités)
+            if(itineraryDay.getDayNumber() == 1 || itineraryDay.getDayNumber() == 5 || itineraryDay.getDayNumber() == 9 || itineraryDay.getDayNumber() == 13){
+                itineraryDay.setDayOff(true);
+                itineraryDay.setActivity(null);
             }
+
+            // Déterminer le pays et la ville en fonction du jour
+            int dayNumber = itineraryDay.getDayNumber();
+            assignCityAndActivity(itineraryDay, dayNumber, userRequest);
 
             // Déterminer la date de chaque jour
-            userItineraryDay.setDate(userItinerary.getStartDate().plusDays(userItineraryDay.getDayNumber()));
-
-            // Vérifier si c'est un jour off (sans activités)
-            if(userItineraryDay.getDayNumber() == 1 || userItineraryDay.getDayNumber() == 5 || userItineraryDay.getDayNumber() == 9 || userItineraryDay.getDayNumber() == 13){
-                userItineraryDay.setDayOff(true);
-                userItineraryDay.setActivity(null);
-            }
+            itineraryDay.setDate(userItinerary.getStartDate().plusDays(itineraryDay.getDayNumber()));
 
             // Assigner un hôtel
-            List<HotelDto> userItineraryDayHotels = assignHotel(userItineraryDay.getCityName(), userPreferences.getHotelStanding());
-            if(userItineraryDay.getHotel() == null){
-                userItineraryDay.setHotel(new HotelDto());
+
+            Object result = assignHotel(itineraryDay.getCityName(), userRequest.getHotelStanding());
+
+            if (result instanceof Map) {
+                // Si c'est un message d'erreur
+                Map<String, String> errorResponse = (Map<String, String>) result;
+                String message = errorResponse.get("message");
+                // Gérer l'affichage du message d'erreur ou autre logique
+                // Exemple : afficher un message d'erreur dans le frontend
+            } else if (result instanceof List) {
+                // Si c'est une liste d'hôtels
+                List<HotelDto> hotels = (List<HotelDto>) result;
+                double random = Math.random() * hotels.size();
+                itineraryDay.setHotel(hotels.get((int) random));
             }
 
-            double random = Math.random() * userItineraryDayHotels.size();
-            userItineraryDay.setHotel(userItineraryDayHotels.get((int) random));
 
             // Assigner les vols
-            if (userItineraryDay.isDayOff()) {
+            if (itineraryDay.isDayOff()) {
                 String departureIata = userItinerary.getDepartureCity();
-                String arrivalIata = cityDao.findCityByName(userItineraryDay.getCityName()).getIataCode();
+                String arrivalIata = cityDao.findCityByName(itineraryDay.getCityName()).getIataCode();
 
-                LocalDate departureDate = userItineraryDay.getDate();
+                LocalDate departureDate = itineraryDay.getDate();
                 LocalDate arrivalDate = departureDate;
 
-                System.out.println("Processing flight for day: " + i);
-                System.out.println("Departure IATA: " + departureIata + ", Arrival IATA: " + arrivalIata);
-                System.out.println("Departure Date: " + departureDate + ", Arrival Date: " + arrivalDate);
-
-                int totalPeople = userPreferences.getNumberOfAdults() + userPreferences.getNumberOfKids();
-                System.out.println("Total number of people: " + totalPeople);
+                int totalPeople = userRequest.getNumberOfAdults() + userRequest.getNumberOfKids();
 
                 // Récupérer les vols via PlaneRideService
                 Mono<List<FlightItineraryDTO>> flightsMono = planeRideService.getFlights(
@@ -289,12 +284,12 @@ public class UserItineraryService {
                 // Bloquer pour obtenir le résultat
                 List<FlightItineraryDTO> flights = flightsMono.block();
 
-                if (flights != null) {
+                /*if (flights != null) {
                     System.out.println("Flights sans block : " + flightsMono);
                     System.out.println("Number of flights found: " + flights.size());
                 } else {
                     System.out.println("No flights found.");
-                }
+                }*/
 
                 if (flights != null && !flights.isEmpty()) {
                     // Trouver le PlaneRide correspondant dans la base de données
@@ -302,7 +297,7 @@ public class UserItineraryService {
 
                     if (planeRide != null) {
                         System.out.println("Plane ride assigned for day " + i + ": " + planeRide.getId());
-                        userItineraryDay.setPlaneRide(planeRide);
+                        itineraryDay.setFlightItineraryDTO(planeRide);
                     } else {
                         System.out.println("No matching PlaneRide found in the database for day " + i);
                     }
@@ -313,35 +308,51 @@ public class UserItineraryService {
             i += 1;
         }
 
-        List<BigDecimal> countriesPrices = userPreferences.getCountrySelection()
+        List<BigDecimal> countriesPrices = userRequest.getCountrySelection()
                 .stream()
                 .map(country -> Optional.ofNullable(countryDao.findByName(country.getCountryName()))
                         .map(Country::getPrice)
                         .orElse(BigDecimal.ZERO))
                 .collect(Collectors.toList());
 
-        List<BigDecimal> optionsPrices = userPreferences.getOptions()
+        List<BigDecimal> optionsPrices = userRequest.getOptions()
                 .stream()
                 .map(Option::getPrice)
                 .collect(Collectors.toList());
 
-        userItinerary.setStartingPrice(calculateTotal(countriesPrices, optionsPrices, userPreferences.getNumberOfAdults(), userPreferences.getNumberOfKids()));
+        userItinerary.setStartingPrice(calculateTotal(countriesPrices, optionsPrices, userRequest.getNumberOfAdults(), userRequest.getNumberOfKids()));
         userItinerary.setTotalDuration(13);
-        userItinerary.setItineraryDays(userItineraryDays);
-        userItinerary.setNumberOfAdults(userPreferences.getNumberOfAdults());
-        userItinerary.setNumberOfKids(userPreferences.getNumberOfKids());
-        userItinerary.setItineraryName(userPreferences.getItineraryName());
+        userItinerary.setItineraryDays(itineraryDays);
+        userItinerary.setNumberOfAdults(userRequest.getNumberOfAdults());
+        userItinerary.setNumberOfKids(userRequest.getNumberOfKids());
+        userItinerary.setItineraryName(userRequest.getItineraryName());
 
-        // Sauvegarder l'itinéraire principal
+        // Sauvegarder l'itinéraire principal en BDD
         UserItinerary userItinerarySaved = saveUserItinerary(userItinerary);
 
-        // Sauvegarder chaque jour du voyage
+        // Sauvegarder chaque jour du voyage en BDD
         saveUserDailyPlans(userItinerarySaved, userItinerary.getItineraryDays());
 
         // Retourner l'itinéraire DTO avec l'ID généré
         userItinerary.setId(userItinerarySaved.getId());
 
         return userItinerary;
+    }
+
+    // Assigner une ville et une activité
+    private void assignCityAndActivity(UserItineraryDayDTO itineraryDay, int dayNumber, UserRequestDTO userRequest){
+        if(dayNumber <=  4){
+            assignCity(itineraryDay, userRequest.getCountrySelection().getFirst(), dayNumber);
+            assignActivity(itineraryDay, userRequest.getCountrySelection().getFirst());
+        } else if (dayNumber <= 8){
+            assignCity(itineraryDay, userRequest.getCountrySelection().get(1), dayNumber);
+            assignActivity(itineraryDay, userRequest.getCountrySelection().get(1));
+        } else if (dayNumber <= 12){
+            assignCity(itineraryDay, userRequest.getCountrySelection().getLast(), dayNumber);
+            assignActivity(itineraryDay, userRequest.getCountrySelection().get(2));
+        } else {
+            assignCity(itineraryDay, userRequest.getCountrySelection().getFirst(), dayNumber);
+        }
     }
 
     // Retourner la liste de tous les itinéraires d'un utilisateur
@@ -398,22 +409,24 @@ public class UserItineraryService {
 
         if((dayNumber % 4) <= 2 && (dayNumber % 4) != 0){
             day.setCityName(country.getCitySelection().getFirst().getCityName());
-            System.out.println("City 1" + country.getCitySelection().getFirst().getCityName());
-            System.out.println("Day number 1 :" + dayNumber);
+//            System.out.println("City 1" + country.getCitySelection().getFirst().getCityName());
+//            System.out.println("Day number 1 :" + dayNumber);
         } else {
             day.setCityName(country.getCitySelection().get(1).getCityName());
-            System.out.println("City 2" + country.getCitySelection().get(1).getCityName());
-            System.out.println("Day number 2 :" + dayNumber);
+//            System.out.println("City 2" + country.getCitySelection().get(1).getCityName());
+//            System.out.println("Day number 2 :" + dayNumber);
         }
 
     }
 
     // Assigner un hôtel
-    private List<HotelDto> assignHotel(String cityName, int starRating){
-        System.out.println("City name : " + cityName);
+    private Object assignHotel(String cityName, int starRating){
         List<Hotel> hotels = hotelService.getHotelsByCityAndStarRating(cityDao.findCityByName(cityName).getId(), starRating);
-        if(hotels.isEmpty()){
-            return null;
+        if (hotels == null || hotels.isEmpty()) {
+            // Retourne un message d'erreur dans un format JSON
+            Map<String, String> response = new HashMap<>();
+            response.put("message", "Sorry, there are no hotels available");
+            return response;
         }
         return hotels.stream()
                 .map(HotelDto::fromEntity)

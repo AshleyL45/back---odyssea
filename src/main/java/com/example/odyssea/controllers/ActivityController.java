@@ -4,8 +4,11 @@ import com.example.odyssea.dtos.ActivityDto;
 import com.example.odyssea.entities.mainTables.Activity;
 import com.example.odyssea.services.ActivityService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.Collections;
 import java.util.List;
 
 @RestController
@@ -64,8 +67,13 @@ public class ActivityController {
      * Récupère les 5 meilleures activités d'une ville spécifique
      */
     @GetMapping("/top5")
-    public List<Activity> getTop5ActivitiesByCityId(@RequestParam int cityId) {
-        return activityService.getTop5ActivitiesByCityId(cityId);
+    public ResponseEntity<?> getTop5ActivitiesByCityId(@RequestParam int cityId) {
+        List<Activity> activities = activityService.getTop5ActivitiesByCityId(cityId);
+        if(activities == null){
+            return ResponseEntity.status(HttpStatus.OK)
+                    .body(Collections.singletonMap("message", "Sorry, there are no activities for this city."));
+        }
+        return ResponseEntity.ok(activities);
     }
 
     /**
