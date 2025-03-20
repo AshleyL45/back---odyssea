@@ -1,37 +1,36 @@
 package com.example.odyssea.dtos.UserItinerary;
 
-import com.example.odyssea.daos.userItinerary.UserItineraryStepDao;
-import com.example.odyssea.dtos.ActivityDto;
+import com.example.odyssea.dtos.Flight.FlightItineraryDTO;
 import com.example.odyssea.dtos.HotelDto;
 import com.example.odyssea.entities.mainTables.Activity;
-import com.example.odyssea.entities.userItinerary.UserItineraryStep;
-import org.springframework.beans.factory.annotation.Autowired;
+import com.example.odyssea.entities.mainTables.PlaneRide;
 
 import java.time.LocalDate;
-import java.util.List;
 
 public class UserItineraryDayDTO {
 
     private String cityName;
     private String countryName;
-    private List<HotelDto> hotels;
-    private List<Activity> activities;
+    private HotelDto hotel;
+    private Activity activity;
     private int dayNumber;
     private LocalDate date;
     private boolean dayOff;
+    private PlaneRide flightItineraryDTO;
 
 
     public UserItineraryDayDTO() {
     }
 
-    public UserItineraryDayDTO(String cityName, String countryName, List<HotelDto> hotels, List<Activity> activities, int dayNumber, LocalDate date, boolean dayOff) {
+    public UserItineraryDayDTO(String cityName, String countryName, HotelDto hotel, Activity activity, int dayNumber, LocalDate date, boolean dayOff, PlaneRide flightItineraryDTO) {
         this.cityName = cityName;
         this.countryName = countryName;
-        this.hotels = hotels;
-        this.activities = activities;
+        this.hotel = hotel;
+        this.activity = activity;
         this.dayNumber = dayNumber;
         this.date = date;
         this.dayOff = dayOff;
+        this.flightItineraryDTO = flightItineraryDTO;
     }
 
     public String getCityName() {
@@ -67,20 +66,20 @@ public class UserItineraryDayDTO {
         this.date = date;
     }
 
-    public List<HotelDto> getHotels() {
-        return hotels;
+    public HotelDto getHotel() {
+        return hotel;
     }
 
-    public void setHotels(List<HotelDto> hotels) {
-        this.hotels = hotels;
+    public void setHotel(HotelDto hotel) {
+        this.hotel = hotel;
     }
 
-    public List<Activity> getActivities() {
-        return activities;
+    public Activity getActivity() {
+        return activity;
     }
 
-    public void setActivities(List<Activity> activities) {
-        this.activities = activities;
+    public void setActivity(Activity activity) {
+        this.activity = activity;
     }
 
     public boolean isDayOff() {
@@ -89,5 +88,13 @@ public class UserItineraryDayDTO {
 
     public void setDayOff(boolean dayOff) {
         this.dayOff = dayOff;
+    }
+
+    public PlaneRide getFlightItineraryDTO() {
+        return flightItineraryDTO;
+    }
+
+    public void setFlightItineraryDTO(PlaneRide flightItineraryDTO) {
+        this.flightItineraryDTO = flightItineraryDTO;
     }
 }

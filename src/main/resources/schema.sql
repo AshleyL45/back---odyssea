@@ -28,7 +28,7 @@ CREATE TABLE IF NOT EXISTS `activity` (
   `name` text NOT NULL,
   `type` text NOT NULL,
   `physicalEffort` varchar(255) NOT NULL,
-  `duration` time NOT NULL,
+  `duration` int DEFAULT NULL,
   `description` text NOT NULL,
   `price` decimal(7,2) NOT NULL,
   PRIMARY KEY (`id`),
@@ -36,46 +36,7 @@ CREATE TABLE IF NOT EXISTS `activity` (
   CONSTRAINT `activity_ibfk_1` FOREIGN KEY (`cityId`) REFERENCES `city` (`id`)
 ) ENGINE=InnoDB AUTO_INCREMENT=21 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
-
 SET FOREIGN_KEY_CHECKS = 1;
---
--- Dumping data for table `activity`
---
-
-LOCK TABLES `activity` WRITE;
-/*!40000 ALTER TABLE `activity` DISABLE KEYS */;
-/*!40000 ALTER TABLE `activity` ENABLE KEYS */;
-UNLOCK TABLES;
-
---
--- Table structure for table `article`
---
-
-SET FOREIGN_KEY_CHECKS = 0;
-/*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!50503 SET character_set_client = utf8mb4 */;
-CREATE TABLE IF NOT EXISTS `article` (
-  `id` int NOT NULL AUTO_INCREMENT,
-  `countryId` int NOT NULL,
-  `title` varchar(255) NOT NULL,
-  `intro_paragraph` text NOT NULL,
-  `when_to_go_paragraph` text,
-  `what_to_see_do_paragraph` text,
-  `cultural_advice_paragraph` text,
-  PRIMARY KEY (`id`),
-  KEY `countryId` (`countryId`),
-  CONSTRAINT `article_ibfk_1` FOREIGN KEY (`countryId`) REFERENCES `country` (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
-/*!40101 SET character_set_client = @saved_cs_client */;
-SET FOREIGN_KEY_CHECKS = 1;
---
--- Dumping data for table `article`
---
-
-LOCK TABLES `article` WRITE;
-/*!40000 ALTER TABLE `article` DISABLE KEYS */;
-/*!40000 ALTER TABLE `article` ENABLE KEYS */;
-UNLOCK TABLES;
 
 --
 -- Table structure for table `city`
@@ -95,18 +56,9 @@ CREATE TABLE IF NOT EXISTS `city` (
   UNIQUE KEY `uniqueIata` (`iataCode`),
   KEY `countryId` (`countryId`),
   CONSTRAINT `city_ibfk_1` FOREIGN KEY (`countryId`) REFERENCES `country` (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=16 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=307 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
-
 SET FOREIGN_KEY_CHECKS = 1;
---
--- Dumping data for table `city`
---
-
-LOCK TABLES `city` WRITE;
-/*!40000 ALTER TABLE `city` DISABLE KEYS */;
-/*!40000 ALTER TABLE `city` ENABLE KEYS */;
-UNLOCK TABLES;
 
 --
 -- Table structure for table `cityDistance`
@@ -128,14 +80,6 @@ CREATE TABLE IF NOT EXISTS `cityDistance` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 SET FOREIGN_KEY_CHECKS = 1;
---
--- Dumping data for table `cityDistance`
---
-
-LOCK TABLES `cityDistance` WRITE;
-/*!40000 ALTER TABLE `cityDistance` DISABLE KEYS */;
-/*!40000 ALTER TABLE `cityDistance` ENABLE KEYS */;
-UNLOCK TABLES;
 
 --
 -- Table structure for table `country`
@@ -144,23 +88,15 @@ UNLOCK TABLES;
 SET FOREIGN_KEY_CHECKS = 0;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!50503 SET character_set_client = utf8mb4 */;
-CREATE TABLE IF NOT EXISTS`country` (
+CREATE TABLE IF NOT EXISTS `country` (
   `id` int NOT NULL AUTO_INCREMENT,
   `name` varchar(255) NOT NULL,
   `continent` varchar(255) NOT NULL,
   `price` decimal(7,2) NOT NULL,
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=11 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=65 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 SET FOREIGN_KEY_CHECKS = 1;
---
--- Dumping data for table `country`
---
-
-LOCK TABLES `country` WRITE;
-/*!40000 ALTER TABLE `country` DISABLE KEYS */;
-/*!40000 ALTER TABLE `country` ENABLE KEYS */;
-UNLOCK TABLES;
 
 --
 -- Table structure for table `dailyItinerary`
@@ -191,48 +127,46 @@ CREATE TABLE IF NOT EXISTS `dailyItinerary` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 SET FOREIGN_KEY_CHECKS = 1;
---
--- Dumping data for table `dailyItinerary`
---
-
-LOCK TABLES `dailyItinerary` WRITE;
-/*!40000 ALTER TABLE `dailyItinerary` DISABLE KEYS */;
-/*!40000 ALTER TABLE `dailyItinerary` ENABLE KEYS */;
-UNLOCK TABLES;
 
 --
--- Table structure for table `flight`
+-- Table structure for table `flightSegment`
 --
 
 SET FOREIGN_KEY_CHECKS = 0;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!50503 SET character_set_client = utf8mb4 */;
-CREATE TABLE IF NOT EXISTS `flight` (
+CREATE TABLE IF NOT EXISTS `flightSegment` (
   `id` int NOT NULL AUTO_INCREMENT,
-  `companyName` varchar(255) DEFAULT NULL,
-  `duration` time NOT NULL,
-  `departureCityIata` varchar(255) NOT NULL,
-  `arrivalCityIata` varchar(255) NOT NULL,
-  `price` decimal(7,2) NOT NULL,
-  `airplaneName` varchar(255) DEFAULT NULL,
-  `departureDate` timestamp NOT NULL,
-  `arrivalDate` timestamp NOT NULL,
-  PRIMARY KEY (`id`),
-  KEY `departureCityIata` (`departureCityIata`),
-  KEY `arrivalCityIata` (`arrivalCityIata`),
-  CONSTRAINT `flight_ibfk_1` FOREIGN KEY (`departureCityIata`) REFERENCES `city` (`iataCode`),
-  CONSTRAINT `flight_ibfk_2` FOREIGN KEY (`arrivalCityIata`) REFERENCES `city` (`iataCode`)
-) ENGINE=InnoDB AUTO_INCREMENT=13 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+  `departureAirportIata` varchar(255) DEFAULT NULL,
+  `arrivalAirportIata` varchar(255) DEFAULT NULL,
+  `departureDateTime` datetime DEFAULT NULL,
+  `arrivalDateTime` datetime DEFAULT NULL,
+  `carrierCode` varchar(255) DEFAULT NULL,
+  `carrierName` varchar(255) DEFAULT NULL,
+  `aircraftCode` varchar(255) DEFAULT NULL,
+  `aircraftName` varchar(255) DEFAULT NULL,
+  `duration` time DEFAULT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB AUTO_INCREMENT=201 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
-SET FOREIGN_KEY_CHECKS = 1;
+
 --
--- Dumping data for table `flight`
+-- Table structure for table `flightSegmentRide`
 --
 
-LOCK TABLES `flight` WRITE;
-/*!40000 ALTER TABLE `flight` DISABLE KEYS */;
-/*!40000 ALTER TABLE `flight` ENABLE KEYS */;
-UNLOCK TABLES;
+SET FOREIGN_KEY_CHECKS = 0;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!50503 SET character_set_client = utf8mb4 */;
+CREATE TABLE IF NOT EXISTS `flightSegmentRide` (
+  `planeRideId` int NOT NULL,
+  `flightSegmentId` int NOT NULL,
+  PRIMARY KEY (`planeRideId`,`flightSegmentId`),
+  KEY `flightSegmentId` (`flightSegmentId`),
+  CONSTRAINT `flightSegmentRide_ibfk_1` FOREIGN KEY (`planeRideId`) REFERENCES `planeRide` (`id`),
+  CONSTRAINT `flightSegmentRide_ibfk_2` FOREIGN KEY (`flightSegmentId`) REFERENCES `flightSegment` (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
+SET FOREIGN_KEY_CHECKS = 1;
 
 --
 -- Table structure for table `hotel`
@@ -251,17 +185,9 @@ CREATE TABLE IF NOT EXISTS `hotel` (
   PRIMARY KEY (`id`),
   KEY `cityId` (`cityId`),
   CONSTRAINT `hotel_ibfk_1` FOREIGN KEY (`cityId`) REFERENCES `city` (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=37 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=45 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 SET FOREIGN_KEY_CHECKS = 1;
---
--- Dumping data for table `hotel`
---
-
-LOCK TABLES `hotel` WRITE;
-/*!40000 ALTER TABLE `hotel` DISABLE KEYS */;
-/*!40000 ALTER TABLE `hotel` ENABLE KEYS */;
-UNLOCK TABLES;
 
 --
 -- Table structure for table `images`
@@ -291,16 +217,7 @@ CREATE TABLE IF NOT EXISTS `images` (
   CONSTRAINT `images_chk_2` CHECK ((`sizeType` in (_utf8mb4'gallery',_utf8mb4'cover')))
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
-
 SET FOREIGN_KEY_CHECKS = 1;
---
--- Dumping data for table `images`
---
-
-LOCK TABLES `images` WRITE;
-/*!40000 ALTER TABLE `images` DISABLE KEYS */;
-/*!40000 ALTER TABLE `images` ENABLE KEYS */;
-UNLOCK TABLES;
 
 --
 -- Table structure for table `itinerary`
@@ -316,23 +233,14 @@ CREATE TABLE IF NOT EXISTS `itinerary` (
   `shortDescription` text NOT NULL,
   `stock` int NOT NULL,
   `price` decimal(7,2) DEFAULT NULL,
-  `totalDuration` time NOT NULL,
+  `totalDuration` int DEFAULT NULL,
   `themeId` int DEFAULT NULL,
   PRIMARY KEY (`id`),
   KEY `themeId_constraint` (`themeId`),
   CONSTRAINT `themeId_constraint` FOREIGN KEY (`themeId`) REFERENCES `theme` (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=6 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
-
 SET FOREIGN_KEY_CHECKS = 1;
---
--- Dumping data for table `itinerary`
---
-
-LOCK TABLES `itinerary` WRITE;
-/*!40000 ALTER TABLE `itinerary` DISABLE KEYS */;
-/*!40000 ALTER TABLE `itinerary` ENABLE KEYS */;
-UNLOCK TABLES;
 
 --
 -- Table structure for table `itineraryImages`
@@ -350,54 +258,7 @@ CREATE TABLE IF NOT EXISTS `itineraryImages` (
   CONSTRAINT `itineraryImage_constraint_2` FOREIGN KEY (`imageId`) REFERENCES `images` (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
-
 SET FOREIGN_KEY_CHECKS = 1;
---
--- Dumping data for table `itineraryImages`
---
-
-LOCK TABLES `itineraryImages` WRITE;
-/*!40000 ALTER TABLE `itineraryImages` DISABLE KEYS */;
-/*!40000 ALTER TABLE `itineraryImages` ENABLE KEYS */;
-UNLOCK TABLES;
-
---
--- Table structure for table `itineraryStep`
---
-
-SET FOREIGN_KEY_CHECKS = 0;
-/*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!50503 SET character_set_client = utf8mb4 */;
-CREATE TABLE IF NOT EXISTS `itineraryStep` (
-  `id` int NOT NULL AUTO_INCREMENT,
-  `itineraryId` int NOT NULL,
-  `cityId` int NOT NULL,
-  `countryId` int NOT NULL,
-  `hotelId` int NOT NULL,
-  `position` int NOT NULL,
-  `dayNumber` int NOT NULL,
-  `descriptionPerDay` text,
-  PRIMARY KEY (`id`),
-  KEY `itineraryId` (`itineraryId`),
-  KEY `cityId` (`cityId`),
-  KEY `countryId` (`countryId`),
-  KEY `hotelId` (`hotelId`),
-  CONSTRAINT `itineraryStep_ibfk_1` FOREIGN KEY (`itineraryId`) REFERENCES `itinerary` (`id`),
-  CONSTRAINT `itineraryStep_ibfk_2` FOREIGN KEY (`cityId`) REFERENCES `city` (`id`),
-  CONSTRAINT `itineraryStep_ibfk_3` FOREIGN KEY (`countryId`) REFERENCES `country` (`id`),
-  CONSTRAINT `itineraryStep_ibfk_4` FOREIGN KEY (`hotelId`) REFERENCES `hotel` (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
-/*!40101 SET character_set_client = @saved_cs_client */;
-
-SET FOREIGN_KEY_CHECKS = 1;
---
--- Dumping data for table `itineraryStep`
---
-
-LOCK TABLES `itineraryStep` WRITE;
-/*!40000 ALTER TABLE `itineraryStep` DISABLE KEYS */;
-/*!40000 ALTER TABLE `itineraryStep` ENABLE KEYS */;
-UNLOCK TABLES;
 
 --
 -- Table structure for table `mySelection`
@@ -416,14 +277,6 @@ CREATE TABLE IF NOT EXISTS `mySelection` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 SET FOREIGN_KEY_CHECKS = 1;
---
--- Dumping data for table `mySelection`
---
-
-LOCK TABLES `mySelection` WRITE;
-/*!40000 ALTER TABLE `mySelection` DISABLE KEYS */;
-/*!40000 ALTER TABLE `mySelection` ENABLE KEYS */;
-UNLOCK TABLES;
 
 --
 -- Table structure for table `options`
@@ -437,18 +290,29 @@ CREATE TABLE IF NOT EXISTS `options` (
   `name` varchar(255) NOT NULL,
   `price` decimal(7,2) NOT NULL,
   `description` text,
+  `category` varchar(255) DEFAULT NULL,
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=11 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=12 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 SET FOREIGN_KEY_CHECKS = 1;
+
 --
--- Dumping data for table `options`
+-- Table structure for table `planeRide`
 --
 
-LOCK TABLES `options` WRITE;
-/*!40000 ALTER TABLE `options` DISABLE KEYS */;
-/*!40000 ALTER TABLE `options` ENABLE KEYS */;
-UNLOCK TABLES;
+SET FOREIGN_KEY_CHECKS = 0;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!50503 SET character_set_client = utf8mb4 */;
+CREATE TABLE IF NOT EXISTS `planeRide` (
+  `id` int NOT NULL AUTO_INCREMENT,
+  `one_way` tinyint(1) DEFAULT NULL,
+  `totalPrice` decimal(7,2) DEFAULT NULL,
+  `currency` varchar(255) DEFAULT NULL,
+  `created_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB AUTO_INCREMENT=118 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
+SET FOREIGN_KEY_CHECKS = 1;
 
 --
 -- Table structure for table `reservation`
@@ -467,29 +331,35 @@ CREATE TABLE IF NOT EXISTS `reservation` (
   `purchaseDate` date DEFAULT (curdate()),
   `numberOfAdults` int NOT NULL,
   `numberOfKids` int NOT NULL DEFAULT '0',
-  `flightId` int NOT NULL,
-  `optionId` int NOT NULL,
-  PRIMARY KEY (`userId`,`itineraryId`,`flightId`,`optionId`),
+  `optionId` int DEFAULT NULL,
+  PRIMARY KEY (`userId`,`itineraryId`),
   KEY `userId` (`userId`),
   KEY `itineraryId` (`itineraryId`),
-  KEY `flightId_constraint` (`flightId`),
   KEY `optionId_constraint` (`optionId`),
-  CONSTRAINT `flightId_constraint` FOREIGN KEY (`flightId`) REFERENCES `flight` (`id`),
   CONSTRAINT `itinerary_id_reservation` FOREIGN KEY (`itineraryId`) REFERENCES `itinerary` (`id`) ON DELETE CASCADE,
   CONSTRAINT `optionId_constraint` FOREIGN KEY (`optionId`) REFERENCES `options` (`id`),
   CONSTRAINT `user_id_reservation` FOREIGN KEY (`userId`) REFERENCES `user` (`id`) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
-
 SET FOREIGN_KEY_CHECKS = 1;
---
--- Dumping data for table `reservation`
---
 
-LOCK TABLES `reservation` WRITE;
-/*!40000 ALTER TABLE `reservation` DISABLE KEYS */;
-/*!40000 ALTER TABLE `reservation` ENABLE KEYS */;
-UNLOCK TABLES;
+--
+-- Table structure for table `reservationOption`
+--
+SET FOREIGN_KEY_CHECKS = 0;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!50503 SET character_set_client = utf8mb4 */;
+CREATE TABLE IF NOT EXISTS `reservationOption` (
+  `user_id` int NOT NULL,
+  `itinerary_id` int NOT NULL,
+  `option_id` int NOT NULL,
+  PRIMARY KEY (`user_id`,`itinerary_id`,`option_id`),
+  KEY `option_id` (`option_id`),
+  CONSTRAINT `reservationOption_ibfk_1` FOREIGN KEY (`user_id`, `itinerary_id`) REFERENCES `reservation` (`userId`, `itineraryId`) ON DELETE CASCADE,
+  CONSTRAINT `reservationOption_ibfk_2` FOREIGN KEY (`option_id`) REFERENCES `options` (`id`) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
+SET FOREIGN_KEY_CHECKS = 1;
 
 --
 -- Table structure for table `theme`
@@ -502,17 +372,9 @@ CREATE TABLE IF NOT EXISTS `theme` (
   `id` int NOT NULL AUTO_INCREMENT,
   `name` text NOT NULL,
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=5 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 SET FOREIGN_KEY_CHECKS = 1;
---
--- Dumping data for table `theme`
---
-
-LOCK TABLES `theme` WRITE;
-/*!40000 ALTER TABLE `theme` DISABLE KEYS */;
-/*!40000 ALTER TABLE `theme` ENABLE KEYS */;
-UNLOCK TABLES;
 
 --
 -- Table structure for table `user`
@@ -526,19 +388,13 @@ CREATE TABLE IF NOT EXISTS `user` (
   `email` varchar(255) NOT NULL,
   `password` varchar(255) NOT NULL,
   `role` varchar(255) NOT NULL,
+  `firstName` varchar(255) DEFAULT NULL,
+  `lastName` varchar(255) DEFAULT NULL,
   PRIMARY KEY (`id`),
   UNIQUE KEY `email_UNIQUE` (`email`)
-) ENGINE=InnoDB AUTO_INCREMENT=11 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=16 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 SET FOREIGN_KEY_CHECKS = 1;
---
--- Dumping data for table `user`
---
-
-LOCK TABLES `user` WRITE;
-/*!40000 ALTER TABLE `user` DISABLE KEYS */;
-/*!40000 ALTER TABLE `user` ENABLE KEYS */;
-UNLOCK TABLES;
 
 --
 -- Table structure for table `userDailyPlan`
@@ -548,39 +404,31 @@ SET FOREIGN_KEY_CHECKS = 0;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE IF NOT EXISTS `userDailyPlan` (
+  `id` int NOT NULL AUTO_INCREMENT,
   `userId` int NOT NULL,
   `userItineraryId` int NOT NULL,
   `hotelId` int NOT NULL,
   `cityId` int NOT NULL,
   `dayNumber` int NOT NULL,
   `offDay` tinyint(1) DEFAULT '0',
-  `activityId` int NOT NULL,
-  `flightId` int NOT NULL,
-  PRIMARY KEY (`userId`,`userItineraryId`,`hotelId`,`cityId`,`activityId`,`flightId`),
+  `activityId` int DEFAULT NULL,
+  `planeRideId` int DEFAULT NULL,
+  PRIMARY KEY (`id`),
   KEY `userId` (`userId`),
   KEY `userItineraryId` (`userItineraryId`),
   KEY `hotelId` (`hotelId`),
   KEY `cityId` (`cityId`),
+  KEY `fk_userDailyPlan_planeRide` (`planeRideId`),
   KEY `user_activities_constraint` (`activityId`),
-  KEY `flightId_userPlan_constraint` (`flightId`),
-  CONSTRAINT `flightId_userPlan_constraint` FOREIGN KEY (`flightId`) REFERENCES `flight` (`id`),
-  CONSTRAINT `user_activities_constraint` FOREIGN KEY (`activityId`) REFERENCES `activity` (`id`),
+  CONSTRAINT `fk_userDailyPlan_planeRide` FOREIGN KEY (`planeRideId`) REFERENCES `planeRide` (`id`) ON DELETE SET NULL ON UPDATE CASCADE,
+  CONSTRAINT `user_activities_constraint` FOREIGN KEY (`activityId`) REFERENCES `activity` (`id`) ON DELETE SET NULL ON UPDATE CASCADE,
   CONSTRAINT `userDailyPlan_ibfk_1` FOREIGN KEY (`userId`) REFERENCES `user` (`id`),
   CONSTRAINT `userDailyPlan_ibfk_2` FOREIGN KEY (`userItineraryId`) REFERENCES `userItinerary` (`id`),
   CONSTRAINT `userDailyPlan_ibfk_3` FOREIGN KEY (`hotelId`) REFERENCES `hotel` (`id`),
   CONSTRAINT `userDailyPlan_ibfk_4` FOREIGN KEY (`cityId`) REFERENCES `city` (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=14 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
-
 SET FOREIGN_KEY_CHECKS = 1;
---
--- Dumping data for table `userDailyPlan`
---
-
-LOCK TABLES `userDailyPlan` WRITE;
-/*!40000 ALTER TABLE `userDailyPlan` DISABLE KEYS */;
-/*!40000 ALTER TABLE `userDailyPlan` ENABLE KEYS */;
-UNLOCK TABLES;
 
 --
 -- Table structure for table `userItinerary`
@@ -595,32 +443,35 @@ CREATE TABLE IF NOT EXISTS `userItinerary` (
   `startDate` date NOT NULL,
   `endDate` date NOT NULL,
   `startingPrice` decimal(7,2) DEFAULT NULL,
-  `totalDuration` time NOT NULL,
+  `totalDuration` int DEFAULT NULL,
   `departureCity` varchar(255) NOT NULL,
   `itineraryName` text,
   `numberOfAdults` int NOT NULL,
   `numberOfKids` int NOT NULL DEFAULT '0',
-  `flightId` int DEFAULT NULL,
-  `optionId` int DEFAULT NULL,
   PRIMARY KEY (`id`),
   KEY `userId` (`userId`),
-  KEY `flightId_user_constraint` (`flightId`),
-  KEY `optionId_user_constraint` (`optionId`),
-  CONSTRAINT `flightId_user_constraint` FOREIGN KEY (`flightId`) REFERENCES `flight` (`id`),
-  CONSTRAINT `optionId_user_constraint` FOREIGN KEY (`optionId`) REFERENCES `options` (`id`),
   CONSTRAINT `user_id_userItinerary` FOREIGN KEY (`userId`) REFERENCES `user` (`id`) ON DELETE CASCADE
-) ENGINE=InnoDB AUTO_INCREMENT=17 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=58 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
-
 SET FOREIGN_KEY_CHECKS = 1;
+
 --
--- Dumping data for table `userItinerary`
+-- Table structure for table `userItineraryOption`
 --
 
-LOCK TABLES `userItinerary` WRITE;
-/*!40000 ALTER TABLE `userItinerary` DISABLE KEYS */;
-/*!40000 ALTER TABLE `userItinerary` ENABLE KEYS */;
-UNLOCK TABLES;
+SET FOREIGN_KEY_CHECKS = 0;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!50503 SET character_set_client = utf8mb4 */;
+CREATE TABLE IF NOT EXISTS `userItineraryOption` (
+  `userItineraryId` int NOT NULL,
+  `optionId` int NOT NULL,
+  PRIMARY KEY (`userItineraryId`,`optionId`),
+  KEY `optionId` (`optionId`),
+  CONSTRAINT `userItineraryOption_ibfk_1` FOREIGN KEY (`userItineraryId`) REFERENCES `userItinerary` (`id`) ON DELETE CASCADE,
+  CONSTRAINT `userItineraryOption_ibfk_2` FOREIGN KEY (`optionId`) REFERENCES `options` (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+SET FOREIGN_KEY_CHECKS = 1;
+/*!40101 SET character_set_client = @saved_cs_client */;
 /*!40103 SET TIME_ZONE=@OLD_TIME_ZONE */;
 
 /*!40101 SET SQL_MODE=@OLD_SQL_MODE */;
@@ -631,4 +482,4 @@ UNLOCK TABLES;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2025-03-05 10:43:25
+-- Dump completed on 2025-03-19 16:28:59

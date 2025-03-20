@@ -3,9 +3,12 @@ package com.example.odyssea.controllers;
 import com.example.odyssea.dtos.HotelDto;
 import com.example.odyssea.entities.mainTables.Hotel;
 import com.example.odyssea.services.HotelService;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import reactor.core.publisher.Mono;
 
+import java.util.Collections;
 import java.util.List;
 
 @RestController
@@ -70,8 +73,19 @@ public class HotelController {
         return hotelService.fetchAndSaveHotelsFromAmadeusByCity(iataCityCode, cityId);
     }
 
+    /**
+     * Récupère les hôtels d'une ville spécifique avec un certain standing (nombre d'étoiles)
+     */
+    @GetMapping("/by-city-and-star")
+    public ResponseEntity<?> getHotelsByCityAndStar(@RequestParam int cityId, @RequestParam int starRating) {
+        List<Hotel> hotels = hotelService.getHotelsByCityAndStarRating(cityId, starRating);
 
+        if (hotels == null) {
+            return ResponseEntity.status(HttpStatus.OK)
+                    .body(Collections.singletonMap("message", "Sorry, there are no hotels for this city."));
+        }
 
-
+        return ResponseEntity.ok(hotels);
+    }
 
 }

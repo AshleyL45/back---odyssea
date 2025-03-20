@@ -20,15 +20,21 @@ public class Option {
     @NotNull(message = "Price is required")
     @DecimalMin(value = "0.0", inclusive = true, message = "Price must be greater than or equal to 0")
     @Digits(integer = 8, fraction = 2, message = "Price must be a valid monetary amount with up to 2 decimal places")
+
     private BigDecimal price;
+    private String description;
+    private String category;
+
 
     public Option() {
     }
 
-    public Option(int id, String name, String description, BigDecimal price) {
+    public Option(int id, String name,String description, BigDecimal price, String category) {
+
         this.id = id;
         this.name = name;
         this.description = description;
+        this.category = category;
         this.price = price;
     }
 
@@ -57,6 +63,15 @@ public class Option {
         this.description = description;
     }
 
+    public String getCategory() {
+        return category;
+    }
+
+    public void setCategory(String category) {
+        this.category = category;
+    }
+
+
     public BigDecimal getPrice() {
         return price;
     }
@@ -65,3 +80,4 @@ public class Option {
         this.price = price;
     }
 }
+

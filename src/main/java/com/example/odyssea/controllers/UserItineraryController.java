@@ -1,7 +1,7 @@
 package com.example.odyssea.controllers;
 
 import com.example.odyssea.dtos.UserItinerary.UserItineraryDTO;
-import com.example.odyssea.dtos.UserItinerary.UserPreferencesDTO;
+import com.example.odyssea.dtos.UserItinerary.UserRequestDTO;
 import com.example.odyssea.services.UserItineraryService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -34,7 +34,7 @@ public class UserItineraryController {
 
     // Générer un itinéraire
     @PostMapping("/generate")
-        public ResponseEntity<UserItineraryDTO> generateItinerary(@RequestBody UserPreferencesDTO userPreferences){
+        public ResponseEntity<UserItineraryDTO> generateItinerary(@RequestBody UserRequestDTO userPreferences) throws Exception {
         UserItineraryDTO userItinerary = userItineraryService.generateUserItinerary(userPreferences);
         return ResponseEntity.status(HttpStatus.CREATED).body(userItinerary);
     }

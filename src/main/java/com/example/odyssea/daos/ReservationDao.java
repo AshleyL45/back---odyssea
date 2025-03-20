@@ -92,7 +92,7 @@ public class ReservationDao {
     // Enregistre une nouvelle réservation dans la base
     public Reservation save(Reservation reservation) {
         // Insérer la réservation principale (sans les options)
-        String sql = "INSERT INTO reservation (userId, itineraryId, status, departureDate, returnDate, totalPrice, purchaseDate, numberOfAdults, numberOfKids, planeRideId) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+        String sql = "INSERT INTO reservation (userId, itineraryId, status, departureDate, returnDate, totalPrice, purchaseDate, numberOfAdults, numberOfKids) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)";
 
         jdbcTemplate.update(sql,
                 reservation.getUserId(),
@@ -103,8 +103,7 @@ public class ReservationDao {
                 reservation.getTotalPrice(),
                 reservation.getPurchaseDate(),
                 reservation.getNumberOfAdults(),
-                reservation.getNumberOfKids(),
-                reservation.getPlaneRideId()
+                reservation.getNumberOfKids()
         );
 
         // Vérifier si optionIds est null ou vide
@@ -147,7 +146,7 @@ public class ReservationDao {
             throw new ReservationNotFoundException("Reservation of user " + userId + " with itinerary" + itineraryId + "does not exist");
         }
 
-        String sql = "UPDATE reservation SET userId = ?, itineraryId = ?, status = ?, departureDate = ?, returnDate = ?, totalPrice = ?, purchaseDate = ?, numberOfAdults = ?, numberOfKids = ? WHERE userId = ? AND itineraryId = ?";
+        String sql = "UPDATE reservation SET userId = ?, itineraryId = ?, status = ?, departureDate = ?, returnDate = ?, totalPrice = ?, purchaseDate = ?, numberOfAdults = ?, numberOfKids = ?, optionId = ? WHERE userId = ? AND itineraryId = ?";
         int rowsAffected = jdbcTemplate.update(sql,
                 reservation.getUserId(),
                 reservation.getItineraryId(),
@@ -159,7 +158,6 @@ public class ReservationDao {
                 reservation.getNumberOfAdults(),
                 reservation.getNumberOfKids(),
                 reservation.getOptionIds(),
-                reservation.getPlaneRideId(),
                 userId,
                 itineraryId
         );

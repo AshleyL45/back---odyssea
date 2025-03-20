@@ -134,4 +134,25 @@ public class PlaneRideDao {
         }
         return flight;
     }
+
+    /**
+     * Retrouver un planeRIde par ses segments
+     */
+
+    public List<PlaneRide> findBySegmentDetails(
+            String departureIata,
+            String arrivalIata,
+            LocalDateTime departureTime,
+            LocalDateTime arrivalTime
+    ) {
+        String sql = "SELECT pr.* FROM planeRide pr " +
+                "JOIN flightSegmentRide fsr ON pr.id = fsr.planeRideId " +
+                "JOIN flightSegment fs ON fsr.flightSegmentId = fs.id " +
+                "WHERE fs.departureAirportIata = ? " +
+                "AND fs.arrivalAirportIata = ? " +
+                "AND fs.departureDateTime = ? " +
+                "AND fs.arrivalDateTime = ?";
+
+        return jdbcTemplate.query(sql, new Object[]{departureIata, arrivalIata, departureTime, arrivalTime}, planeRideRowMapper);
+    }
 }

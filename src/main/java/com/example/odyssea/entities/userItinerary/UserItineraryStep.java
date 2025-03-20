@@ -1,36 +1,40 @@
 package com.example.odyssea.entities.userItinerary;
 
+import org.springframework.data.relational.core.sql.In;
 import jakarta.validation.constraints.Min;
+
 
 public class UserItineraryStep {
 
     @Min(value = 1, message = "User ID must be greater than or equal to 1")
-    private int userId;
+    private Integer userId;
 
     @Min(value = 1, message = "User Itinerary ID must be greater than or equal to 1")
-    private int userItineraryId;
+    private Integer userItineraryId;
 
     @Min(value = 1, message = "Hotel ID must be greater than or equal to 1")
-    private int hotelId;
+    private Integer hotelId;
 
     @Min(value = 1, message = "City ID must be greater than or equal to 1")
-    private int cityId;
+    private Integer cityId;
 
     @Min(value = 1, message = "Day number must be greater than or equal to 1")
-    private int dayNumber;
+    private Integer dayNumber;
 
     private boolean offDay;
 
     @Min(value = 1, message = "Activity ID must be greater than or equal to 1")
-    private int activityId;
+    private Integer activityId;
 
     @Min(value = 1, message = "Flight ID must be greater than or equal to 1")
-    private int flightId;
+    private Integer planeRideId;
+
 
     public UserItineraryStep() {
     }
 
-    public UserItineraryStep(int userId, int userItineraryId, int hotelId, int cityId, int dayNumber, boolean offDay, int activityId, int flightId) {
+    public UserItineraryStep(Integer id, Integer userId, Integer userItineraryId, Integer hotelId, Integer cityId, Integer dayNumber, boolean offDay, Integer activityId, Integer planeRideId) {
+        this.id = id;
         this.userId = userId;
         this.userItineraryId = userItineraryId;
         this.hotelId = hotelId;
@@ -38,37 +42,47 @@ public class UserItineraryStep {
         this.dayNumber = dayNumber;
         this.offDay = offDay;
         this.activityId = activityId;
-        this.flightId = flightId;
+        this.planeRideId = planeRideId;
     }
 
-    public int getUserId() {
+
+    public Integer getUserId() {
         return userId;
     }
-    public void setUserId(int userId) {
+
+    public void setUserId(Integer userId) {
         this.userId = userId;
     }
-    public int getUserItineraryId() {
+
+    public Integer getUserItineraryId() {
         return userItineraryId;
     }
-    public void setUserItineraryId(int userItineraryId) {
+
+    public void setUserItineraryId(Integer userItineraryId) {
         this.userItineraryId = userItineraryId;
     }
-    public int getHotelId() {
+
+    public Integer getHotelId() {
         return hotelId;
     }
-    public void setHotelId(int hotelId) {
+
+    public void setHotelId(Integer hotelId) {
         this.hotelId = hotelId;
     }
-    public int getCityId() {
+
+    public Integer getCityId() {
         return cityId;
     }
-    public void setCityId(int cityId) {
+
+    public void setCityId(Integer cityId) {
         this.cityId = cityId;
     }
-    public int getDayNumber() {
+
+    public Integer getDayNumber() {
         return dayNumber;
     }
-    public void setDayNumber(int dayNumber) {
+
+    public void setDayNumber(Integer dayNumber) {
         this.dayNumber = dayNumber;
     }
     public boolean isOffDay() {
@@ -77,16 +91,29 @@ public class UserItineraryStep {
     public void setOffDay(boolean offDay) {
         this.offDay = offDay;
     }
-    public int getActivityId() {
+
+    public Integer getActivityId() {
         return activityId;
     }
-    public void setActivityId(int activityId) {
+
+    public void setActivityId(Integer activityId) {
         this.activityId = activityId;
     }
-    public int getFlightId() {
-        return flightId;
+
+    public Integer getPlaneRideId() {
+        return planeRideId;
     }
-    public void setFlightId(int flightId) {
-        this.flightId = flightId;
+
+    public void setPlaneRideId(Integer planeRideId) {
+        this.planeRideId = planeRideId;
+    }
+
+    public Integer getId() {
+        return id;
+    }
+
+    public void setId(Integer id) {
+        this.id = id;
+
     }
 }

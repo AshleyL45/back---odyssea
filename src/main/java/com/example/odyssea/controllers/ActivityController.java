@@ -3,8 +3,11 @@ package com.example.odyssea.controllers;
 import com.example.odyssea.dtos.ActivityDto;
 import com.example.odyssea.entities.mainTables.Activity;
 import com.example.odyssea.services.ActivityService;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.Collections;
 import java.util.List;
 
 @RestController
@@ -50,6 +53,30 @@ public class ActivityController {
         return activityService.updateActivity(id, activity);
     }
 
+    /**
+     * Supprime une activité par son identifiant
+     */
+    @DeleteMapping("/{id}")
+    public boolean deleteActivity(@PathVariable int id) {
+        return activityService.deleteActivity(id);
+    }
+
+    /**
+     * Récupère les 5 meilleures activités d'une ville spécifique
+     */
+    @GetMapping("/top5")
+    public ResponseEntity<?> getTop5ActivitiesByCityId(@RequestParam int cityId) {
+        List<Activity> activities = activityService.getTop5ActivitiesByCityId(cityId);
+        if(activities == null){
+            return ResponseEntity.status(HttpStatus.OK)
+                    .body(Collections.singletonMap("message", "Sorry, there are no activities for this city."));
+        }
+        return ResponseEntity.ok(activities);
+    }
+
+    /**
+     * Importe les activités depuis l'API Amadeus pour une ville donnée
+     */
     @PostMapping("/importAndGet")
     public List<Activity> importAndGetActivities(@RequestParam int cityId) {
         // Importation des activités depuis Amadeus pour la ville donnée

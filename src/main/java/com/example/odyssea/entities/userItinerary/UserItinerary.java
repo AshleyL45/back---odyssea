@@ -1,5 +1,6 @@
 package com.example.odyssea.entities.userItinerary;
 
+import org.springframework.data.annotation.Id;
 import jakarta.validation.constraints.*;
 
 import java.math.BigDecimal;
@@ -7,7 +8,7 @@ import java.sql.Date;
 
 
 public class UserItinerary {
-
+    @Id
     @Min(value = 1, message = "User Itinerary ID must be greater than or equal to 1")
     private int id;
 
@@ -51,7 +52,7 @@ public class UserItinerary {
     public UserItinerary() {
     }
 
-    public UserItinerary(int id, int userId, Date startDate, Date endDate, BigDecimal startingPrice, int totalDuration, String departureCity, String itineraryName, int numberOfAdults, int numberOfKids, int flightId, int optionId) {
+    public UserItinerary(int id, int userId, Date startDate, Date endDate, BigDecimal startingPrice, int totalDuration, String departureCity, String itineraryName, int numberOfAdults, int numberOfKids) {
         this.id = id;
         this.userId = userId;
         this.startDate = startDate;
@@ -62,8 +63,6 @@ public class UserItinerary {
         this.itineraryName = itineraryName;
         this.numberOfAdults = numberOfAdults;
         this.numberOfKids = numberOfKids;
-        this.flightId = flightId;
-        this.optionId = optionId;
     }
 
     public int getId() {
@@ -125,17 +124,5 @@ public class UserItinerary {
     }
     public void setNumberOfKids(int numberOfKids) {
         this.numberOfKids = numberOfKids;
-    }
-    public int getFlightId() {
-        return flightId;
-    }
-    public void setFlightId(int flightId) {
-        this.flightId = flightId;
-    }
-    public int getOptionId() {
-        return optionId;
-    }
-    public void setOptionId(int optionId) {
-        this.optionId = optionId;
     }
 }
