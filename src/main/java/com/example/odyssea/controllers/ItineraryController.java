@@ -1,5 +1,6 @@
 package com.example.odyssea.controllers;
 
+import com.example.odyssea.dtos.ItineraryResponseDTO;
 import com.example.odyssea.entities.itinerary.Itinerary;
 import com.example.odyssea.services.ItineraryService;
 import org.springframework.http.HttpStatus;
@@ -28,6 +29,16 @@ public class ItineraryController {
     public ResponseEntity<Itinerary> getItineraryById(@PathVariable int id) {
         Itinerary itinerary = itineraryService.getItineraryById(id);
         return new ResponseEntity<>(itinerary, HttpStatus.OK);
+    }
+
+    @GetMapping("/{id}/details")
+    public ResponseEntity<ItineraryResponseDTO> getItineraryDetails(@PathVariable int id) {
+        return ResponseEntity.ok(itineraryService.getItineraryDetails(id));
+    }
+
+    @GetMapping("/search")
+    public ResponseEntity<List<Itinerary>> searchItineraries(@RequestParam String query){
+        return ResponseEntity.ok(itineraryService.searchItineraries(query));
     }
 
     @PostMapping

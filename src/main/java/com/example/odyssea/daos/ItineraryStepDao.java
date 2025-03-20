@@ -1,7 +1,9 @@
 package com.example.odyssea.daos;
 
 
+import com.example.odyssea.dtos.DailyPlanDto;
 import com.example.odyssea.entities.itinerary.ItineraryStep;
+import com.example.odyssea.mapper.DailyPlanDTOMapper;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.stereotype.Repository;
@@ -32,29 +34,35 @@ public class ItineraryStepDao {
 
 
     public List<ItineraryStep> findAll() {
-        String sql = "SELECT * FROM itinerarystep";
+        String sql = "SELECT * FROM itineraryStep";
         return jdbcTemplate.query(sql, itineraryStepRowMapper);
     }
 
 
 
-    public ItineraryStep findById(int idItineraryStep) {
-        String sql = "SELECT * FROM itinerarystep WHERE id = ?";
-        return jdbcTemplate.query(sql, itineraryStepRowMapper, idItineraryStep)
+    public ItineraryStep findById(int id) {
+        String sql = "SELECT * FROM itineraryStep WHERE id = ?";
+        return jdbcTemplate.query(sql, itineraryStepRowMapper, id)
                 .stream()
                 .findFirst()
-                .orElseThrow(() -> new RuntimeException("Itinéraire avec l'ID : " + idItineraryStep + " n'existe pas"));
+                .orElseThrow(() -> new RuntimeException("Itinéraire avec l'ID : " + id + " n'existe pas"));
+    }
+
+    public List<DailyPlanDto> findByItineraryId(int itineraryId){
+        String sql = "SELECT city.name AS cityName, country.name AS countryName, hotel.name AS hotelName, hotel.description AS hotelDescription, activity.name AS activityName, activity.description AS activityDescription, dailyItinerary.descriptionPerDay, dailyItinerary.dayNumber FROM dailyItinerary\n" +
+                "INNER JOIN city ON dailyItinerary.cityId = city.id\n" +
+                "INNER JOIN country ON dailyItinerary.countryId = country.id\n" +
+                "INNER JOIN hotel ON dailyItinerary.hotelId = hotel.id\n" +
+                "INNER JOIN activity ON dailyItinerary.activityId = activity.id where dailyItinerary.itineraryId = ? ORDER BY dayNumber";
+        return jdbcTemplate.query(sql, new DailyPlanDTOMapper(), itineraryId);
     }
 
 
     public ItineraryStep save(ItineraryStep itineraryStep) {
-        String sql = "INSERT INTO itinerarystep (itineraryId, cityId, countryId, hotelId, position, dayNumber, descriptionPerDay) VALUES (?, ?, ?, ?, ?, ?, ?)";
-        jdbcTemplate.update(sql, itineraryStep.getPosition(), itineraryStep.getDayNumber(), itineraryStep.getDescriptionPerDay());
+        String sql = "INSERT INTO itineraryStep (itineraryId, cityId, countryId, hotelId, position, dayNumber, descriptionPerDay) VALUES (?, ?, ?, ?, ?, ?, ?)";
+        jdbcTemplate.update(sql, itineraryStep.getItineraryId(), itineraryStep.getIdCity(), itineraryStep.getIdCountry(), itineraryStep.getIdHotel(), itineraryStep.getPosition(), itineraryStep.getDayNumber(), itineraryStep.getDescriptionPerDay());
 
-        String sqlGetId = "SELECT LAST_INSERT_ID()";
-        int id = jdbcTemplate.queryForObject(sqlGetId, Integer.class);
 
-        itineraryStep.setIdItineraryStep(id);
         return itineraryStep;
     }
 
@@ -65,7 +73,7 @@ public class ItineraryStepDao {
             throw new RuntimeException("Etape de l'itinéraire avec l'ID : " + id + " n'existe pas");
         }
 
-        String sql = "UPDATE itinerarystep SET itineraryId = ?, cityId =?, countryId = ?, hotelId = ?, position = ?, dayNumber = ?, descriptionPerDay = ? WHERE id = ?";
+        String sql = "UPDATE itineraryStep SET itineraryId = ?, cityId =?, countryId = ?, hotelId = ?, position = ?, dayNumber = ?, descriptionPerDay = ? WHERE id = ?";
         int rowsAffected = jdbcTemplate.update(sql, itineraryStep.getPosition(), itineraryStep.getDayNumber(), itineraryStep.getDescriptionPerDay(), id);
 
         if (rowsAffected <= 0) {
@@ -77,7 +85,7 @@ public class ItineraryStepDao {
 
 
     private boolean itineraryStepExists(int id) {
-        String checkSql = "SELECT COUNT(*) FROM itinerarystep WHERE id = ?";
+        String checkSql = "SELECT COUNT(*) FROM itineraryStep WHERE id = ?";
         int count = jdbcTemplate.queryForObject(checkSql, Integer.class, id);
         return count > 0;
     }
@@ -85,7 +93,7 @@ public class ItineraryStepDao {
 
 
     public boolean delete(int id) {
-        String sql = "DELETE FROM itinerarystep WHERE id = ?";
+        String sql = "DELETE FROM itineraryStep WHERE id = ?";
         int rowsAffected = jdbcTemplate.update(sql, id);
         return rowsAffected > 0;
     }
