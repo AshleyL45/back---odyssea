@@ -1,18 +1,49 @@
 package com.example.odyssea.entities.mainTables;
 
+import jakarta.validation.constraints.Min;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Size;
+
 import java.time.LocalDateTime;
 import java.time.Duration;
 
 public class FlightSegment {
+
+    @Min(value = 1, message = "Flight segment ID must be greater than or equal to 1")
     private int id;
+
+    @NotBlank(message = "Departure airport IATA code is required")
+    @Size(max = 10, message = "Departure airport IATA code must not exceed 10 characters")
     private String departureAirportIata;
+
+    @NotBlank(message = "Arrival airport IATA code is required")
+    @Size(max = 10, message = "Arrival airport IATA code must not exceed 10 characters")
     private String arrivalAirportIata;
+
+    @NotNull(message = "Departure date and time is required")
     private LocalDateTime departureDateTime;
+
+    @NotNull(message = "Arrival date and time is required")
     private LocalDateTime arrivalDateTime;
+
+    @NotBlank(message = "Carrier code is required")
+    @Size(max = 10, message = "Carrier code must not exceed 10 characters")
     private String carrierCode;
+
+    @NotBlank(message = "Carrier name is required")
+    @Size(max = 255, message = "Carrier name must not exceed 255 characters")
     private String carrierName;
+
+    @NotBlank(message = "Aircraft code is required")
+    @Size(max = 10, message = "Aircraft code must not exceed 10 characters")
     private String aircraftCode;
+
+    @NotBlank(message = "Aircraft name is required")
+    @Size(max = 255, message = "Aircraft name must not exceed 255 characters")
     private String aircraftName;
+
+    @NotNull(message = "Duration is required")
     private Duration duration;
 
     public FlightSegment() {}
@@ -33,7 +64,7 @@ public class FlightSegment {
         this.duration = duration;
     }
 
-    // Getters et setters
+    // Getters and Setters
 
     public int getId() {
         return id;

@@ -44,12 +44,9 @@ public class SecurityConfig {
                 )
                 .authorizeHttpRequests(authorizeRequests ->
                         authorizeRequests
-                                .requestMatchers("/auth/**", "/test/all", "/error").permitAll()
-                                .requestMatchers("/user/**").hasRole("USER")
-                                .requestMatchers("/flights/**").permitAll()
-                                .requestMatchers("/reservations/**").hasRole("USER")
-                                .requestMatchers("/userItinerary/**").permitAll()
-                                .requestMatchers("/hotels/**").permitAll()
+
+                                .requestMatchers("/auth/**", "/test/all","/hotels/**", "/flights/**", "/activities/**",  "/error", "/userItinerary/**").permitAll()
+                                .requestMatchers("/user/**", "/reservations/**").hasRole("USER")
                                 .anyRequest().authenticated()
                 );
         http.addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class);

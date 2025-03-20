@@ -3,7 +3,6 @@ package com.example.odyssea.controllers;
 import com.example.odyssea.dtos.ActivityDto;
 import com.example.odyssea.entities.mainTables.Activity;
 import com.example.odyssea.services.ActivityService;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -17,7 +16,6 @@ public class ActivityController {
 
     private final ActivityService activityService;
 
-    @Autowired
     public ActivityController(ActivityService activityService) {
         this.activityService = activityService;
     }
@@ -31,9 +29,9 @@ public class ActivityController {
     }
 
     /**
-     * Récupère une activité spécifique par son identifiant
+     * Récupère une activité spécifique par son identifiant (uniquement numérique)
      */
-    @GetMapping("/{id}")
+    @GetMapping("/{id:\\d+}")
     public Activity getActivityById(@PathVariable int id) {
         return activityService.getActivity(id);
     }
@@ -47,9 +45,9 @@ public class ActivityController {
     }
 
     /**
-     * Met à jour une activité existante
+     * Met à jour une activité existante (identifiant numérique uniquement)
      */
-    @PutMapping("/{id}")
+    @PutMapping("/{id:\\d+}")
     public boolean updateActivity(@PathVariable int id, @RequestBody ActivityDto activityDto, @RequestParam int cityId) {
         Activity activity = activityDto.toActivity(cityId);
         return activityService.updateActivity(id, activity);
@@ -79,8 +77,13 @@ public class ActivityController {
     /**
      * Importe les activités depuis l'API Amadeus pour une ville donnée
      */
-    @PostMapping("/import")
-    public void importActivities(@RequestParam int cityId) {
+    @PostMapping("/importAndGet")
+    public List<Activity> importAndGetActivities(@RequestParam int cityId) {
+        // Importation des activités depuis Amadeus pour la ville donnée
         activityService.importActivitiesFromAmadeus(cityId);
+        // Récupération des 5 activités enregistrées dans la base
+        return activityService.getTop5ActivitiesByCityId(cityId);
     }
 }
+
+

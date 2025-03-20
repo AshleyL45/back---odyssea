@@ -23,7 +23,6 @@ import java.util.List;
 
 @Service
 public class PlaneRideService {
-
     private final PlaneRideDao planeRideDao;
     private final FlightSegmentRideDao flightSegmentRideDao;
     private final TokenService tokenService;
@@ -42,6 +41,9 @@ public class PlaneRideService {
         this.flightSegmentService = flightSegmentService;
     }
 
+    /**
+     * Récupère l'itinéraire complet d'un vol via l'API Amadeus.
+     */
     public Mono<List<FlightItineraryDTO>> getFlights(String departureIata, String arrivalIata,
                                                      LocalDate departureDate, LocalDate arrivalDate,
                                                      int totalPeople) {
@@ -97,11 +99,9 @@ public class PlaneRideService {
                     if (offer.getPrice() != null && offer.getPrice().getTotalPrice() != null) {
                         totalPrice = offer.getPrice().getTotalPrice();
                     }
-                    // Création d'un DTO minimal pour PlaneRide à partir du prix global
                     PlaneRideDTO planeRideDTO = createFlightDTO(offer);
                     if (planeRideDTO != null) {
                         planeRideDTO.setTotalPrice(totalPrice);
-                        // Création de l'entité PlaneRide (one_way à true pour un vol one way)
                         PlaneRide planeRideEntity = new PlaneRide(
                                 0,
                                 true,
@@ -109,22 +109,20 @@ public class PlaneRideService {
                                 planeRideDTO.getCurrency(),
                                 null
                         );
-                        // Sauvegarder la PlaneRide et récupérer l'ID généré
                         PlaneRide savedPlaneRide = planeRideDao.save(planeRideEntity);
 
-                        // Pour chaque segment sauvegardé, créer une association dans flightSegmentRide
                         for (Integer segmentId : savedSegmentIds) {
                             FlightSegmentRide ride = new FlightSegmentRide(savedPlaneRide.getId(), segmentId);
                             flightSegmentRideDao.save(ride);
                         }
                     }
+                    // Retourne l'itinéraire complet avec tous ses segments dans une liste
                     return Mono.just(Collections.singletonList(itinerary));
                 });
     }
 
     /**
-     * Méthode pour créer un PlaneRideDTO minimal avec les informations nécessaires
-     * pour alimenter la table planeRide.
+     * Méthode pour créer un PlaneRideDTO minimal avec les informations nécessaires pour alimenter la table planeRide
      */
     private PlaneRideDTO createFlightDTO(FlightOffersDTO flightOffer) {
         if (flightOffer == null || flightOffer.getPrice() == null) {

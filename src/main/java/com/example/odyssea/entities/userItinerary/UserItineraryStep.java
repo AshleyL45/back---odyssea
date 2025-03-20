@@ -1,17 +1,34 @@
 package com.example.odyssea.entities.userItinerary;
 
 import org.springframework.data.relational.core.sql.In;
+import jakarta.validation.constraints.Min;
+
 
 public class UserItineraryStep {
-    private Integer id;
+
+    @Min(value = 1, message = "User ID must be greater than or equal to 1")
     private Integer userId;
+
+    @Min(value = 1, message = "User Itinerary ID must be greater than or equal to 1")
     private Integer userItineraryId;
+
+    @Min(value = 1, message = "Hotel ID must be greater than or equal to 1")
     private Integer hotelId;
+
+    @Min(value = 1, message = "City ID must be greater than or equal to 1")
     private Integer cityId;
+
+    @Min(value = 1, message = "Day number must be greater than or equal to 1")
     private Integer dayNumber;
+
     private boolean offDay;
+
+    @Min(value = 1, message = "Activity ID must be greater than or equal to 1")
     private Integer activityId;
+
+    @Min(value = 1, message = "Flight ID must be greater than or equal to 1")
     private Integer planeRideId;
+
 
     public UserItineraryStep() {
     }
@@ -68,11 +85,9 @@ public class UserItineraryStep {
     public void setDayNumber(Integer dayNumber) {
         this.dayNumber = dayNumber;
     }
-
     public boolean isOffDay() {
         return offDay;
     }
-
     public void setOffDay(boolean offDay) {
         this.offDay = offDay;
     }
@@ -99,5 +114,6 @@ public class UserItineraryStep {
 
     public void setId(Integer id) {
         this.id = id;
+
     }
 }

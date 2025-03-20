@@ -1,11 +1,25 @@
 package com.example.odyssea.entities.mainTables;
 
+import jakarta.validation.constraints.*;
+
 import java.math.BigDecimal;
 
 public class Country {
+
+    @Min(value = 1, message = "Country ID must be greater than or equal to 1")
     private int id;
+
+    @NotBlank(message = "Country name is required")
+    @Size(max = 255, message = "Country name must not exceed 255 characters")
     private String name;
+
+    @NotBlank(message = "Continent is required")
+    @Size(max = 255, message = "Continent must not exceed 255 characters")
     private String continent;
+
+    @NotNull(message = "Price is required")
+    @DecimalMin(value = "0.0", inclusive = true, message = "Price must be greater than or equal to 0")
+    @Digits(integer = 8, fraction = 2, message = "Price must be a valid monetary amount with up to 2 decimal places")
     private BigDecimal price;
 
     public Country() {}
@@ -17,7 +31,7 @@ public class Country {
         this.price = price;
     }
 
-    // Getters et Setters
+    // Getters and Setters
     public int getId() {
         return id;
     }

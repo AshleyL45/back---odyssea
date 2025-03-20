@@ -23,9 +23,6 @@ public class HotelDto {
         this.price = price;
     }
 
-    /**
-     * Convertit une entité Hotel en HotelDto
-     */
     public static HotelDto fromEntity(Hotel hotel) {
         return new HotelDto(
                 hotel.getId(),
@@ -37,9 +34,7 @@ public class HotelDto {
         );
     }
 
-    /**
-     * Convertit ce DTO en entité Hotel
-     */
+
     public Hotel toEntity() {
         return new Hotel(
                 id,
@@ -51,6 +46,7 @@ public class HotelDto {
         );
     }
 
+  
     // Getters & Setters
     public Integer getId() {
         return id;

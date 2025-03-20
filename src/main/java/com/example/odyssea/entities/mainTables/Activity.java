@@ -1,13 +1,37 @@
 package com.example.odyssea.entities.mainTables;
 
+import jakarta.validation.constraints.*;
+
 public class Activity {
+
+    @Min(value = 1, message = "Activity ID must be greater than or equal to 1")
     private int id;
+
+    @Min(value = 1, message = "City ID must be greater than or equal to 1")
     private int cityId;
+
+    @NotBlank(message = "Name is required")
+    @Size(max = 255, message = "Name must not exceed 255 characters")
     private String name;
+
+    @NotBlank(message = "Type is required")
+    @Size(max = 255, message = "Type must not exceed 255 characters")
     private String type;
+
+    @NotBlank(message = "Physical effort description is required")
+    @Size(max = 255, message = "Physical effort description must not exceed 255 characters")
     private String physicalEffort;
+
+    @Min(value = 0, message = "Duration must be greater than or equal to 0")
     private int duration;
+
+    @NotBlank(message = "Description is required")
+    @Size(max = 5000, message = "Description must not exceed 5000 characters")
     private String description;
+
+    @NotNull(message = "Price is required")
+    @DecimalMin(value = "0.0", inclusive = true, message = "Price must be greater than or equal to 0")
+    @Digits(integer = 8, fraction = 2, message = "Price must be a valid monetary amount with up to 2 decimal places")
     private Double price;
 
     public Activity() {}
@@ -23,7 +47,7 @@ public class Activity {
         this.price = price;
     }
 
-    // Getters et Setters
+    // Getters & Setters
     public int getId() {
         return id;
     }

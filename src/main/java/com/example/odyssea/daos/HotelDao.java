@@ -91,7 +91,6 @@ public class HotelDao {
 
     /**
      * Recherche un hôtel par son identifiant
-     * Retourne Optional.empty() si non trouvé
      */
     public Optional<Hotel> findById(int id) {
         String sql = "SELECT * FROM hotel WHERE id = ?";
@@ -123,9 +122,18 @@ public class HotelDao {
         if (hotels.isEmpty()) {
             throw new ResourceNotFoundException("No hotels found for city id " + cityId);
         }
-
         return hotels;
     }
+
+    /**
+     * Vérifie si un hôtel existe déjà dans la base en fonction de son nom et de son cityId
+     */
+    public boolean existsByNameAndCityId(String name, int cityId) {
+        String sql = "SELECT COUNT(*) FROM hotel WHERE name = ? AND cityId = ?";
+        Integer count = jdbcTemplate.queryForObject(sql, Integer.class, name, cityId);
+        return count != null && count > 0;
+    }
+
 
     /**
      * Récupère les hôtels d'une ville donnée ayant un certain standing (starRating)
