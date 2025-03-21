@@ -1,6 +1,7 @@
 package com.example.odyssea.daos;
 
 import com.example.odyssea.entities.itinerary.Itinerary;
+import com.example.odyssea.exceptions.ResourceNotFoundException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.stereotype.Repository;
@@ -46,7 +47,7 @@ public class ItineraryDao {
         return jdbcTemplate.query(sql, itineraryRowMapper, idItinerary)
                 .stream()
                 .findFirst()
-                .orElseThrow(() -> new RuntimeException("Itinéraire avec l'Id : " + idItinerary + " n'existe pas"));
+                .orElseThrow(() -> new ResourceNotFoundException("Itinéraire avec l'Id : " + idItinerary + " n'existe pas"));
     }
 
 
@@ -56,7 +57,7 @@ public class ItineraryDao {
         return jdbcTemplate.query(sql, itineraryRowMapper, name)
                 .stream()
                 .findFirst()
-                .orElseThrow(() -> new RuntimeException("Itinéraire avec le nom : " + name + " n'existe pas"));
+                .orElseThrow(() -> new ResourceNotFoundException("Itinéraire avec le nom : " + name + " n'existe pas"));
     }
 
 
@@ -66,7 +67,7 @@ public class ItineraryDao {
         return jdbcTemplate.query(sql, itineraryRowMapper, totalDuration)
                 .stream()
                 .findFirst()
-                .orElseThrow(() -> new RuntimeException("Itinéraire avec une durée de : " + totalDuration + " n'existe pas"));
+                .orElseThrow(() -> new ResourceNotFoundException("Itinéraire avec une durée de : " + totalDuration + " n'existe pas"));
     }
 
 
@@ -93,7 +94,7 @@ public class ItineraryDao {
         int rowsAffected = jdbcTemplate.update(sql, itinerary.getName(), itinerary.getDescription(), itinerary.getShortDescription(), itinerary.getStock(), itinerary.getPrice(), itinerary.getTotalDuration(), itinerary.getThemeId(), id);
 
         if (rowsAffected <= 0) {
-            throw new RuntimeException("Échec de la mise à jour du produit avec l'ID : " + id);
+            throw new ResourceNotFoundException("Cannot update itinerary with ID : " + id);
         }
 
         return this.findById(id);

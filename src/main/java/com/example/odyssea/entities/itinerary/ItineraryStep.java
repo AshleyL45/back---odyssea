@@ -5,12 +5,10 @@ import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
 
 public class ItineraryStep {
-
-    @Min(value = 1, message = "Itinerary Step ID must be greater than or equal to 1")
-    private int idItineraryStep;
+    private int id;
 
     @Min(value = 1, message = "Itinerary ID must be greater than or equal to 1")
-    private int idItinerary;
+    private int itineraryId;
 
     @Min(value = 1, message = "City ID must be greater than or equal to 1")
     private int idCity;
@@ -33,9 +31,9 @@ public class ItineraryStep {
 
     public ItineraryStep() {}
 
-    public ItineraryStep(int idItineraryStep, int idItinerary, int idCity, int idCountry, int idHotel, int position, int dayNumber, String descriptionPerDay) {
-        this.idItineraryStep = idItineraryStep;
-        this.idItinerary = idItinerary;
+    public ItineraryStep(int id, int itineraryId, int idCity, int idCountry, int idHotel, int position, int dayNumber, String descriptionPerDay) {
+        this.id = id;
+        this.itineraryId = itineraryId;
         this.idCity = idCity;
         this.idCountry = idCountry;
         this.idHotel = idHotel;
@@ -44,20 +42,12 @@ public class ItineraryStep {
         this.descriptionPerDay = descriptionPerDay;
     }
 
-    public int getIdItineraryStep() {
-        return idItineraryStep;
+    public int getItineraryId() {
+        return itineraryId;
     }
 
-    public void setIdItineraryStep(int idItineraryStep) {
-        this.idItineraryStep = idItineraryStep;
-    }
-
-    public int getIdItinerary() {
-        return idItinerary;
-    }
-
-    public void setIdItinerary(int idItinerary) {
-        this.idItinerary = idItinerary;
+    public void setItineraryId(int itineraryId) {
+        this.itineraryId = itineraryId;
     }
 
     public int getIdCity() {
@@ -106,5 +96,13 @@ public class ItineraryStep {
 
     public void setDescriptionPerDay(String descriptionPerDay) {
         this.descriptionPerDay = descriptionPerDay;
+    }
+
+    public int getId() {
+        return id;
+    }
+
+    public void setId(int id) {
+        this.id = id;
     }
 }
