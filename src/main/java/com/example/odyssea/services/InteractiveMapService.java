@@ -7,11 +7,11 @@ import org.springframework.stereotype.Service;
 import java.util.List;
 
 @Service
-public class ItineraryService {
+public class InteractiveMapService {
 
     private final ItineraryDao itineraryDao;
 
-    public ItineraryService(ItineraryDao itineraryDao) {
+    public InteractiveMapService(ItineraryDao itineraryDao) {
         this.itineraryDao = itineraryDao;
     }
 
