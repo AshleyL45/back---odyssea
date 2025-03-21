@@ -1,11 +1,9 @@
 package com.example.odyssea.dtos.UserItinerary;
 
-import com.example.odyssea.entities.userItinerary.UserItinerary;
+import com.example.odyssea.entities.mainTables.Option;
+
 import java.math.BigDecimal;
 import java.time.LocalDate;
-import java.time.ZoneId;
-import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
 
 public class UserItineraryDTO {
@@ -13,26 +11,28 @@ public class UserItineraryDTO {
     private int userId;
     private LocalDate startDate;
     private LocalDate endDate;
-    private int duration;
+    private int totalDuration;
     private String departureCity;
     private BigDecimal startingPrice;
     private String itineraryName;
     private int numberOfAdults;
     private int numberOfKids;
     private List<UserItineraryDayDTO> itineraryDays;
+    private List<Option> options;
 
-    public UserItineraryDTO(int id, int userId, LocalDate startDate, LocalDate endDate, int duration, String departureCity, BigDecimal startingPrice, String itineraryName, int numberOfAdults, int numberOfKids, List<UserItineraryDayDTO> itineraryDays) {
+    public UserItineraryDTO(int id, int userId, LocalDate startDate, LocalDate endDate, int totalDuration, String departureCity, BigDecimal startingPrice, String itineraryName, int numberOfAdults, int numberOfKids, List<UserItineraryDayDTO> itineraryDays, List<Option> options) {
         this.id = id;
         this.userId = userId;
         this.startDate = startDate;
         this.endDate = endDate;
-        this.duration = duration;
+        this.totalDuration = totalDuration;
         this.departureCity = departureCity;
         this.startingPrice = startingPrice;
         this.itineraryName = itineraryName;
         this.numberOfAdults = numberOfAdults;
         this.numberOfKids = numberOfKids;
         this.itineraryDays = itineraryDays;
+        this.options = options;
     }
 
     public UserItineraryDTO() {
@@ -70,12 +70,12 @@ public class UserItineraryDTO {
         this.endDate = endDate;
     }
 
-    public int getDuration() {
-        return duration;
+    public int getTotalDuration() {
+        return totalDuration;
     }
 
-    public void setDuration(int duration) {
-        this.duration = duration;
+    public void setTotalDuration(int totalDuration) {
+        this.totalDuration = totalDuration;
     }
 
     public String getDepartureCity() {
@@ -124,5 +124,13 @@ public class UserItineraryDTO {
 
     public void setItineraryDays(List<UserItineraryDayDTO> itineraryDays) {
         this.itineraryDays = itineraryDays;
+    }
+
+    public List<Option> getOptions() {
+        return options;
+    }
+
+    public void setOptions(List<Option> options) {
+        this.options = options;
     }
 }

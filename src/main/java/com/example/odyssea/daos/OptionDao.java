@@ -19,7 +19,8 @@ public class OptionDao {
             rs.getInt("id"),
             rs.getString("name"),
             rs.getString("description"),
-            rs.getBigDecimal("price")
+            rs.getBigDecimal("price"),
+            rs.getString("category")
     );
 
     public List<Option> findAll (){
@@ -35,6 +36,16 @@ public class OptionDao {
                 .orElseThrow(() -> new RuntimeException("The option you are looking for does not exist."));
     }
 
+    public List<Option> findOptionsByIds(List<Integer> ids) {
+        if (ids == null || ids.isEmpty()) {
+            return List.of();
+        }
+
+        String sql = "SELECT * FROM options WHERE id IN (" + String.join(",", ids.stream().map(String::valueOf).toArray(String[]::new)) + ")";
+
+        return jdbcTemplate.query(sql, optionRowMapper);
+    }
+
     public Option findPrice (int optionId){
         String sql = "SELECT name, description, price FROM options WHERE id = ?";
         return jdbcTemplate.query(sql, optionRowMapper, optionId)
@@ -44,7 +55,7 @@ public class OptionDao {
     }
 
     public Option save (Option option){
-        String sql = "INSERT INTO options (name, description, price) VALUES (?, ?, ?)";
+        String sql = "INSERT INTO options (name, description, price, category) VALUES (?, ?, ?, ?)";
         jdbcTemplate.update(sql, option.getName(), option.getPrice());
 
         String sqlGetId = "SELECT LAST_INSERT_ID()";
@@ -59,7 +70,7 @@ public class OptionDao {
             throw new RuntimeException("The option you are looking for does not exist.");
         }
 
-        String sql = "UPDATE options SET name = ?, description = ?, price = ? WHERE id = ?";
+        String sql = "UPDATE options SET name = ?, description = ?, price = ?, SET category = ? WHERE id = ?";
         int rowsAffected = jdbcTemplate.update(sql, option.getName(), option.getDescription(), option.getPrice(), id);
 
         if(rowsAffected <= 0){

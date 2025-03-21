@@ -5,7 +5,7 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class HotelDto {
-    private int id;
+    private Integer id;
     private int cityId;
     private String name;
     private int starRating;
@@ -14,7 +14,7 @@ public class HotelDto {
 
     public HotelDto() {}
 
-    public HotelDto(int id, int cityId, String name, int starRating, String description, double price) {
+    public HotelDto(Integer id, int cityId, String name, int starRating, String description, double price) {
         this.id = id;
         this.cityId = cityId;
         this.name = name;
@@ -46,10 +46,12 @@ public class HotelDto {
         );
     }
 
-    public int getId() {
+  
+    // Getters & Setters
+    public Integer getId() {
         return id;
     }
-    public void setId(int id) {
+    public void setId(Integer id) {
         this.id = id;
     }
     public int getCityId() {

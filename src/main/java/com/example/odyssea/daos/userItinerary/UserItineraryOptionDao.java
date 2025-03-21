@@ -1,7 +1,10 @@
 package com.example.odyssea.daos.userItinerary;
 
+import com.example.odyssea.entities.mainTables.Option;
+import com.example.odyssea.entities.userItinerary.UserItinerary;
 import com.example.odyssea.entities.userItinerary.UserItineraryOption;
 import com.example.odyssea.entities.userItinerary.UserItineraryStep;
+import org.springframework.jdbc.core.BeanPropertyRowMapper;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.stereotype.Repository;
@@ -27,9 +30,9 @@ public class UserItineraryOptionDao {
         return  jdbcTemplate.query(sql, userItineraryOptionRowMapper);
     }
 
-    public List<UserItineraryOption> findOptionsByUserItineraryId(int userItineraryId){ // Gets all options of a user itinerary in particular
-        String sql = "SELECT * FROM userItineraryOption WHERE userItineraryId = ?";
-        return jdbcTemplate.query(sql, userItineraryOptionRowMapper, userItineraryId);
+    public List<Option> findOptionsByUserItineraryId(int userItineraryId){ // Gets all options of a user itinerary in particular
+        String sql = "SELECT options.* FROM userItineraryOption INNER JOIN options ON userItineraryOption.optionId = options.id WHERE userItineraryId = ?";
+        return jdbcTemplate.query(sql, new Object[]{userItineraryId}, new BeanPropertyRowMapper<>(Option.class));
     }
 
     public UserItineraryOption findByIds(int userItineraryId, int optionId){
@@ -40,12 +43,16 @@ public class UserItineraryOptionDao {
                 .orElseThrow(() -> new RuntimeException("The option ID : " + optionId + "doesn't exist for user itinerary ID : + " + userItineraryId));
     }
 
-    public UserItineraryOption save (UserItineraryOption userItineraryOption){
+    public UserItineraryOption save(int userItineraryId, int optionId) {
         String sql = "INSERT INTO userItineraryOption (userItineraryId, optionId) VALUES (?, ?)";
-        jdbcTemplate.update(sql, userItineraryOption.getUserItineraryId(), userItineraryOption.getOptionId());
+
+        jdbcTemplate.update(sql, userItineraryId, optionId);
+
+        UserItineraryOption userItineraryOption = new UserItineraryOption(userItineraryId, optionId);
 
         return userItineraryOption;
     }
+
 
 
     public UserItineraryOption update(int userItineraryId, int optionId, UserItineraryOption userItineraryOption){

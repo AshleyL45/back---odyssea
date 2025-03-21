@@ -6,6 +6,11 @@ import com.example.odyssea.dtos.ActivityDto;
 import com.example.odyssea.entities.mainTables.Activity;
 import com.example.odyssea.entities.mainTables.City;
 import com.example.odyssea.exceptions.ResourceNotFoundException;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.stereotype.Service;
+import org.springframework.web.client.RestTemplate;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.http.*;
@@ -81,7 +86,11 @@ public class ActivityService {
      * Récupère les 5 activités d'une ville spécifique
      */
     public List<Activity> getTop5ActivitiesByCityId(int cityId) {
-        return activityDao.findTop5ByCityId(cityId);
+        try{
+            return activityDao.findTop5ByCityId(cityId);
+        } catch (ResourceNotFoundException e){
+            return null;
+        }
     }
 
     /**
