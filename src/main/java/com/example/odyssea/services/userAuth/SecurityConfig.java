@@ -44,8 +44,7 @@ public class SecurityConfig {
                 )
                 .authorizeHttpRequests(authorizeRequests ->
                         authorizeRequests
-
-                                .requestMatchers("/auth/**", "/test/all","/hotels/**", "/flights/**", "/activities/**",  "/error", "/userItinerary/**", "/api/**", "/countries/**").permitAll()
+                                .requestMatchers("/auth/**", "/hotels/**", "/flights/**", "/activities/**",  "/error", "/userItinerary/**", "/api/**", "/countries/**", "/cities/**", "/mySelection/**", "/options/**").permitAll()
                                 .requestMatchers("/user/**", "/reservations/**").hasRole("USER")
                                 .anyRequest().authenticated()
                 );
