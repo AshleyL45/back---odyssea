@@ -2,12 +2,14 @@ package com.example.odyssea.daos;
 
 
 import com.example.odyssea.dtos.DailyPlanDto;
+import com.example.odyssea.dtos.DailyPlanWithCityDto;
 import com.example.odyssea.entities.itinerary.ItineraryStep;
 import com.example.odyssea.mapper.DailyPlanDTOMapper;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.stereotype.Repository;
 
+import java.sql.ResultSet;
 import java.util.List;
 
 @Repository
@@ -96,6 +98,28 @@ public class ItineraryStepDao {
         String sql = "DELETE FROM itineraryStep WHERE id = ?";
         int rowsAffected = jdbcTemplate.update(sql, id);
         return rowsAffected > 0;
+    }
+
+    public List<DailyPlanWithCityDto> findByItineraryIdWithCity(int itineraryId) {
+        String sql = "SELECT " +
+                "city.name AS cityName, " +
+                "country.name AS countryName, " +
+                "hotel.name AS hotelName, " +
+                "hotel.description AS hotelDescription, " +
+                "activity.name AS activityName, " +
+                "activity.description AS activityDescription, " +
+                "dailyItinerary.descriptionPerDay, " +
+                "dailyItinerary.dayNumber, " +
+                "city.latitude, " +
+                "city.longitude " +
+                "FROM dailyItinerary " +
+                "INNER JOIN city ON dailyItinerary.cityId = city.id " +
+                "INNER JOIN country ON dailyItinerary.countryId = country.id " +
+                "INNER JOIN hotel ON dailyItinerary.hotelId = hotel.id " +
+                "INNER JOIN activity ON dailyItinerary.activityId = activity.id " +
+                "WHERE dailyItinerary.itineraryId = ? " +
+                "ORDER BY dayNumber";
+        return jdbcTemplate.query(sql, (ResultSet rs, int rowNum) -> DailyPlanWithCityDto.fromResultSet(rs), itineraryId);
     }
 
 

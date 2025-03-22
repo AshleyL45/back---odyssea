@@ -1,5 +1,6 @@
 package com.example.odyssea.controllers;
 
+import com.example.odyssea.dtos.DailyPlanWithCityDto;
 import com.example.odyssea.dtos.ItineraryResponseDTO;
 import com.example.odyssea.entities.itinerary.Itinerary;
 import com.example.odyssea.services.ItineraryService;
@@ -58,5 +59,11 @@ public class ItineraryController {
         boolean deleted = itineraryService.deleteItinerary(id);
         return deleted ? new ResponseEntity<>(HttpStatus.NO_CONTENT)
                 : new ResponseEntity<>(HttpStatus.NOT_FOUND);
+    }
+
+    @GetMapping("/{id}/daily")
+    public ResponseEntity<List<DailyPlanWithCityDto>> getDailyPlanWithCity(@PathVariable int id) {
+        List<DailyPlanWithCityDto> dailyPlan = itineraryService.getDailyPlanWithCity(id);
+        return ResponseEntity.ok(dailyPlan);
     }
 }
