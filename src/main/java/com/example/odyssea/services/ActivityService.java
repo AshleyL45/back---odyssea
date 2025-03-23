@@ -99,12 +99,8 @@ public class ActivityService {
      * en demandant 5 activités et en vérifiant qu'au moins 5 résultats sont obtenus
      * Seules les 5 premières activités seront insérées
      */
-    public void importActivitiesFromAmadeus(int cityId) {
-        if (!activityDao.cityExists(cityId)) {
-            throw new IllegalArgumentException("The cityId supplied does not exist in the database!");
-        }
-
-        // Récupère les informations complètes de la ville via CityDao
+    public void importActivitiesFromAmadeus(int cityId, int radius) {
+        // Vérifier que la ville existe, récupérer les infos, etc.
         City city = cityDao.findById(cityId).orElseThrow(() ->
                 new IllegalStateException("City not found for id " + cityId));
 
@@ -113,23 +109,22 @@ public class ActivityService {
         double longitude = city.getLongitude();
 
         if (cityCode == null || cityCode.isEmpty()) {
-            throw new IllegalStateException("LIATA code for city id " + cityId + " cannot be found.");
+            throw new IllegalStateException("IATA code for city id " + cityId + " cannot be found.");
         }
 
-        // Récupère le token via le TokenService de façon synchrone
         String token = tokenService.getValidToken().block();
         if (token == null) {
             throw new IllegalStateException("Unable to retrieve Amadeus token.");
         }
 
-        // Construction de l'URL avec le paramètre cityCode, latitude, longitude et limit=5
+        // Ajout du paramètre "radius" dans l'URL
         String url = "https://test.api.amadeus.com/v1/shopping/activities"
                 + "?cityCode=" + cityCode
                 + "&latitude=" + latitude
                 + "&longitude=" + longitude
+                + "&radius=" + radius
                 + "&limit=5";
 
-        // Configuration de l'en-tête HTTP avec le token
         HttpHeaders headers = new HttpHeaders();
         headers.setBearerAuth(token);
         HttpEntity<?> entity = new HttpEntity<>(headers);
@@ -143,14 +138,14 @@ public class ActivityService {
                 JsonNode root = mapper.readTree(response.getBody());
                 JsonNode dataArray = root.path("data");
 
-                // Vérifie qu'on a au moins 5 activités
-                if (!dataArray.isArray() || dataArray.size() < 5) {
-                    throw new ResourceNotFoundException("Minimum of 5 activities required for the city with IATA code "
-                            + cityCode + ", but only " + dataArray.size() + " have been returned.");
+                // Si aucune activité n'est retournée, on log et on arrête l'import
+                if (!dataArray.isArray() || dataArray.size() == 0) {
+                    System.out.println("No activities returned for the city with IATA code " + cityCode);
+                    return;
                 }
 
-                // Insérer exactement les 5 premières activités
-                for (int i = 0; i < 5; i++) {
+                int numberOfActivitiesToImport = Math.min(5, dataArray.size());
+                for (int i = 0; i < numberOfActivitiesToImport; i++) {
                     JsonNode node = dataArray.get(i);
                     ActivityDto dto = mapper.treeToValue(node, ActivityDto.class);
                     Activity activity = dto.toActivity(cityId);
@@ -163,4 +158,5 @@ public class ActivityService {
             System.out.println("Error calling Amadeus API: " + response.getStatusCode());
         }
     }
+
 }
