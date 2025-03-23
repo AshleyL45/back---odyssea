@@ -5,6 +5,7 @@ import com.example.odyssea.daos.ItineraryStepDao;
 import com.example.odyssea.daos.ThemeDao;
 import com.example.odyssea.dtos.DailyPlanDto;
 import com.example.odyssea.dtos.ItineraryResponseDTO;
+import com.example.odyssea.dtos.ItineraryThemes;
 import com.example.odyssea.entities.itinerary.Itinerary;
 import org.springframework.stereotype.Service;
 
@@ -25,6 +26,10 @@ public class ItineraryService {
 
     public List<Itinerary> getAllItineraries() {
         return itineraryDao.findAll();
+    }
+
+    public List<ItineraryThemes> getAllItinerariesWithThemes(){
+        return itineraryDao.findAllItinerariesWithTheme();
     }
 
     public Itinerary getItineraryById(int id) {
