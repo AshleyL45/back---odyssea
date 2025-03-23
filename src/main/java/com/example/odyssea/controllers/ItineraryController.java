@@ -2,6 +2,7 @@ package com.example.odyssea.controllers;
 
 import com.example.odyssea.dtos.DailyPlanWithCityDto;
 import com.example.odyssea.dtos.ItineraryResponseDTO;
+import com.example.odyssea.dtos.ItineraryThemes;
 import com.example.odyssea.entities.itinerary.Itinerary;
 import com.example.odyssea.services.ItineraryService;
 import org.springframework.http.HttpStatus;
@@ -23,6 +24,12 @@ public class ItineraryController {
     @GetMapping
     public ResponseEntity<List<Itinerary>> getAllItineraries() {
         List<Itinerary> itineraries = itineraryService.getAllItineraries();
+        return new ResponseEntity<>(itineraries, HttpStatus.OK);
+    }
+
+    @GetMapping("/themes")
+    public ResponseEntity<List<ItineraryThemes>> getAllItinerariesWithThemes() {
+        List<ItineraryThemes> itineraries = itineraryService.getAllItinerariesWithThemes();
         return new ResponseEntity<>(itineraries, HttpStatus.OK);
     }
 
