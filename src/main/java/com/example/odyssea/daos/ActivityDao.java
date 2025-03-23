@@ -113,11 +113,11 @@ public class ActivityDao {
     public List<Activity> findTop5ByCityId(int cityId) {
         String sql = "SELECT * FROM activity WHERE cityId = ? LIMIT 5";
         List<Activity> activities = jdbcTemplate.query(sql, new ActivityRowMapper(), cityId);
-        if (activities.isEmpty()) {
-            throw new ResourceNotFoundException("No activities found for city id: " + cityId);
-        }
+        // Si aucune activité n'est trouvée, jdbcTemplate.query renvoie déjà une liste vide,
+        // donc il n'est pas nécessaire de lancer une exception ici.
         return activities;
     }
+
 
     /**
      * RowMapper pour transformer un ResultSet en objet Activity

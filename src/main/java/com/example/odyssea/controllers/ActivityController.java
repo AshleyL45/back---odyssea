@@ -78,12 +78,20 @@ public class ActivityController {
      * Importe les activités depuis l'API Amadeus pour une ville donnée
      */
     @PostMapping("/importAndGet")
-    public List<Activity> importAndGetActivities(@RequestParam int cityId) {
-        // Importation des activités depuis Amadeus pour la ville donnée
-        activityService.importActivitiesFromAmadeus(cityId);
-        // Récupération des 5 activités enregistrées dans la base
-        return activityService.getTop5ActivitiesByCityId(cityId);
+    public ResponseEntity<?> importAndGetActivities(@RequestParam int cityId, @RequestParam int radius) {
+        List<Activity> activities = activityService.getTop5ActivitiesByCityId(cityId);
+        if (activities.size() < 5) {
+            activityService.importActivitiesFromAmadeus(cityId, radius);
+            activities = activityService.getTop5ActivitiesByCityId(cityId);
+        }
+        if (activities.isEmpty()) {
+            return ResponseEntity.ok(Collections.singletonMap("message", "Sorry, there are no activities for this city."));
+        }
+        return ResponseEntity.ok(activities);
     }
+
+
+
 }
 
 
