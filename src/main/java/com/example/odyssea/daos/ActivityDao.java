@@ -9,6 +9,7 @@ import org.springframework.stereotype.Repository;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.time.LocalTime;
 import java.util.List;
 import java.util.Optional;
 
@@ -131,11 +132,11 @@ public class ActivityDao {
             String type = rs.getString("type");
             String physicalEffort = rs.getString("physicalEffort");
             // Conversion du TIME en minutes
-            java.sql.Time time = rs.getTime("duration");
-            int duration = 0;
-            if (time != null) {
+            //java.sql.Time time = rs.getTime("duration");
+            LocalTime duration = rs.getTime("duration").toLocalTime();
+            /*if (time != null) {
                 duration = time.toLocalTime().getHour() * 60 + time.toLocalTime().getMinute();
-            }
+            }*/
             String description = rs.getString("description");
             double price = rs.getDouble("price");
             return new Activity(id, cityId, name, type, physicalEffort, duration, description, price);

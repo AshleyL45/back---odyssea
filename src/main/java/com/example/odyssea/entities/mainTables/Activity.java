@@ -2,6 +2,9 @@ package com.example.odyssea.entities.mainTables;
 
 import jakarta.validation.constraints.*;
 
+import java.time.LocalDateTime;
+import java.time.LocalTime;
+
 public class Activity {
 
     @Min(value = 1, message = "Activity ID must be greater than or equal to 1")
@@ -23,7 +26,7 @@ public class Activity {
     private String physicalEffort;
 
     @Min(value = 0, message = "Duration must be greater than or equal to 0")
-    private int duration;
+    private LocalTime duration;
 
     @NotBlank(message = "Description is required")
     @Size(max = 5000, message = "Description must not exceed 5000 characters")
@@ -36,7 +39,7 @@ public class Activity {
 
     public Activity() {}
 
-    public Activity(int id, int cityId, String name, String type, String physicalEffort, int duration, String description, Double price) {
+    public Activity(int id, int cityId, String name, String type, String physicalEffort, LocalTime duration, String description, Double price) {
         this.id = id;
         this.cityId = cityId;
         this.name = name;
@@ -78,10 +81,10 @@ public class Activity {
     public void setPhysicalEffort(String physicalEffort) {
         this.physicalEffort = physicalEffort;
     }
-    public int getDuration() {
+    public LocalTime getDuration() {
         return duration;
     }
-    public void setDuration(int duration) {
+    public void setDuration(LocalTime duration) {
         this.duration = duration;
     }
     public String getDescription() {

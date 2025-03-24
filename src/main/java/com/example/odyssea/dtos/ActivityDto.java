@@ -4,6 +4,7 @@ import com.example.odyssea.entities.mainTables.Activity;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
 import java.time.Duration;
+import java.time.LocalTime;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -44,28 +45,30 @@ public class ActivityDto {
         if (this.name == null || this.name.isEmpty()) {
             throw new IllegalArgumentException("The 'name' field is mandatory!");
         }
-        int duration = parseDuration(this.minimumDuration);
+
+        LocalTime durationTime = parseDuration(this.minimumDuration);
+        //int duration = parseDuration(this.minimumDuration);
         Double parsedPrice = parsePrice(this.price);
         // Utiliser une valeur par défaut si description est null
         String descriptionNonNull = (this.description != null ? this.description : "No description available");
 
-        return new Activity(0, cityId, this.name, "Other", "Low", duration, descriptionNonNull, parsedPrice);
+        return new Activity(0, cityId, this.name, "Other", "Low", durationTime, descriptionNonNull, parsedPrice);
     }
 
 
     /**
      * Convertit une durée au format ISO-8601 en minutes
      */
-    private int parseDuration(String isoDuration) {
+    private LocalTime parseDuration(String isoDuration) {
         if (isoDuration != null && !isoDuration.isEmpty()) {
             try {
                 Duration duration = Duration.parse(isoDuration);
-                return (int) duration.toMinutes();
+                return LocalTime.ofSecondOfDay(duration.toSeconds()); // Convertir en HH:mm:ss
             } catch (Exception e) {
                 System.out.println("[ActivityDto] Time conversion error: " + e.getMessage());
             }
         }
-        return 0;
+        return LocalTime.MIDNIGHT;
     }
 
     /**
