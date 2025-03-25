@@ -373,10 +373,15 @@ public class UserItineraryService {
     }
 
     // Retourner la liste de tous les itinéraires d'un utilisateur
-    public List<UserItinerary> getAllUserItineraries(int userId){
-        List<UserItinerary> userItineraries = userItineraryDao.findAllUserItineraries(userId);
+    public List<UserItinerary> getAllUserItineraries(int userId) {
+        List<UserItinerary> itineraries = userItineraryDao.findAllUserItineraries(userId);
 
-        return userItineraries;
+        for (UserItinerary itinerary : itineraries) {
+            String cityName = cityDao.findByIATACode(itinerary.getDepartureCity()).getName();
+            itinerary.setDepartureCity(cityName);
+        }
+
+        return itineraries;
     }
 
 

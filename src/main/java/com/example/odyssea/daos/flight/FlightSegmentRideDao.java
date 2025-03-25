@@ -1,6 +1,8 @@
 package com.example.odyssea.daos.flight;
 
+import com.example.odyssea.entities.mainTables.FlightSegment;
 import com.example.odyssea.entities.mainTables.FlightSegmentRide;
+import org.springframework.jdbc.core.BeanPropertyRowMapper;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.stereotype.Repository;
@@ -31,6 +33,13 @@ public class FlightSegmentRideDao {
     public FlightSegmentRide findByIds(int planeRideId, int flightSegmentId) {
         String sql = "SELECT * FROM flightSegmentRide WHERE planeRideId = ? AND flightSegmentId = ?";
         return jdbcTemplate.queryForObject(sql, flightSegmentRideRowMapper, planeRideId, flightSegmentId);
+    }
+
+    public List<FlightSegment> findSegmentsByPlaneId(int planeRideId) {
+        String sql = "SELECT flightSegment.* from flightSegmentRide\n" +
+                "INNER JOIN flightSegment ON flightSegmentRide.flightSegmentId = flightSegment.id\n" +
+                "WHERE flightSegmentRide.planeRideId = 2";
+        return jdbcTemplate.query(sql, new Object[]{planeRideId}, new BeanPropertyRowMapper<>(FlightSegment.class));
     }
 
     public FlightSegmentRide save(FlightSegmentRide ride) {
