@@ -9,6 +9,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Map;
 
 @RestController
 @RequestMapping("userItinerary")
@@ -31,6 +32,17 @@ public class UserItineraryController {
     public ResponseEntity<UserItineraryDTO> getAnItinerary(@PathVariable int userItineraryId){
         UserItineraryDTO userItinerary = userItineraryService.getAUserItineraryById(userItineraryId);
         return ResponseEntity.status(HttpStatus.OK).body(userItinerary);
+    }
+
+    @PostMapping("/itineraryName/{id}")
+    public ResponseEntity<String> updateItineraryName(@PathVariable int id, @RequestBody Map<String, String> itineraryName){
+        String newItineraryName = itineraryName.get("itineraryName");
+        boolean isUpdated = userItineraryService.updateItineraryName(id, newItineraryName);
+        if(isUpdated){
+            return ResponseEntity.ok("The name of your personalized itinerary was successfully saved.");
+        } else {
+            return ResponseEntity.badRequest().body("An error occurred. Please try again.");
+        }
     }
 
     // Générer un itinéraire

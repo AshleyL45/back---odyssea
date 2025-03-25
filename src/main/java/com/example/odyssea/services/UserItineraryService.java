@@ -479,5 +479,9 @@ public class UserItineraryService {
         return activity;
     }
 
+    public boolean updateItineraryName(int id, String newItineraryName){
+        return userItineraryDao.updateUserItineraryName(id, newItineraryName);
+    }
+
 
 }
