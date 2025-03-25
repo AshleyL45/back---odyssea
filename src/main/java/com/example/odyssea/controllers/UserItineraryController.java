@@ -2,6 +2,7 @@ package com.example.odyssea.controllers;
 
 import com.example.odyssea.dtos.UserItinerary.UserItineraryDTO;
 import com.example.odyssea.dtos.UserItinerary.UserRequestDTO;
+import com.example.odyssea.entities.userItinerary.UserItinerary;
 import com.example.odyssea.services.UserItineraryService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -20,8 +21,8 @@ public class UserItineraryController {
 
     // Avoir tous les itinéraires personnalisés d'un utilisateur
     @GetMapping("/all/{userId}")
-    public ResponseEntity<List<UserItineraryDTO>> getAllUserItineraries(@PathVariable int userId){
-        List<UserItineraryDTO> userItineraryDTOs = userItineraryService.getAllUserItineraries(userId);
+    public ResponseEntity<List<UserItinerary>> getAllUserItineraries(@PathVariable int userId){
+        List<UserItinerary> userItineraryDTOs = userItineraryService.getAllUserItineraries(userId);
         return ResponseEntity.status(HttpStatus.OK).body(userItineraryDTOs);
     }
 

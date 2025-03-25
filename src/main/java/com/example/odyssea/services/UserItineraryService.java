@@ -16,6 +16,7 @@ import com.example.odyssea.entities.userItinerary.UserItinerary;
 import com.example.odyssea.entities.userItinerary.UserItineraryStep;
 import com.example.odyssea.services.flight.PlaneRideService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import reactor.core.publisher.Mono;
@@ -90,9 +91,7 @@ public class UserItineraryService {
 
     @Transactional
     public UserItinerary saveUserItinerary(UserItineraryDTO userItineraryDTO) throws Exception {
-
         UserItinerary userItinerary = new UserItinerary();
-
         userItinerary.setUserId(userItineraryDTO.getUserId());
         userItinerary.setStartDate(Date.valueOf(userItineraryDTO.getStartDate()));
         userItinerary.setEndDate(Date.valueOf(userItineraryDTO.getEndDate()));
@@ -103,81 +102,70 @@ public class UserItineraryService {
         userItinerary.setNumberOfAdults(userItineraryDTO.getNumberOfAdults());
         userItinerary.setNumberOfKids(userItineraryDTO.getNumberOfKids());
 
-
-        userItineraryDao.save(userItinerary);
+        UserItinerary savedItinerary = userItineraryDao.save(userItinerary);
 
         if (userItineraryDTO.getOptions() != null) {
-            for (Option optionDTO : userItineraryDTO.getOptions()) {
-                Option option = new Option();
-                option.setName(optionDTO.getName());
-                option.setPrice(optionDTO.getPrice());
-                option.setDescription(optionDTO.getDescription());
-                option.setCategory(optionDTO.getCategory());
-
-                userItineraryOptionDao.save(userItinerary.getId(), option.getId());
+            for (Option option : userItineraryDTO.getOptions()) {
+                userItineraryOptionDao.save(savedItinerary.getId(), option.getId());
             }
         }
 
-        return userItinerary;
+        return savedItinerary;
     }
 
-    // Enregistrer chaque journée dans la BDD
+    @Transactional
     public void saveUserDailyPlans(UserItinerary userItinerary, List<UserItineraryDayDTO> days) {
-        UserItinerary userItinerarySaved = userItineraryDao.findById(userItinerary.getId());
-        System.out.println("Starting save user daily plan : " );
+        UserItinerary savedItinerary = userItineraryDao.findById(userItinerary.getId());
 
-        int day = 1;
         for (UserItineraryDayDTO dayDTO : days) {
+            UserItineraryStep step = new UserItineraryStep();
+            step.setUserId(savedItinerary.getUserId());
+            step.setUserItineraryId(savedItinerary.getId());
+            step.setDayNumber(dayDTO.getDayNumber());
+            step.setOffDay(dayDTO.isDayOff());
 
-            UserItineraryStep userItineraryStep = new UserItineraryStep();
-            userItineraryStep.setUserId(userItinerarySaved.getUserId());
-            userItineraryStep.setUserItineraryId(userItinerarySaved.getId());
-            if (dayDTO.getHotel() != null && dayDTO.getHotel().getId() != null) {
-                userItineraryStep.setHotelId(dayDTO.getHotel().getId());
+            // Gestion de la ville
+            City city = cityDao.findCityByName(dayDTO.getCityName());
+            if (city != null) {
+                step.setCityId(city.getId());
             } else {
-                userItineraryStep.setHotelId(null);
+                //logger.error("City not found: {}", dayDTO.getCityName());
+                continue; // ou throw exception
             }
 
-            int cityId = cityDao.findCityByName(dayDTO.getCityName()).getId();
-            System.out.println("City ID: " + cityId);
-            userItineraryStep.setCityId(cityId);
+            // Gestion de l'hôtel
+            if (dayDTO.getHotel() != null && dayDTO.getHotel().getId() != null) {
+                step.setHotelId(dayDTO.getHotel().getId());
+            }
 
-            System.out.println("Processing day: " + dayDTO.getDayNumber());
-            userItineraryStep.setDayNumber(dayDTO.getDayNumber());
+            // Gestion des activités (jours normaux)
+            if (!dayDTO.isDayOff() && dayDTO.getActivity() != null) {
+                step.setActivityId(dayDTO.getActivity().getId());
+            }
 
-            System.out.println("Is off day: " + dayDTO.isDayOff());
-            userItineraryStep.setOffDay(dayDTO.isDayOff());
-
-
-            if (!dayDTO.isDayOff()) {
-                if (dayDTO.getActivity() != null) {
-                    System.out.println("Activity ID: " + dayDTO.getActivity().getId());
-                    userItineraryStep.setActivityId(dayDTO.getActivity().getId());
-                    userItineraryStep.setPlaneRideId(null);
-                } else {
-                    System.out.println("No activity for this day.");
+            // Gestion des vols (jours off)
+            if (dayDTO.isDayOff()) {
+                try {
+                    if (dayDTO.getFlightItineraryDTO() != null && dayDTO.getFlightItineraryDTO().getId() != null) {
+                        Integer planeRideId = dayDTO.getFlightItineraryDTO().getId();
+                        if (planeRideDao.existsById(planeRideId)) {
+                            step.setPlaneRideId(planeRideId);
+                        } else {
+                            //logger.warn("PlaneRide not found, ID: {}", planeRideId);
+                            step.setPlaneRideId(null);
+                        }
+                    }
+                } catch (NumberFormatException e) {
+                    //logger.error("Invalid PlaneRide ID format", e);
+                    step.setPlaneRideId(null);
+                } catch (DataIntegrityViolationException e) {
+                    //logger.error("Foreign key violation for PlaneRide", e);
+                    step.setPlaneRideId(null);
                 }
             }
 
-            // Sauvegarder l'ID du vol si présent
-            if (dayDTO.isDayOff()) {
-                System.out.println("Plane ride present: " + dayDTO.getFlightItineraryDTO().getId());
-                userItineraryStep.setPlaneRideId(dayDTO.getFlightItineraryDTO().getId());
-                userItineraryStep.setActivityId(null);
-            } else {
-                System.out.println("No plane ride for this day.");
-                userItineraryStep.setPlaneRideId(null);
-            }
-
-            //System.out.println("Plane ride of the day :" + dayDTO.getFlightItineraryDTO().getId());
-
-            // Sauvegarder le jour dans la base de données
-            System.out.println("Saving userItineraryStep: " + userItineraryStep);
-            userItineraryStepDao.save(userItineraryStep);
-
-            day++;
+            userItineraryStepDao.save(step);
         }
-
     }
 
 
@@ -267,9 +255,31 @@ public class UserItineraryService {
                 itineraryDay.setHotel(hotels.get((int) random));
             }
 
+            if (itineraryDay.isDayOff()) {
+                String departureIata = userItinerary.getDepartureCity();
+                String arrivalIata = cityDao.findCityByName(itineraryDay.getCityName()).getIataCode();
+
+                int totalPeople = userRequest.getNumberOfAdults() + userRequest.getNumberOfKids();
+
+                Mono<List<FlightItineraryDTO>> flightsMono = planeRideService.getFlights(
+                        departureIata, arrivalIata,
+                        itineraryDay.getDate(), itineraryDay.getDate(),
+                        totalPeople
+                );
+
+                List<FlightItineraryDTO> flights = flightsMono.block();
+
+                if (flights != null && !flights.isEmpty() && flights.get(0) != null) {
+                    // Vérification que l'ID est valide avant assignation
+                    if (flights.get(0).getId() != null) {
+                        itineraryDay.setFlightItineraryDTO(flights.get(0));
+                    }
+                }
+            }
+
 
             // Assigner les vols
-            if (itineraryDay.isDayOff()) {
+           /* if (itineraryDay.isDayOff()) {
                 String departureIata = userItinerary.getDepartureCity();
                 String arrivalIata = cityDao.findCityByName(itineraryDay.getCityName()).getIataCode();
 
@@ -297,7 +307,7 @@ public class UserItineraryService {
                         System.out.println("No matching PlaneRide found in the database for day " + i);
                     }
                 }
-            }
+            }*/
 
 
             i += 1;
@@ -363,15 +373,10 @@ public class UserItineraryService {
     }
 
     // Retourner la liste de tous les itinéraires d'un utilisateur
-    public List<UserItineraryDTO> getAllUserItineraries(int userId){
+    public List<UserItinerary> getAllUserItineraries(int userId){
         List<UserItinerary> userItineraries = userItineraryDao.findAllUserItineraries(userId);
-        List<UserItineraryDTO> userItineraryDTOs = new ArrayList<>();
 
-        for(UserItinerary userItinerary : userItineraries){
-            userItineraryDTOs.add(toUserItineraryDTO(userItinerary));
-        }
-        System.out.println("Days of itinerary  all itineraries: " + userItineraryDTOs.size());
-        return userItineraryDTOs;
+        return userItineraries;
     }
 
 

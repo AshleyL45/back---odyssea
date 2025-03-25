@@ -4,6 +4,7 @@ import com.example.odyssea.daos.CityDao;
 import com.example.odyssea.daos.CountryDao;
 import com.example.odyssea.daos.flight.PlaneRideDao;
 import com.example.odyssea.daos.userItinerary.UserItineraryStepDao;
+import com.example.odyssea.dtos.Flight.FlightItineraryDTO;
 import com.example.odyssea.dtos.HotelDto;
 import com.example.odyssea.dtos.UserItinerary.UserItineraryDayDTO;
 import com.example.odyssea.entities.mainTables.Activity;
@@ -54,7 +55,7 @@ public class UserDailyPlanService {
                 userItineraryStep.getDayNumber(),
                 date,
                 userItineraryStep.isOffDay(),
-                planeRideDao.findById(userItineraryStep.getPlaneRideId())
+                new FlightItineraryDTO()
         );
     }
 }

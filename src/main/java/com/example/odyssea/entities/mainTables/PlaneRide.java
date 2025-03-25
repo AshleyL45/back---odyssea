@@ -8,7 +8,7 @@ import java.time.LocalDateTime;
 public class PlaneRide {
 
     @Min(value = 1, message = "Plane Ride ID must be greater than or equal to 1")
-    private int id;
+    private Integer id;
 
     private boolean oneWay;
 
@@ -25,7 +25,7 @@ public class PlaneRide {
 
     public PlaneRide() {}
 
-    public PlaneRide(int id, boolean oneWay, BigDecimal totalPrice, String currency, LocalDateTime createdAt) {
+    public PlaneRide(Integer id, boolean oneWay, BigDecimal totalPrice, String currency, LocalDateTime createdAt) {
         this.id = id;
         this.oneWay = oneWay;
         this.totalPrice = totalPrice;
@@ -35,10 +35,10 @@ public class PlaneRide {
 
     // Getters and Setters
 
-    public int getId() {
+    public Integer getId() {
         return id;
     }
-    public void setId(int id) {
+    public void setId(Integer id) {
         this.id = id;
     }
 
