@@ -1,9 +1,9 @@
 package com.example.odyssea.controllers;
 
 import com.example.odyssea.daos.userAuth.UserDao;
-import com.example.odyssea.entities.userAuth.JwtToken;
+import com.example.odyssea.security.JwtToken;
 import com.example.odyssea.entities.userAuth.User;
-import com.example.odyssea.services.userAuth.JwtUtil;
+import com.example.odyssea.security.JwtUtil;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;

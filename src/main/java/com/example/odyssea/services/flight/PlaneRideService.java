@@ -2,10 +2,10 @@ package com.example.odyssea.services.flight;
 
 import com.example.odyssea.daos.flight.PlaneRideDao;
 import com.example.odyssea.daos.flight.FlightSegmentRideDao;
-import com.example.odyssea.dtos.Flight.*;
+import com.example.odyssea.dtos.flight.*;
 import com.example.odyssea.entities.mainTables.FlightSegmentRide;
 import com.example.odyssea.entities.mainTables.PlaneRide;
-import com.example.odyssea.services.TokenService;
+import com.example.odyssea.services.amadeus.TokenService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;

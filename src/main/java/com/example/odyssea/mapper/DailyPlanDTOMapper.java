@@ -1,6 +1,6 @@
 package com.example.odyssea.mapper;
 
-import com.example.odyssea.dtos.DailyPlanDto;
+import com.example.odyssea.dtos.mainTables.DailyPlanDto;
 import org.springframework.jdbc.core.RowMapper;
 import java.sql.ResultSet;
 import java.sql.SQLException;

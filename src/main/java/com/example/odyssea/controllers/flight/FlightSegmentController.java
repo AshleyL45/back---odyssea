@@ -1,6 +1,6 @@
 package com.example.odyssea.controllers.flight;
 
-import com.example.odyssea.dtos.Flight.FlightSegmentDTO;
+import com.example.odyssea.dtos.flight.FlightSegmentDTO;
 import com.example.odyssea.services.flight.FlightSegmentService;
 import org.springframework.web.bind.annotation.*;
 

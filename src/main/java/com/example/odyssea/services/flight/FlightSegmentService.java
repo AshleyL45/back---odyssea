@@ -1,9 +1,9 @@
 package com.example.odyssea.services.flight;
 
 import com.example.odyssea.daos.flight.FlightSegmentDao;
-import com.example.odyssea.dtos.Flight.AirportDTO;
-import com.example.odyssea.dtos.Flight.AircraftDTO;
-import com.example.odyssea.dtos.Flight.FlightSegmentDTO;
+import com.example.odyssea.dtos.flight.AirportDTO;
+import com.example.odyssea.dtos.flight.AircraftDTO;
+import com.example.odyssea.dtos.flight.FlightSegmentDTO;
 import com.example.odyssea.entities.mainTables.FlightSegment;
 import org.springframework.stereotype.Service;
 

@@ -1,6 +1,6 @@
 package com.example.odyssea.mapper;
 
-import com.example.odyssea.dtos.ItineraryThemes;
+import com.example.odyssea.dtos.mainTables.ItineraryThemes;
 import org.springframework.jdbc.core.RowMapper;
 
 import java.sql.ResultSet;

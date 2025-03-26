@@ -1,7 +1,7 @@
 package com.example.odyssea.daos.flight;
 
 import com.example.odyssea.entities.mainTables.PlaneRide;
-import com.example.odyssea.dtos.Flight.PlaneRideDTO;
+import com.example.odyssea.dtos.flight.PlaneRideDTO;
 import com.example.odyssea.exceptions.ResourceNotFoundException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
