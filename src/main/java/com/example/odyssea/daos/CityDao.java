@@ -88,6 +88,14 @@ public class CityDao {
         return cities;
     }
 
+    public City findByIATACode(String iataCode){
+        String sql = "SELECT * FROM city WHERE iataCode = ?";
+        return jdbcTemplate.query(sql, new CityRowMapper(), iataCode)
+                .stream()
+                .findFirst()
+                .orElseThrow(() -> new RuntimeException("No cities found with IATA code : " + iataCode));
+    }
+
     /**
      * Retrouve une ville en fonction de ses coordonnées exactes (latitude et longitude)
      */

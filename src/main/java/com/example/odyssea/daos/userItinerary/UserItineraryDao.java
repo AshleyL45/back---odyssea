@@ -108,6 +108,21 @@ public class UserItineraryDao {
 
     }
 
+    public boolean updateUserItineraryName(int id, String newItineraryName){
+        if(!userItineraryExists(id)){
+            throw new RuntimeException("The user itinerary you are looking for does not exist.");
+        }
+
+        String sql = "UPDATE userItinerary SET itineraryName = ? WHERE id = ?";
+
+        int rowsAffected = jdbcTemplate.update(sql, newItineraryName, id);
+        if(rowsAffected <= 0){
+            throw new RuntimeException("Failed to update the user itinerary with id : " + id);
+        }
+
+        return true;
+    }
+
     /*public List<Option> getOptions (int userItineraryId){ // Gets options of a userItinerary
         String sql = "SELECT options.* FROM userItinerary \n" +
                 "INNER JOIN options ON userItinerary.optionId = options.id WHERE userItinerary.id = ?";

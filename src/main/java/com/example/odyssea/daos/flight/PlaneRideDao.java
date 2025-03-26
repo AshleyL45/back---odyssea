@@ -155,4 +155,10 @@ public class PlaneRideDao {
 
         return jdbcTemplate.query(sql, new Object[]{departureIata, arrivalIata, departureTime, arrivalTime}, planeRideRowMapper);
     }
+
+    public boolean existsById(Integer id) {
+        String sql = "SELECT COUNT(*) FROM planeRide WHERE id = ?";
+        Integer count = jdbcTemplate.queryForObject(sql, Integer.class, id);
+        return count != null && count > 0;
+    }
 }
