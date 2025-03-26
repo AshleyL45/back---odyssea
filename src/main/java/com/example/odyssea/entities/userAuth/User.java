@@ -2,6 +2,8 @@ package com.example.odyssea.entities.userAuth;
 
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.Pattern;
+import jakarta.validation.constraints.Size;
 
 public class User {
     private int id;
@@ -9,6 +11,11 @@ public class User {
     @Email(message = "The email must be valid.")
     private String email;
     @NotBlank(message = "Password cannot be blank.")
+    @Size(min = 14, message = "Password must contain at least 14 characters")
+    @Pattern(
+            regexp = "^(?=.*[0-9])(?=.*[a-zA-Z])(?=.*[@#$%^&+=!])(?=\\S+$).*$",
+            message = "The password must contain at least 1 number, 1 letter and 1 special character (@#$%^&+=!)."
+    )
     private String password;
     private String role;
     @NotBlank(message = "Firstname cannot be blank.")
