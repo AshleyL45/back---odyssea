@@ -104,7 +104,7 @@ public class CountryDao {
         return jdbcTemplate.query(sql, new CountryRowMapper(), countryName)
                 .stream()
                 .findFirst()
-                .orElseThrow(() -> new RuntimeException("The country " + countryName + " isn't available"));
+                .orElseThrow(() -> new ResourceNotFoundException("The country " + countryName + " isn't available"));
     }
 
     /**

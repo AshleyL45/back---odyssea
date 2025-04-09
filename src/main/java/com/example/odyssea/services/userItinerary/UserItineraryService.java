@@ -14,6 +14,8 @@ import com.example.odyssea.entities.mainTables.*;
 
 import com.example.odyssea.entities.userItinerary.UserItinerary;
 import com.example.odyssea.entities.userItinerary.UserItineraryStep;
+import com.example.odyssea.exceptions.ResourceNotFoundException;
+import com.example.odyssea.exceptions.ValidationException;
 import com.example.odyssea.services.mainTables.HotelService;
 import com.example.odyssea.services.flight.PlaneRideService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -66,6 +68,46 @@ public class UserItineraryService {
         return date.toLocalDate();
     }
 
+    public void validateStep1(int duration) {
+        if (duration != 9 && duration != 17 && duration != 25 && duration != 33) {
+            throw new ValidationException("The duration must be of 9, 17, 25 or 33 days.");
+        }
+    }
+
+    public boolean validateStep2(LocalDate date) {
+        if (date == null) {
+            throw new ValidationException("Date cannot be null.");
+        }
+
+        LocalDate today = LocalDate.now();
+        LocalDate maxDate = today.plusDays(7);
+
+        if (date.isBefore(today) || date.isBefore(maxDate)) {
+            throw new ValidationException("The date must be in the future, 7 days after today.");
+        }
+
+        return true;
+
+    }
+
+    public void validateStep3(List<String> countryNames){
+        if (countryNames == null || countryNames.isEmpty()) {
+            throw new ValidationException("You must choose at least one country.");
+        }
+
+        for (String countryName : countryNames) {
+            try {
+                Country country = countryDao.findByName(countryName);
+            } catch (ResourceNotFoundException ex) {
+                throw new ValidationException("No country found for country name: " + countryName);
+            }
+        }
+
+        if(countryNames.size() < 1){
+            throw new ValidationException("You must choose at least a country");
+        }
+
+    }
 
     private PlaneRide findPlaneRideByItinerary(FlightItineraryDTO flightItinerary) {
         if (flightItinerary.getSegments() == null || flightItinerary.getSegments().isEmpty()) {
