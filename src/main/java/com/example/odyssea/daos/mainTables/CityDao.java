@@ -2,6 +2,7 @@ package com.example.odyssea.daos.mainTables;
 
 import com.example.odyssea.entities.mainTables.City;
 import com.example.odyssea.exceptions.CityNotFound;
+import com.example.odyssea.exceptions.DatabaseException;
 import com.example.odyssea.exceptions.ResourceNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.JdbcTemplate;
@@ -63,7 +64,7 @@ public class CityDao {
         List<City> cities = jdbcTemplate.query(sql, new CityRowMapper(), id);
 
         if (cities.isEmpty()) {
-            throw new ResourceNotFoundException("City with id " + id + " not found.");
+            throw new CityNotFound("City with id " + id + " not found.");
         }
         return Optional.of(cities.get(0));
     }

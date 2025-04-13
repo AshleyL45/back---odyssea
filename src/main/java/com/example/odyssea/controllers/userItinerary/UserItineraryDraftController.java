@@ -47,4 +47,43 @@ public class UserItineraryDraftController {
         userItineraryDraftService.validateCountries(countries);
         return ResponseEntity.ok(Map.of("success", true));
     }
+
+    @PostMapping("/step5")
+    public ResponseEntity<Map<String, Boolean>> handleCities(@RequestBody Map<String, List<Integer>> request){
+        List<Integer> cities = request.get("cities");
+        userItineraryDraftService.validateCities(cities);
+        return ResponseEntity.ok(Map.of("success", true));
+    }
+
+    @PostMapping("/step6")
+    public ResponseEntity<Map<String, Boolean>> handleActivities(@RequestBody Map<String, List<Integer>> request){
+        List<Integer> activities = request.get("activities");
+        userItineraryDraftService.validateActivities(activities);
+        return ResponseEntity.ok(Map.of("success", true));
+    }
+
+    @PostMapping("/step7")
+    public ResponseEntity<Map<String, Boolean>> handleHotelStanding (@RequestBody Map<String, Integer> request){
+        Integer hotelStanding = request.get("hotelStanding");
+        userItineraryDraftService.validateHotelStanding(hotelStanding);
+        return ResponseEntity.ok(Map.of("success", true));
+    }
+
+    @PostMapping("/step8")
+    public ResponseEntity<Map<String, Boolean>> handleTravelersNumber (@RequestBody Map<String, Integer> request){
+        Integer numberAdults = request.get("numberAdults");
+        Integer numberKids = request.get("numberKids");
+        userItineraryDraftService.validateTravelersNumber(numberAdults, numberKids);
+        return ResponseEntity.ok(Map.of("success", true));
+    }
+
+
+    @PostMapping("/step9")
+    public ResponseEntity<Map<String, Boolean>> handleOptions(@RequestBody Map<String, List<Integer>> request){
+        List<Integer> options = request.get("options");
+        userItineraryDraftService.validateOptions(options);
+        return ResponseEntity.ok(Map.of("success", true));
+    }
+
+
 }

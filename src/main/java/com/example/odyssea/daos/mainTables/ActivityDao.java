@@ -1,6 +1,7 @@
 package com.example.odyssea.daos.mainTables;
 
 import com.example.odyssea.entities.mainTables.Activity;
+import com.example.odyssea.exceptions.ActivityNotFound;
 import com.example.odyssea.exceptions.ResourceNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.JdbcTemplate;
@@ -94,8 +95,8 @@ public class ActivityDao {
     public Optional<Activity> findById(int id) {
         String sql = "SELECT * FROM activity WHERE id = ?";
         List<Activity> activities = jdbcTemplate.query(sql, new ActivityRowMapper(), id);
-        if (activities.isEmpty()) {
-            throw new ResourceNotFoundException("Activity not found with id: " + id);
+        if ( activities == null || activities.isEmpty()) {
+            throw new ActivityNotFound("Activity not found with id: " + id);
         }
         return Optional.of(activities.get(0));
     }

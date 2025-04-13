@@ -28,6 +28,16 @@ public class DraftCountriesDao {
             rs.getInt("position")
     );
 
+    public List<Integer> getCountriesByDraftId(int userId) {
+        String sql = """
+        SELECT draft_countries.country_id
+         FROM draft_countries
+         JOIN userItineraryDraft ON draft_countries.draft_user_itinerary_id = userItineraryDraft.id
+         WHERE userItineraryDraft.user_id = ?
+    """;
+        return jdbcTemplate.queryForList(sql, Integer.class, userId);
+    }
+
 
     public void saveCountries(Integer userId, List<Integer> countriesIds){
         Integer draftId = userItineraryDraftDao.getLastDraftIdByUser(userId);

@@ -91,4 +91,14 @@ public class GlobalExceptionHandler {
     public ResponseEntity<ErrorResponse> handleCountryNotFound(CountryNotFound ex) {
         return new ResponseEntity<>(new ErrorResponse(HttpStatus.BAD_REQUEST,"Invalid country", ex.getMessage()), HttpStatus.BAD_REQUEST);
     }
+
+    @ExceptionHandler(ActivityNotFound.class)
+    public ResponseEntity<ErrorResponse> handleActivityNotFound(ActivityNotFound ex) {
+        return new ResponseEntity<>(new ErrorResponse(HttpStatus.BAD_REQUEST,"Invalid activity or activities", ex.getMessage()), HttpStatus.BAD_REQUEST);
+    }
+
+    @ExceptionHandler(OptionNotFound.class)
+    public ResponseEntity<ErrorResponse> handleOptionNotFound(OptionNotFound ex) {
+        return new ResponseEntity<>(new ErrorResponse(HttpStatus.BAD_REQUEST,"Invalid option", ex.getMessage()), HttpStatus.BAD_REQUEST);
+    }
 }

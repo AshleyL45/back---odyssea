@@ -1,5 +1,6 @@
 package com.example.odyssea.daos.mainTables;
 import com.example.odyssea.entities.mainTables.Option;
+import com.example.odyssea.exceptions.OptionNotFound;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.stereotype.Repository;
@@ -33,7 +34,7 @@ public class OptionDao {
         return jdbcTemplate.query(sql, optionRowMapper, optionId)
                 .stream()
                 .findFirst()
-                .orElseThrow(() -> new RuntimeException("The option you are looking for does not exist."));
+                .orElseThrow(() -> new OptionNotFound("The option you are looking for does not exist."));
     }
 
     public List<Option> findOptionsByIds(List<Integer> ids) {

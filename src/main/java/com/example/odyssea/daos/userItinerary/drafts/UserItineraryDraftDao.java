@@ -105,6 +105,28 @@ public class UserItineraryDraftDao {
 
     }
 
+    public void saveHotelStanding(int userId, int hotelStanding){
+        int draftId = getLastDraftIdByUser(userId);
+
+        String sql = "UPDATE userItineraryDraft SET hotel_standing = ? WHERE id = ?";
+        int rowsAffected = jdbcTemplate.update(sql, hotelStanding, draftId);
+
+        if (rowsAffected == 0) {
+            throw new DatabaseException("No draft found with ID: " + draftId);
+        }
+
+    }
+    public void saveTravelsNumber(int userId, int numberAdults, int numberKids){
+        int draftId = getLastDraftIdByUser(userId);
+
+        String sql = "UPDATE userItineraryDraft SET number_adults = ?, number_kids = ? WHERE id = ?";
+        int rowsAffected = jdbcTemplate.update(sql, numberAdults, numberKids, draftId);
+
+        if (rowsAffected == 0) {
+            throw new DatabaseException("No draft found with ID: " + draftId);
+        }
+    }
+
 
     public boolean delete(Integer id){
         boolean doesExist = doesExist(id);
