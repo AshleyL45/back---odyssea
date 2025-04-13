@@ -45,15 +45,14 @@ public class UserItineraryService {
     private PlaneRideService planeRideService;
     private PlaneRideDao planeRideDao;
     private UserItineraryOptionDao userItineraryOptionDao;
-    private UserItineraryDraftDao userItineraryDraftDao;
-    private CurrentUserService currentUserService;
+
 
     public UserItineraryService() {
 
     }
 
     @Autowired
-    public UserItineraryService(CityDao cityDao, HotelService hotelService, CountryDao countryDao, UserItineraryDao userItineraryDao, UserItineraryStepDao userItineraryStepDao, UserDailyPlanService userDailyPlanService, PlaneRideService planeRideService, PlaneRideDao planeRideDao, UserItineraryOptionDao userItineraryOptionDao, UserItineraryDraftDao userItineraryDraftDao, CurrentUserService currentUserService) {
+    public UserItineraryService(CityDao cityDao, HotelService hotelService, CountryDao countryDao, UserItineraryDao userItineraryDao, UserItineraryStepDao userItineraryStepDao, UserDailyPlanService userDailyPlanService, PlaneRideService planeRideService, PlaneRideDao planeRideDao, UserItineraryOptionDao userItineraryOptionDao) {
         this.cityDao = cityDao;
         this.hotelService = hotelService;
         this.countryDao = countryDao;
@@ -63,8 +62,6 @@ public class UserItineraryService {
         this.planeRideService = planeRideService;
         this.planeRideDao = planeRideDao;
         this.userItineraryOptionDao = userItineraryOptionDao;
-        this.userItineraryDraftDao = userItineraryDraftDao;
-        this.currentUserService = currentUserService;
     }
 
     private LocalDate convertToLocalDate(Date date) {
@@ -72,42 +69,6 @@ public class UserItineraryService {
             return null;
         }
         return date.toLocalDate();
-    }
-
-    public void validateFirstStep (int duration) {
-        if(!(duration == 9 || duration == 17 || duration == 25 || duration == 33)){
-            throw new ValidationException("The duration must be of 9, 17, 25 or 33 days.");
-        }
-
-        Integer userId = currentUserService.getCurrentUserId();
-        userItineraryDraftDao.saveFirstStep(userId, duration);
-    }
-
-    public void validateStartDate(String date) {
-        if (date == null) {
-            throw new ValidationException("Date cannot be null.");
-        }
-        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy");
-        LocalDate validDate = LocalDate.parse(date, formatter);
-
-        LocalDate today = LocalDate.now();
-        LocalDate maxDate = today.plusDays(7);
-
-        if (validDate.isBefore(today) || validDate.isBefore(maxDate)) {
-           throw new ValidationException("Date must be in the future at least 7 days after today.");
-        }
-
-        Integer userId = currentUserService.getCurrentUserId();
-        userItineraryDraftDao.saveDate(userId, validDate);
-    }
-
-    public void validateDepartureCity(String departureCity){
-        if (departureCity == null || departureCity.isEmpty()) {
-            throw new ValidationException("Departure city cannot be null.");
-        }
-        cityDao.findCityByName(departureCity);
-        Integer userId = currentUserService.getCurrentUserId();
-        userItineraryDraftDao.saveDepartureCity(userId, departureCity);
     }
 
 

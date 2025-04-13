@@ -3,6 +3,7 @@ package com.example.odyssea.daos.userItinerary.drafts;
 import com.example.odyssea.dtos.userItinerary.UserItineraryDraftDTO;
 import com.example.odyssea.entities.userItinerary.drafts.UserItineraryDraft;
 import com.example.odyssea.exceptions.DatabaseException;
+import com.example.odyssea.exceptions.ValidationException;
 import com.example.odyssea.security.SecurityConfig;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.data.relational.core.sql.In;
@@ -47,6 +48,15 @@ public class UserItineraryDraftDao {
             throw new DatabaseException("No draft found for user with ID: " + userId);
         } catch (Exception e) {
             throw new DatabaseException("Error while retrieving the last draft: " + e.getMessage());
+        }
+    }
+
+    public Integer getDurationByUserId(int userId) {
+        String sql = "SELECT duration FROM userItineraryDraft WHERE user_id = ? ORDER BY created_at DESC LIMIT 1";
+        try {
+            return jdbcTemplate.queryForObject(sql, Integer.class, userId);
+        } catch (EmptyResultDataAccessException e) {
+            throw new DatabaseException("No itinerary found for the user with ID: " + userId);
         }
     }
 

@@ -86,4 +86,9 @@ public class GlobalExceptionHandler {
     public ResponseEntity<ErrorResponse> handleCityNotFound(CityNotFound ex) {
         return new ResponseEntity<>(new ErrorResponse(HttpStatus.BAD_REQUEST,"Invalid city", ex.getMessage()), HttpStatus.BAD_REQUEST);
     }
+
+    @ExceptionHandler(CountryNotFound.class)
+    public ResponseEntity<ErrorResponse> handleCountryNotFound(CountryNotFound ex) {
+        return new ResponseEntity<>(new ErrorResponse(HttpStatus.BAD_REQUEST,"Invalid country", ex.getMessage()), HttpStatus.BAD_REQUEST);
+    }
 }

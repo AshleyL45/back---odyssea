@@ -1,6 +1,7 @@
 package com.example.odyssea.daos.mainTables;
 
 import com.example.odyssea.entities.mainTables.Country;
+import com.example.odyssea.exceptions.CountryNotFound;
 import com.example.odyssea.exceptions.ResourceNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.JdbcTemplate;
@@ -59,7 +60,7 @@ public class CountryDao {
         String sql = "SELECT * FROM country WHERE id = ?";
         List<Country> countries = jdbcTemplate.query(sql, new CountryRowMapper(), id);
         if (countries.isEmpty()) {
-            throw new ResourceNotFoundException("Country with id " + id + " not found.");
+            throw new CountryNotFound("Country with id " + id + " not found.");
         }
         return Optional.of(countries.get(0));
     }

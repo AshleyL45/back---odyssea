@@ -45,37 +45,6 @@ public class UserItineraryController {
         }
     }
 
-    @PostMapping("/generate/step1")
-    public ResponseEntity<Map<String, Boolean>> handleFirstStep(@RequestBody Map<String, Integer> durationRequest){
-        Integer duration = durationRequest.get("duration");
-        userItineraryService.validateFirstStep(duration);
-
-        return ResponseEntity.ok(Map.of("success", true));
-    }
-
-    @PostMapping("/generate/step2")
-    public ResponseEntity<Map<String, Boolean>> handleStartDate(@RequestBody Map<String, String> dateRequest){
-        String date = dateRequest.get("startDate");
-        userItineraryService.validateStartDate(date);
-        return ResponseEntity.ok(Map.of("success", true));
-    }
-
-    @PostMapping("/generate/step3")
-    public ResponseEntity<Map<String, Boolean>> handleDepartureCity(@RequestBody Map<String, String> departureCity){
-        String city = departureCity.get("departureCity");
-        userItineraryService.validateDepartureCity(city);
-        return ResponseEntity.ok(Map.of("success", true));
-    }
-
-    /*@PostMapping("/generate/step4")
-    public ResponseEntity<Map<String, Boolean>> handleDepartureCity(@RequestBody Map<String, List<String>> countriesRequest){
-        List<String> countries = countriesRequest.get("countries");
-        userItineraryService.validateStep4(countries);
-
-        return ResponseEntity.ok(Map.of("success", true));
-    }*/
-
-
     // Générer un itinéraire
     @PostMapping("/generate")
         public ResponseEntity<UserItineraryDTO> generateItinerary(@RequestBody UserRequestDTO userPreferences) throws Exception {
