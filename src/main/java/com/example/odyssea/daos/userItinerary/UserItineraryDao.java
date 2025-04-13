@@ -37,17 +37,6 @@ public class UserItineraryDao {
             rs.getInt("numberOfKids")
     );
 
-    /*public static UserItinerary fromEntity(UserItineraryDTO userItinerary) {
-        return new UserItinerary (
-                userItinerary.getUserId(),
-                userItinerary.getStartDate(),
-                userItinerary.getDepartureCity(),
-                userItinerary.getEndDate(),
-                userItinerary.getTotalDuration(),
-                userItinerary.getStartingPrice()
-        );
-    }*/
-
     public List<UserItinerary> findAll (){
         String sql = "SELECT * FROM userItinerary";
         return jdbcTemplate.query(sql, userItineraryRowMapper);

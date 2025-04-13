@@ -19,6 +19,10 @@ public class CustomUserDetails implements UserDetails {
         return Collections.singletonList(() -> "ROLE_" + user.getRole());
     }
 
+    public Integer getUserId() {
+        return user.getId();
+    }
+
     @Override
     public String getPassword() {
         return user.getPassword();

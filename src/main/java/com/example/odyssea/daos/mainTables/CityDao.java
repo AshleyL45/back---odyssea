@@ -1,6 +1,7 @@
 package com.example.odyssea.daos.mainTables;
 
 import com.example.odyssea.entities.mainTables.City;
+import com.example.odyssea.exceptions.CityNotFound;
 import com.example.odyssea.exceptions.ResourceNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.JdbcTemplate;
@@ -117,7 +118,7 @@ public class CityDao {
         return jdbcTemplate.query(sql, new CityRowMapper(), cityName)
                 .stream()
                 .findFirst()
-                .orElseThrow(() -> new RuntimeException("The city " + cityName + " doesn't exist."));
+                .orElseThrow(() -> new CityNotFound("The city " + cityName + " doesn't exist."));
     }
 
     /**

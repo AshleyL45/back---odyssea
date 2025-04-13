@@ -6,6 +6,7 @@ import com.example.odyssea.daos.flight.PlaneRideDao;
 import com.example.odyssea.daos.userItinerary.UserItineraryDao;
 import com.example.odyssea.daos.userItinerary.UserItineraryOptionDao;
 import com.example.odyssea.daos.userItinerary.UserItineraryStepDao;
+import com.example.odyssea.daos.userItinerary.drafts.UserItineraryDraftDao;
 import com.example.odyssea.dtos.flight.FlightItineraryDTO;
 import com.example.odyssea.dtos.flight.FlightSegmentDTO;
 import com.example.odyssea.dtos.mainTables.HotelDto;
@@ -14,8 +15,8 @@ import com.example.odyssea.entities.mainTables.*;
 
 import com.example.odyssea.entities.userItinerary.UserItinerary;
 import com.example.odyssea.entities.userItinerary.UserItineraryStep;
-import com.example.odyssea.exceptions.ResourceNotFoundException;
 import com.example.odyssea.exceptions.ValidationException;
+import com.example.odyssea.services.CurrentUserService;
 import com.example.odyssea.services.mainTables.HotelService;
 import com.example.odyssea.services.flight.PlaneRideService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -27,6 +28,7 @@ import reactor.core.publisher.Mono;
 import java.math.BigDecimal;
 import java.sql.Date;
 import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
@@ -43,13 +45,15 @@ public class UserItineraryService {
     private PlaneRideService planeRideService;
     private PlaneRideDao planeRideDao;
     private UserItineraryOptionDao userItineraryOptionDao;
+    private UserItineraryDraftDao userItineraryDraftDao;
+    private CurrentUserService currentUserService;
 
     public UserItineraryService() {
 
     }
 
     @Autowired
-    public UserItineraryService(CityDao cityDao, HotelService hotelService, CountryDao countryDao, UserItineraryDao userItineraryDao, UserItineraryStepDao userItineraryStepDao, UserDailyPlanService userDailyPlanService, PlaneRideService planeRideService, PlaneRideDao planeRideDao, UserItineraryOptionDao userItineraryOptionDao) {
+    public UserItineraryService(CityDao cityDao, HotelService hotelService, CountryDao countryDao, UserItineraryDao userItineraryDao, UserItineraryStepDao userItineraryStepDao, UserDailyPlanService userDailyPlanService, PlaneRideService planeRideService, PlaneRideDao planeRideDao, UserItineraryOptionDao userItineraryOptionDao, UserItineraryDraftDao userItineraryDraftDao, CurrentUserService currentUserService) {
         this.cityDao = cityDao;
         this.hotelService = hotelService;
         this.countryDao = countryDao;
@@ -59,6 +63,8 @@ public class UserItineraryService {
         this.planeRideService = planeRideService;
         this.planeRideDao = planeRideDao;
         this.userItineraryOptionDao = userItineraryOptionDao;
+        this.userItineraryDraftDao = userItineraryDraftDao;
+        this.currentUserService = currentUserService;
     }
 
     private LocalDate convertToLocalDate(Date date) {
@@ -68,46 +74,42 @@ public class UserItineraryService {
         return date.toLocalDate();
     }
 
-    public void validateStep1(int duration) {
-        if (duration != 9 && duration != 17 && duration != 25 && duration != 33) {
+    public void validateFirstStep (int duration) {
+        if(!(duration == 9 || duration == 17 || duration == 25 || duration == 33)){
             throw new ValidationException("The duration must be of 9, 17, 25 or 33 days.");
         }
+
+        Integer userId = currentUserService.getCurrentUserId();
+        userItineraryDraftDao.saveFirstStep(userId, duration);
     }
 
-    public boolean validateStep2(LocalDate date) {
+    public void validateStartDate(String date) {
         if (date == null) {
             throw new ValidationException("Date cannot be null.");
         }
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy");
+        LocalDate validDate = LocalDate.parse(date, formatter);
 
         LocalDate today = LocalDate.now();
         LocalDate maxDate = today.plusDays(7);
 
-        if (date.isBefore(today) || date.isBefore(maxDate)) {
-            throw new ValidationException("The date must be in the future, 7 days after today.");
+        if (validDate.isBefore(today) || validDate.isBefore(maxDate)) {
+           throw new ValidationException("Date must be in the future at least 7 days after today.");
         }
 
-        return true;
-
+        Integer userId = currentUserService.getCurrentUserId();
+        userItineraryDraftDao.saveDate(userId, validDate);
     }
 
-    public void validateStep3(List<String> countryNames){
-        if (countryNames == null || countryNames.isEmpty()) {
-            throw new ValidationException("You must choose at least one country.");
+    public void validateDepartureCity(String departureCity){
+        if (departureCity == null || departureCity.isEmpty()) {
+            throw new ValidationException("Departure city cannot be null.");
         }
-
-        for (String countryName : countryNames) {
-            try {
-                Country country = countryDao.findByName(countryName);
-            } catch (ResourceNotFoundException ex) {
-                throw new ValidationException("No country found for country name: " + countryName);
-            }
-        }
-
-        if(countryNames.size() < 1){
-            throw new ValidationException("You must choose at least a country");
-        }
-
+        cityDao.findCityByName(departureCity);
+        Integer userId = currentUserService.getCurrentUserId();
+        userItineraryDraftDao.saveDepartureCity(userId, departureCity);
     }
+
 
     private PlaneRide findPlaneRideByItinerary(FlightItineraryDTO flightItinerary) {
         if (flightItinerary.getSegments() == null || flightItinerary.getSegments().isEmpty()) {

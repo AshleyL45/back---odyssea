@@ -3,16 +3,11 @@ package com.example.odyssea.controllers.userItinerary;
 import com.example.odyssea.dtos.userItinerary.UserItineraryDTO;
 import com.example.odyssea.dtos.userItinerary.UserRequestDTO;
 import com.example.odyssea.entities.userItinerary.UserItinerary;
-import com.example.odyssea.exceptions.ErrorResponse;
 import com.example.odyssea.services.userItinerary.UserItineraryService;
-import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.time.LocalDate;
-import java.time.format.DateTimeFormatter;
-import java.util.Date;
 import java.util.List;
 import java.util.Map;
 
@@ -51,42 +46,34 @@ public class UserItineraryController {
     }
 
     @PostMapping("/generate/step1")
-    public ResponseEntity<?> handleStep1( @RequestBody Map<String, Integer> durationRequest){
+    public ResponseEntity<Map<String, Boolean>> handleFirstStep(@RequestBody Map<String, Integer> durationRequest){
         Integer duration = durationRequest.get("duration");
-        userItineraryService.validateStep1(duration);
+        userItineraryService.validateFirstStep(duration);
 
         return ResponseEntity.ok(Map.of("success", true));
     }
 
     @PostMapping("/generate/step2")
-    public ResponseEntity<?> handleStep2( @RequestBody Map<String, String> dateRequest){
-
-        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy");
+    public ResponseEntity<Map<String, Boolean>> handleStartDate(@RequestBody Map<String, String> dateRequest){
         String date = dateRequest.get("startDate");
-        try {
-            LocalDate validDate = LocalDate.parse(date, formatter);
-            boolean isValidated = userItineraryService.validateStep2(validDate);
-            if(isValidated){
-                return ResponseEntity.ok(Map.of("success", true));
-            }
-        } catch (Exception e) {
-            ErrorResponse error = new ErrorResponse(
-                    HttpStatus.BAD_REQUEST,
-                    "Validation Error",
-                    e.getMessage()
-            );
-            return new ResponseEntity<>(error, HttpStatus.BAD_REQUEST);
-        }
+        userItineraryService.validateStartDate(date);
         return ResponseEntity.ok(Map.of("success", true));
     }
 
     @PostMapping("/generate/step3")
-    public ResponseEntity<?> handleStep3( @RequestBody Map<String, List<String>> countriesRequest){
-        List<String> countries = countriesRequest.get("countries");
-        userItineraryService.validateStep3(countries);
-
+    public ResponseEntity<Map<String, Boolean>> handleDepartureCity(@RequestBody Map<String, String> departureCity){
+        String city = departureCity.get("departureCity");
+        userItineraryService.validateDepartureCity(city);
         return ResponseEntity.ok(Map.of("success", true));
     }
+
+    /*@PostMapping("/generate/step4")
+    public ResponseEntity<Map<String, Boolean>> handleDepartureCity(@RequestBody Map<String, List<String>> countriesRequest){
+        List<String> countries = countriesRequest.get("countries");
+        userItineraryService.validateStep4(countries);
+
+        return ResponseEntity.ok(Map.of("success", true));
+    }*/
 
 
     // Générer un itinéraire
