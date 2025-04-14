@@ -29,7 +29,7 @@ public class DraftCitiesDao {
         SELECT dc.city_id
          FROM draft_cities dc
          JOIN userItineraryDraft uid ON dc.draft_user_itinerary_id = uid.id
-         WHERE uid.user_id = 1
+         WHERE uid.user_id = ?
     """;
         return jdbcTemplate.queryForList(sql, Integer.class, userId);
     }
