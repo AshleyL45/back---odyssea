@@ -67,7 +67,7 @@ public class ActivityController {
     @GetMapping("/top5")
     public ResponseEntity<?> getTop5ActivitiesByCityId(@RequestParam int cityId) {
         List<Activity> activities = activityService.getTop5ActivitiesByCityId(cityId);
-        if(activities == null){
+        if (activities == null || activities.isEmpty()) {
             return ResponseEntity.status(HttpStatus.OK)
                     .body(Collections.singletonMap("message", "Sorry, there are no activities for this city."));
         }
@@ -75,13 +75,15 @@ public class ActivityController {
     }
 
     /**
-     * Importe les activités depuis l'API Amadeus pour une ville donnée
+     * Importe les activités depuis Google Places pour une ville donnée et renvoie jusqu'à 5 activités.
+     * Si le nombre d'activités existantes est inférieur à 5, on lance l'import,
+     * puis on renvoie la liste complète après importation.
      */
     @PostMapping("/importAndGet")
     public ResponseEntity<?> importAndGetActivities(@RequestParam int cityId, @RequestParam int radius) {
         List<Activity> activities = activityService.getTop5ActivitiesByCityId(cityId);
         if (activities.size() < 5) {
-            activityService.importActivitiesFromAmadeus(cityId, radius);
+            activityService.importActivitiesFromGooglePlaces(cityId, radius);
             activities = activityService.getTop5ActivitiesByCityId(cityId);
         }
         if (activities.isEmpty()) {
@@ -89,9 +91,4 @@ public class ActivityController {
         }
         return ResponseEntity.ok(activities);
     }
-
-
-
 }
-
-

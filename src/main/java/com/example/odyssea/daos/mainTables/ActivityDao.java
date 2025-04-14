@@ -120,6 +120,12 @@ public class ActivityDao {
         return activities;
     }
 
+    public boolean activityExists(int cityId, String name) {
+        String sql = "SELECT COUNT(*) FROM activity WHERE cityId = ? AND name = ?";
+        Integer count = jdbcTemplate.queryForObject(sql, Integer.class, cityId, name);
+        return count != null && count > 0;
+    }
+
 
     /**
      * RowMapper pour transformer un ResultSet en objet Activity

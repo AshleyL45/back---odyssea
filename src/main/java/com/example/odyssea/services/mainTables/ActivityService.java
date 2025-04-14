@@ -7,6 +7,7 @@ import com.example.odyssea.entities.mainTables.Activity;
 import com.example.odyssea.entities.mainTables.City;
 import com.example.odyssea.exceptions.ResourceNotFoundException;
 import com.example.odyssea.services.amadeus.TokenService;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
@@ -15,16 +16,18 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.http.*;
 
-
+import java.time.LocalTime;
 import java.util.List;
 
 @Service
 public class ActivityService {
 
+    @Value("${GOOGLE_PLACES_API_KEY}")
+    private String googlePlacesApiKey;
+
     private final ActivityDao activityDao;
     private final TokenService tokenService;
     private final CityDao cityDao;
-
 
     public ActivityService(ActivityDao activityDao, TokenService tokenService, CityDao cityDao) {
         this.activityDao = activityDao;
@@ -84,77 +87,75 @@ public class ActivityService {
      * Récupère les 5 activités d'une ville spécifique
      */
     public List<Activity> getTop5ActivitiesByCityId(int cityId) {
-        try{
+        try {
             return activityDao.findTop5ByCityId(cityId);
-        } catch (ResourceNotFoundException e){
+        } catch (ResourceNotFoundException e) {
             return null;
         }
     }
 
     /**
-     * Importe les activités depuis l'API Amadeus pour une ville donnée
-     * en filtrant par le code IATA, la latitude et la longitude de la ville,
-     * en demandant 5 activités et en vérifiant qu'au moins 5 résultats sont obtenus
-     * Seules les 5 premières activités seront insérées
+     * Import les activités depuis Google Places et s'assure que la ville possède 5 activités uniques.
+     * Pour chaque résultat de l'API, on vérifie qu'une activité avec le même nom n'est pas déjà présente,
+     * et on continue à importer jusqu'à atteindre 5 activités ou épuiser les résultats.
      */
-    public void importActivitiesFromAmadeus(int cityId, int radius) {
-        // Vérifier que la ville existe, récupérer les infos, etc.
+    public void importActivitiesFromGooglePlaces(int cityId, int radius) {
+        // Récupère les informations de la ville
         City city = cityDao.findById(cityId).orElseThrow(() ->
                 new IllegalStateException("City not found for id " + cityId));
-
-        String cityCode = city.getIataCode();
         double latitude = city.getLatitude();
         double longitude = city.getLongitude();
 
-        if (cityCode == null || cityCode.isEmpty()) {
-            throw new IllegalStateException("IATA code for city id " + cityId + " cannot be found.");
-        }
-
-        String token = tokenService.getValidToken().block();
-        if (token == null) {
-            throw new IllegalStateException("Unable to retrieve Amadeus token.");
-        }
-
-        // Ajout du paramètre "radius" dans l'URL
-        String url = "https://test.api.amadeus.com/v1/shopping/activities"
-                + "?cityCode=" + cityCode
-                + "&latitude=" + latitude
-                + "&longitude=" + longitude
-                + "&radius=" + radius
-                + "&limit=5";
-
-        HttpHeaders headers = new HttpHeaders();
-        headers.setBearerAuth(token);
-        HttpEntity<?> entity = new HttpEntity<>(headers);
+        String url = "https://maps.googleapis.com/maps/api/place/nearbysearch/json" +
+                "?location=" + latitude + "," + longitude +
+                "&radius=" + radius +
+                "&type=tourist_attraction" +
+                "&key=" + googlePlacesApiKey;
 
         RestTemplate restTemplate = new RestTemplate();
-        ResponseEntity<String> response = restTemplate.exchange(url, HttpMethod.GET, entity, String.class);
+        ResponseEntity<String> response = restTemplate.getForEntity(url, String.class);
 
         if (response.getStatusCode() == HttpStatus.OK) {
             ObjectMapper mapper = new ObjectMapper();
             try {
                 JsonNode root = mapper.readTree(response.getBody());
-                JsonNode dataArray = root.path("data");
-
-                // Si aucune activité n'est retournée, on log et on arrête l'import
-                if (!dataArray.isArray() || dataArray.size() == 0) {
-                    System.out.println("No activities returned for the city with IATA code " + cityCode);
+                String status = root.path("status").asText();
+                if (!"OK".equals(status)) {
+                    System.out.println("Google Places API returned status: " + status);
                     return;
                 }
 
-                int numberOfActivitiesToImport = Math.min(5, dataArray.size());
-                for (int i = 0; i < numberOfActivitiesToImport; i++) {
-                    JsonNode node = dataArray.get(i);
-                    ActivityDto dto = mapper.treeToValue(node, ActivityDto.class);
-                    Activity activity = dto.toActivity(cityId);
-                    activityDao.save(activity);
+                JsonNode results = root.path("results");
+                if (!results.isArray() || results.size() == 0) {
+                    System.out.println("No activities returned from Google Places API for city id " + cityId);
+                    return;
+                }
+
+                // Récupérer le nombre actuel d'activités pour la ville
+                int currentCount = activityDao.findTop5ByCityId(cityId).size();
+                // Parcourir l'ensemble des résultats tant que le nombre d'activités est inférieur à 5
+                for (int i = 0; i < results.size() && currentCount < 5; i++) {
+                    JsonNode resultNode = results.get(i);
+                    String name = resultNode.path("name").asText();
+                    String vicinity = resultNode.has("vicinity") ? resultNode.path("vicinity").asText() : "";
+                    String description = vicinity.isEmpty() ? "No description available" : vicinity;
+                    String type = "Tourist Attraction";
+                    String physicalEffort = "Low";
+                    LocalTime duration = LocalTime.of(1, 0);
+                    Double price = 0.0;
+
+                    // Insérer l'activité seulement si elle n'existe pas déjà pour la ville
+                    if (!activityDao.activityExists(cityId, name)) {
+                        Activity activity = new Activity(0, cityId, name, type, physicalEffort, duration, description, price);
+                        activityDao.save(activity);
+                        currentCount++;
+                    }
                 }
             } catch (Exception e) {
                 e.printStackTrace();
             }
         } else {
-            System.out.println("Error calling Amadeus API: " + response.getStatusCode());
+            System.out.println("Error calling Google Places API: " + response.getStatusCode());
         }
     }
-
 }
