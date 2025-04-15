@@ -71,8 +71,13 @@ public class UserItineraryService {
         return date.toLocalDate();
     }
 
+   /* public UserItineraryDTO generateItinerary (DraftData draftData){
 
-    private PlaneRide findPlaneRideByItinerary(FlightItineraryDTO flightItinerary) {
+    }*/
+
+
+
+    /*private PlaneRide findPlaneRideByItinerary(FlightItineraryDTO flightItinerary) {
         if (flightItinerary.getSegments() == null || flightItinerary.getSegments().isEmpty()) {
             return null;
         }
@@ -172,7 +177,7 @@ public class UserItineraryService {
 
             userItineraryStepDao.save(step);
         }
-    }
+    }*/
 
 
     public UserItineraryDTO toUserItineraryDTO (UserItinerary userItinerary){
@@ -209,7 +214,7 @@ public class UserItineraryService {
 
     }
 
-    @Transactional
+    /*@Transactional
     public UserItineraryDTO generateUserItinerary(UserRequestDTO userRequest) throws Exception {
         UserItineraryDTO userItinerary = new UserItineraryDTO();
         userItinerary.setUserId(userRequest.getUserId());
@@ -285,35 +290,35 @@ public class UserItineraryService {
 
 
             // Assigner les vols
-           /* if (itineraryDay.isDayOff()) {
-                String departureIata = userItinerary.getDepartureCity();
-                String arrivalIata = cityDao.findCityByName(itineraryDay.getCityName()).getIataCode();
-
-                LocalDate departureDate = itineraryDay.getDate();
-                LocalDate arrivalDate = departureDate;
-
-                int totalPeople = userRequest.getNumberOfAdults() + userRequest.getNumberOfKids();
-
-                // Récupérer les vols via PlaneRideService
-                Mono<List<FlightItineraryDTO>> flightsMono = planeRideService.getFlights(
-                        departureIata, arrivalIata, departureDate, arrivalDate, totalPeople
-                );
-
-                // Bloquer pour obtenir le résultat
-                List<FlightItineraryDTO> flights = flightsMono.block();
-
-                if (flights != null && !flights.isEmpty()) {
-                    // Trouver le PlaneRide correspondant dans la base de données
-                    PlaneRide planeRide = findPlaneRideByItinerary(flights.get(0));
-
-                    if (planeRide != null) {
-                        System.out.println("Plane ride assigned for day " + i + ": " + planeRide.getId());
-                        itineraryDay.setFlightItineraryDTO(planeRide);
-                    } else {
-                        System.out.println("No matching PlaneRide found in the database for day " + i);
-                    }
-                }
-            }*/
+//           if (itineraryDay.isDayOff()) {
+//                String departureIata = userItinerary.getDepartureCity();
+//                String arrivalIata = cityDao.findCityByName(itineraryDay.getCityName()).getIataCode();
+//
+//                LocalDate departureDate = itineraryDay.getDate();
+//                LocalDate arrivalDate = departureDate;
+//
+//                int totalPeople = userRequest.getNumberOfAdults() + userRequest.getNumberOfKids();
+//
+//                // Récupérer les vols via PlaneRideService
+//                Mono<List<FlightItineraryDTO>> flightsMono = planeRideService.getFlights(
+//                        departureIata, arrivalIata, departureDate, arrivalDate, totalPeople
+//                );
+//
+//                // Bloquer pour obtenir le résultat
+//                List<FlightItineraryDTO> flights = flightsMono.block();
+//
+//                if (flights != null && !flights.isEmpty()) {
+//                    // Trouver le PlaneRide correspondant dans la base de données
+//                    PlaneRide planeRide = findPlaneRideByItinerary(flights.get(0));
+//
+//                    if (planeRide != null) {
+//                        System.out.println("Plane ride assigned for day " + i + ": " + planeRide.getId());
+//                        itineraryDay.setFlightItineraryDTO(planeRide);
+//                    } else {
+//                        System.out.println("No matching PlaneRide found in the database for day " + i);
+//                    }
+//                }
+//            }
 
 
             i += 1;
@@ -376,7 +381,7 @@ public class UserItineraryService {
         } else {
             assignCity(itineraryDay, userRequest.getCountrySelection().getFirst(), dayNumber);
         }
-    }
+    }*/
 
     // Retourner la liste de tous les itinéraires d'un utilisateur
     public List<UserItinerary> getAllUserItineraries(int userId) {
@@ -423,7 +428,7 @@ public class UserItineraryService {
 
 
     // Assigner la ville
-    private void assignCity(UserItineraryDayDTO day, CountrySelectionDTO country, int dayNumber){
+   /* private void assignCity(UserItineraryDayDTO day, CountrySelectionDTO country, int dayNumber){
         if(country.getCitySelection().size() != 2){
             throw new RuntimeException("A country must have 2 cities");
         }
@@ -488,7 +493,7 @@ public class UserItineraryService {
         // Assigner l'activité au jour
         day.setActivity(activity);
         return activity;
-    }
+    }*/
 
     public boolean updateItineraryName(int id, String newItineraryName){
         return userItineraryDao.updateUserItineraryName(id, newItineraryName);

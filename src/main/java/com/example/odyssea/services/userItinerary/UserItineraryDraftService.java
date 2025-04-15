@@ -5,12 +5,17 @@ import com.example.odyssea.daos.mainTables.CityDao;
 import com.example.odyssea.daos.mainTables.CountryDao;
 import com.example.odyssea.daos.mainTables.OptionDao;
 import com.example.odyssea.daos.userItinerary.drafts.*;
+import com.example.odyssea.dtos.userItinerary.DraftData;
 import com.example.odyssea.entities.mainTables.Activity;
 import com.example.odyssea.entities.mainTables.City;
+import com.example.odyssea.entities.mainTables.Country;
+import com.example.odyssea.entities.mainTables.Option;
+import com.example.odyssea.entities.userItinerary.drafts.UserItineraryDraft;
 import com.example.odyssea.enums.TripDuration;
 import com.example.odyssea.exceptions.ValidationException;
 import com.example.odyssea.services.CurrentUserService;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
@@ -45,6 +50,17 @@ public class UserItineraryDraftService {
 
     private Integer getUserId() {
         return currentUserService.getCurrentUserId();
+    }
+
+    @Transactional(readOnly = true)
+    public DraftData loadAllDraftData(Integer userId){
+        UserItineraryDraft draft = userItineraryDraftDao.getLastDraftByUserId(userId);
+        List<Country> countries = draftCountriesDao.findDraftCountries(userId);
+        List<City> cities = draftCitiesDao.findDraftCities(userId);
+        List<Activity> activities = draftActivitiesDao.findDraftActivities(userId);
+        List<Option> options = draftOptionsDao.findDraftOptions(userId);
+
+        return new DraftData(draft, countries, cities, activities, options);
     }
 
     public void validateFirstStep (int duration) {

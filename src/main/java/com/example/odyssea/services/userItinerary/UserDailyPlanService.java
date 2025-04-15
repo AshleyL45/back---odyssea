@@ -14,6 +14,7 @@ import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
 import java.util.Collections;
+import java.util.List;
 import java.util.Optional;
 
 @Service
@@ -76,4 +77,8 @@ public class UserDailyPlanService {
                 new FlightItineraryDTO()
         );
     }
+
+    /*public List<UserItineraryDayDTO> generateEachDay(int duration){
+
+    }*/
 }

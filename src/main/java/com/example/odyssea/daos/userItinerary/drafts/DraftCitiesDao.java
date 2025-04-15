@@ -1,6 +1,9 @@
 package com.example.odyssea.daos.userItinerary.drafts;
 
+import com.example.odyssea.entities.mainTables.Activity;
+import com.example.odyssea.entities.mainTables.City;
 import com.example.odyssea.entities.userItinerary.drafts.DraftCities;
+import org.springframework.jdbc.core.BeanPropertyRowMapper;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.stereotype.Repository;
@@ -44,5 +47,13 @@ public class DraftCitiesDao {
         }
 
         jdbcTemplate.batchUpdate(sql, batchArgs);
+    }
+
+    public List<City> findDraftCities(Integer userId){
+        Integer draftId = userItineraryDraftDao.getLastDraftIdByUser(userId);
+        String sql = "SELECT city.* FROM draft_cities\n" +
+                "INNER JOIN city ON draft_activities.city_id = city.id WHERE draft_cities.draft_user_itinerary_id = ? ";
+
+        return jdbcTemplate.query(sql, new Object[]{draftId}, new BeanPropertyRowMapper<>(City.class));
     }
 }

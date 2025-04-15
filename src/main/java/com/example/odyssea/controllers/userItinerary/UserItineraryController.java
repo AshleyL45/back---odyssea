@@ -45,11 +45,11 @@ public class UserItineraryController {
         }
     }
 
-    // Générer un itinéraire
+    /*// Générer un itinéraire
     @PostMapping("/generate")
         public ResponseEntity<UserItineraryDTO> generateItinerary(@RequestBody UserRequestDTO userPreferences) throws Exception {
         UserItineraryDTO userItinerary = userItineraryService.generateUserItinerary(userPreferences);
         return ResponseEntity.status(HttpStatus.CREATED).body(userItinerary);
-    }
+    }*/
 
 }
