@@ -5,10 +5,10 @@ import jakarta.validation.constraints.*;
 public class Hotel {
 
     @Min(value = 1, message = "Hotel ID must be greater than or equal to 1")
-    private int id;
+    private Integer id;
 
     @Min(value = 1, message = "City ID must be greater than or equal to 1")
-    private int cityId;
+    private Integer cityId;
 
     @NotBlank(message = "Hotel name is required")
     @Size(max = 255, message = "Hotel name must not exceed 255 characters")
@@ -29,7 +29,7 @@ public class Hotel {
 
     public Hotel() {}
 
-    public Hotel(int id, int cityId, String name, int starRating, String description, Double price) {
+    public Hotel(Integer id, Integer cityId, String name, int starRating, String description, Double price) {
         this.id = id;
         this.cityId = cityId;
         this.name = name;
@@ -39,16 +39,16 @@ public class Hotel {
     }
 
     // Getters & Setters
-    public int getId() {
+    public Integer getId() {
         return id;
     }
-    public void setId(int id) {
+    public void setId(Integer id) {
         this.id = id;
     }
-    public int getCityId() {
+    public Integer getCityId() {
         return cityId;
     }
-    public void setCityId(int cityId) {
+    public void setCityId(Integer cityId) {
         this.cityId = cityId;
     }
     public String getName() {

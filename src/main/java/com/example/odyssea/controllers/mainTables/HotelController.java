@@ -66,12 +66,11 @@ public class HotelController {
      * vérifie s'ils existent déjà dans la base de données et enregistre jusqu'à 5 nouveaux hôtels s'ils ne sont pas encore présents.
      */
     @GetMapping("/from-amadeus/by-iata-and-save")
-    public Mono<List<HotelDto>> fetchAndSaveHotelsByIataAndStar(@RequestParam String iataCityCode,
-                                                                @RequestParam int cityId) {
-        System.out.println("fetchAndSaveHotelsByIataAndStar request received with iataCityCode: "
-                + iataCityCode + ", cityId: " + cityId);
-        return hotelService.fetchAndSaveHotelsFromAmadeusByCity(iataCityCode, cityId);
+    public Mono<HotelDto> fetchAndSaveOneHotel(@RequestParam String iataCityCode,
+                                               @RequestParam int cityId) {
+        return hotelService.fetchAndSaveOneHotelFromAmadeusByCity(iataCityCode, cityId);
     }
+
 
     /**
      * Récupère les hôtels d'une ville spécifique avec un certain standing (nombre d'étoiles)
