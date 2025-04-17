@@ -86,10 +86,41 @@ public class HotelService {
     private HotelDto mapJsonNodeToHotelDto(JsonNode node, int cityId) {
         HotelDto dto = new HotelDto();
         dto.setCityId(cityId);
-        dto.setName(node.path("name").asText("Unknown name"));
-        dto.setDescription(node.path("description").asText("Hotel from Amadeus"));
+
+        String rawName = node.path("name").asText("Unknown name");
+        dto.setName(toTitleCase(rawName));
+
+        String rawDescription = node.path("description").asText("Hotel from Amadeus");
+
+        if (rawDescription.equalsIgnoreCase("Hotel from Amadeus")) {
+            rawDescription = "No description for this hotel";
+        } else {
+            rawDescription = toTitleCase(rawDescription);
+        }
+
+        dto.setDescription(rawDescription);
+
+        // Prix
         dto.setPrice(minPrice + random.nextDouble() * (maxPrice - minPrice));
         return dto;
+    }
+
+
+    private String toTitleCase(String input) {
+        if (input == null || input.isEmpty()) return input;
+
+        String[] words = input.toLowerCase().split(" ");
+        StringBuilder sb = new StringBuilder();
+
+        for (String word : words) {
+            if (word.length() > 0) {
+                sb.append(Character.toUpperCase(word.charAt(0)));
+                sb.append(word.substring(1));
+                sb.append(" ");
+            }
+        }
+
+        return sb.toString().trim();
     }
 
     /**
