@@ -58,8 +58,15 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(Exception.class)
     public ResponseEntity<String> handleGlobalException(Exception e) {
-        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(e.getMessage());
+        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Error " + e.getMessage());
     }
+
+    @ExceptionHandler(NullPointerException.class)
+    public ResponseEntity<ErrorResponse> handleNullPointers(NullPointerException e) {
+        return new ResponseEntity<>(new ErrorResponse(HttpStatus.INTERNAL_SERVER_ERROR,"Internal error (Null pointer)", e.getMessage()), HttpStatus.INTERNAL_SERVER_ERROR);
+    }
+
+
 
     @ExceptionHandler(ValidationException.class)
     public ResponseEntity<ErrorResponse> handleInvalidDuration(ValidationException e){

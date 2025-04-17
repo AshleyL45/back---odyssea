@@ -1,5 +1,8 @@
 package com.example.odyssea.services.userItinerary.helpers;
 
+import com.example.odyssea.entities.userItinerary.UserItinerary;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import com.example.odyssea.daos.mainTables.CityDao;
 import com.example.odyssea.dtos.flight.FlightItineraryDTO;
 import com.example.odyssea.dtos.userItinerary.UserItineraryDayDTO;
@@ -15,6 +18,7 @@ import java.util.List;
 public class FlightAssigner {
     private final CityDao cityDao;
     private final PlaneRideService planeRideService;
+    private static final Logger logger = LoggerFactory.getLogger(FlightAssigner.class);
 
     public FlightAssigner(CityDao cityDao, PlaneRideService planeRideService) {
         this.cityDao = cityDao;
@@ -22,13 +26,18 @@ public class FlightAssigner {
     }
 
     public Mono<FlightItineraryDTO> assignFlight(UserItineraryDayDTO day, List<City> visitedCities, int totalPeople) {
+        logger.info("Assigning flight for day: {}", day.getDayNumber());
+
         if (!day.isDayOff()) {
+            logger.info("Day {} is not an off day. Skipping flight assignment.", day.getDayNumber());
             return Mono.empty();
         }
 
         int dayOffIndex = getOffDayIndex(day.getDayNumber());
+        logger.info("Off day index calculated: {}", dayOffIndex);
 
         if (dayOffIndex >= visitedCities.size() - 1) {
+            logger.warn("DayOffIndex ({}) exceeds available cities ({}). No flight possible.", dayOffIndex, visitedCities.size());
             return Mono.empty();
         }
 
@@ -36,17 +45,28 @@ public class FlightAssigner {
         City toCity = visitedCities.get(dayOffIndex + 1);
         LocalDate date = day.getDate();
 
+        logger.info("Fetching flight from {} to {} on {}", fromCity.getName(), toCity.getName(), date);
+
         return planeRideService.getFlights(
-                fromCity.getIataCode(),
-                toCity.getIataCode(),
-                date,
-                date,
-                totalPeople
-        ).flatMap(flights -> {
-            if (flights.isEmpty()) return Mono.empty();
-            return Mono.just(flights.getFirst());
-        });
+                        fromCity.getIataCode(),
+                        toCity.getIataCode(),
+                        date,
+                        date,
+                        totalPeople
+                )
+                .doOnNext(flights -> logger.info("Received {} flights", flights.size()))
+                .flatMap(flights -> {
+                    if (flights.isEmpty()) {
+                        logger.warn("No flights found from {} to {} on {}", fromCity.getName(), toCity.getName(), date);
+                        return Mono.empty();
+                    }
+                    FlightItineraryDTO selectedFlight = flights.getFirst();
+                    logger.info("Selected flight: {}", selectedFlight);
+                    return Mono.just(selectedFlight);
+                })
+                .doOnError(e -> logger.error("Error while assigning flight: {}", e.getMessage(), e));
     }
+
 
     private int getOffDayIndex(int currentDayNumber) {
         int count = 0;

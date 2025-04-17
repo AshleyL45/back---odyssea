@@ -12,13 +12,9 @@ public class DayAssigner {
         return startDate.plusDays(dayNumber);
     }
 
-    public boolean isDayOff(UserItineraryDayDTO day, int duration){
+    public boolean isDayOff(UserItineraryDayDTO day){
         int dayNumber = day.getDayNumber();
-
-        if(dayNumber == 0 || dayNumber == duration){
-            return true;
-        }
-
         return (dayNumber - 1) % 4 == 0;
     }
+
 }

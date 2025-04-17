@@ -95,7 +95,7 @@ public class UserDailyPlanService {
         int duration = draftData.getDraft().getDuration();
         AtomicInteger index = new AtomicInteger(0);
 
-        return IntStream.range(0, duration)
+        return IntStream.range(1, duration + 1)
                 .mapToObj(i ->createItineraryDay(draftData, i, index))
                 .toList();
     }
@@ -120,13 +120,14 @@ public class UserDailyPlanService {
 
 
         LocalDate date = dayAssigner.assignDate(draftData.getDraft().getStartDate(), dayNumber);
-        day.setDayNumber(dayNumber + 1);
-        boolean isOff = dayAssigner.isDayOff(day, draftData.getDraft().getDuration());
+        day.setDayNumber(dayNumber);
+        boolean isOff = dayAssigner.isDayOff(day);
         String countryName = locationAssigner.assignCountry(day, countries);
         String cityName = locationAssigner.assignCity(day, cities, draftData.getDraft().getDuration());
         Activity activity = activityAssigner.assignActivity(day, activities, index);
         //Hotel hotel = hotelAssigner.assignHotel(day, hotels);
         Mono<FlightItineraryDTO> flight = flightAssigner.assignFlight(day,visitedCities, totalPeople);
+        //System.out.println("Flight : " + Objects.requireNonNull(flight.block()));
 
         day.setDate(date);
         day.setDayOff(isOff);
