@@ -6,33 +6,46 @@ import com.example.odyssea.daos.flight.PlaneRideDao;
 import com.example.odyssea.daos.userItinerary.UserItineraryStepDao;
 import com.example.odyssea.dtos.flight.FlightItineraryDTO;
 import com.example.odyssea.dtos.mainTables.HotelDto;
+import com.example.odyssea.dtos.userItinerary.DraftData;
 import com.example.odyssea.dtos.userItinerary.UserItineraryDayDTO;
 import com.example.odyssea.entities.mainTables.*;
 import com.example.odyssea.entities.userItinerary.UserItinerary;
 import com.example.odyssea.entities.userItinerary.UserItineraryStep;
+import com.example.odyssea.services.flight.PlaneRideService;
+import com.example.odyssea.services.mainTables.HotelService;
+import com.example.odyssea.services.userItinerary.helpers.*;
 import org.springframework.stereotype.Service;
+import reactor.core.publisher.Mono;
 
 import java.time.LocalDate;
-import java.util.Collections;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
+import java.util.concurrent.atomic.AtomicInteger;
+import java.util.stream.IntStream;
 
 @Service
 public class UserDailyPlanService {
     private final UserItineraryStepDao userItineraryStepDao;
     private final CityDao cityDao;
     private final CountryDao countryDao;
-    private final PlaneRideDao planeRideDao;
+    private final DayAssigner dayAssigner;
+    private final LocationAssigner locationAssigner;
+    private final HotelAssigner hotelAssigner;
+    private final ActivityAssigner activityAssigner;
+    private final FlightAssigner flightAssigner;
 
 
-    public UserDailyPlanService(UserItineraryStepDao userItineraryStepDao, CityDao cityDao, CountryDao countryDao, PlaneRideDao planeRideDao) {
+    public UserDailyPlanService(UserItineraryStepDao userItineraryStepDao, CityDao cityDao, CountryDao countryDao, DayAssigner dayAssigner, LocationAssigner locationAssigner, HotelAssigner hotelAssigner, ActivityAssigner activityAssigner, FlightAssigner flightAssigner) {
         this.userItineraryStepDao = userItineraryStepDao;
         this.cityDao = cityDao;
         this.countryDao = countryDao;
-        this.planeRideDao = planeRideDao;
+        this.dayAssigner = dayAssigner;
+        this.locationAssigner = locationAssigner;
+        this.hotelAssigner = hotelAssigner;
+        this.activityAssigner = activityAssigner;
+        this.flightAssigner = flightAssigner;
     }
 
-    public UserItineraryDayDTO toUserItineraryStep(UserItinerary userItinerary, UserItineraryStep userItineraryStep) {
+    /*public UserItineraryDayDTO toUserItineraryStep(UserItinerary userItinerary, UserItineraryStep userItineraryStep) {
         // 1. Gestion de la ville et du pays
         String cityName = cityDao.findById(userItineraryStep.getCityId())
                 .map(City::getName)
@@ -76,9 +89,54 @@ public class UserDailyPlanService {
                 userItineraryStep.isOffDay(),
                 new FlightItineraryDTO()
         );
+    }*/
+
+    public List<UserItineraryDayDTO> generateEachDay(DraftData draftData){
+        int duration = draftData.getDraft().getDuration();
+        AtomicInteger index = new AtomicInteger(0);
+
+        return IntStream.range(0, duration)
+                .mapToObj(i ->createItineraryDay(draftData, i, index))
+                .toList();
     }
 
-    /*public List<UserItineraryDayDTO> generateEachDay(int duration){
+    private UserItineraryDayDTO createItineraryDay(DraftData draftData, int dayNumber, AtomicInteger index) {
+        UserItineraryDayDTO day = new UserItineraryDayDTO();
+        List<Country> countries = draftData.getCountries();
+        List<City> cities = draftData.getCities();
+        List<Activity> activities = draftData.getActivities();
+        //List<Hotel> hotels = hotelAssigner.getHotels(draftData.getDraft().getHotelStanding(), cities);
+        int totalPeople = draftData.getDraft().getNumberAdults() + draftData.getDraft().getNumberKids();
+        // Construction de la liste des villes visitées pour les vols
+        LinkedList<City> visitedCities = new LinkedList<>(draftData.getCities());
+        City departureCity = cityDao.findCityByName(draftData.getDraft().getDepartureCity());
 
-    }*/
+        if (!visitedCities.getFirst().getName().equals(departureCity.getName())) {
+            visitedCities.addFirst(departureCity);
+        }
+        if (!visitedCities.getLast().getName().equals(departureCity.getName())) {
+            visitedCities.addLast(departureCity);
+        }
+
+
+        LocalDate date = dayAssigner.assignDate(draftData.getDraft().getStartDate(), dayNumber);
+        day.setDayNumber(dayNumber + 1);
+        boolean isOff = dayAssigner.isDayOff(day, draftData.getDraft().getDuration());
+        String countryName = locationAssigner.assignCountry(day, countries);
+        String cityName = locationAssigner.assignCity(day, cities, draftData.getDraft().getDuration());
+        Activity activity = activityAssigner.assignActivity(day, activities, index);
+        //Hotel hotel = hotelAssigner.assignHotel(day, hotels);
+        Mono<FlightItineraryDTO> flight = flightAssigner.assignFlight(day,visitedCities, totalPeople);
+
+        day.setDate(date);
+        day.setDayOff(isOff);
+        day.setCountryName(countryName);
+        day.setCityName(cityName);
+        day.setActivity(activity);
+        day.setHotel(null);
+        day.setFlightItineraryDTO(flight.block());
+
+        return day;
+    }
+
 }

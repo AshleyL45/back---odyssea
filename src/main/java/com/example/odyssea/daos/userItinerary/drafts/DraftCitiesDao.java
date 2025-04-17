@@ -52,7 +52,7 @@ public class DraftCitiesDao {
     public List<City> findDraftCities(Integer userId){
         Integer draftId = userItineraryDraftDao.getLastDraftIdByUser(userId);
         String sql = "SELECT city.* FROM draft_cities\n" +
-                "INNER JOIN city ON draft_activities.city_id = city.id WHERE draft_cities.draft_user_itinerary_id = ? ";
+                "INNER JOIN city ON draft_cities.city_id = city.id WHERE draft_cities.draft_user_itinerary_id = ? ";
 
         return jdbcTemplate.query(sql, new Object[]{draftId}, new BeanPropertyRowMapper<>(City.class));
     }
