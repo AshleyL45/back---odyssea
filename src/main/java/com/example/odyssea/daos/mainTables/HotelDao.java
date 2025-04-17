@@ -1,6 +1,7 @@
 package com.example.odyssea.daos.mainTables;
 
 import com.example.odyssea.entities.mainTables.Hotel;
+import com.example.odyssea.exceptions.HotelNotFound;
 import com.example.odyssea.exceptions.ResourceNotFoundException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
@@ -20,29 +21,19 @@ public class HotelDao {
         this.jdbcTemplate = jdbcTemplate;
     }
 
-    /**
-     * Vérifie que le cityId existe dans la table city
-     */
     public boolean cityExists(int cityId) {
         String sql = "SELECT COUNT(*) FROM city WHERE id = ?";
         Integer count = jdbcTemplate.queryForObject(sql, Integer.class, cityId);
         return count != null && count > 0;
     }
 
-    /**
-     * Vérifie si un hôtel existe dans la table hotel par son id
-     */
     public boolean existsById(int id) {
         String sql = "SELECT COUNT(*) FROM hotel WHERE id = ?";
         Integer count = jdbcTemplate.queryForObject(sql, Integer.class, id);
         return count != null && count > 0;
     }
 
-    /**
-     * Enregistre un nouvel hôtel
-     */
     public void save(Hotel hotel) {
-        // Vérifier que la ville existe avant d'enregistrer l'hôtel
         if (!cityExists(hotel.getCityId())) {
             throw new ResourceNotFoundException("City with id " + hotel.getCityId() + " not found.");
         }
@@ -56,11 +47,7 @@ public class HotelDao {
         );
     }
 
-    /**
-     * Met à jour un hôtel existant
-     */
     public void update(Hotel hotel) {
-        // Vérifier que la ville existe avant de mettre à jour l'hôtel
         if (!cityExists(hotel.getCityId())) {
             throw new ResourceNotFoundException("City with id " + hotel.getCityId() + " not found.");
         }
@@ -74,24 +61,18 @@ public class HotelDao {
                 hotel.getId()
         );
         if (rowsAffected == 0) {
-            throw new ResourceNotFoundException("Hotel with id " + hotel.getId() + " not found for update.");
+            throw new HotelNotFound("Hotel with id " + hotel.getId() + " not found for update.");
         }
     }
 
-    /**
-     * Supprime un hôtel par son identifiant
-     */
     public void deleteById(int id) {
         String sql = "DELETE FROM hotel WHERE id = ?";
         int rowsAffected = jdbcTemplate.update(sql, id);
         if (rowsAffected == 0) {
-            throw new ResourceNotFoundException("Hotel with id " + id + " not found for deletion.");
+            throw new HotelNotFound("Hotel with id " + id + " not found for deletion.");
         }
     }
 
-    /**
-     * Recherche un hôtel par son identifiant
-     */
     public Optional<Hotel> findById(int id) {
         String sql = "SELECT * FROM hotel WHERE id = ?";
         List<Hotel> hotels = jdbcTemplate.query(sql, new HotelRowMapper(), id);
@@ -101,55 +82,39 @@ public class HotelDao {
         return Optional.of(hotels.get(0));
     }
 
-    /**
-     * Récupère tous les hôtels
-     */
     public List<Hotel> findAll() {
         String sql = "SELECT * FROM hotel";
         List<Hotel> hotels = jdbcTemplate.query(sql, new HotelRowMapper());
         if (hotels.isEmpty()) {
-            throw new ResourceNotFoundException("No hotels found.");
+            throw new HotelNotFound("No hotels found.");
         }
         return hotels;
     }
 
-    /**
-     * Récupère les hôtels d'une ville donnée
-     */
     public List<Hotel> findByCityId(int cityId) {
         String sql = "SELECT * FROM hotel WHERE cityId = ?";
         List<Hotel> hotels = jdbcTemplate.query(sql, new HotelRowMapper(), cityId);
         if (hotels.isEmpty()) {
-            throw new ResourceNotFoundException("No hotels found for city id " + cityId);
+            throw new HotelNotFound("No hotels found for city id " + cityId);
         }
         return hotels;
     }
 
-    /**
-     * Vérifie si un hôtel existe déjà dans la base en fonction de son nom et de son cityId
-     */
     public boolean existsByNameAndCityId(String name, int cityId) {
         String sql = "SELECT COUNT(*) FROM hotel WHERE name = ? AND cityId = ?";
         Integer count = jdbcTemplate.queryForObject(sql, Integer.class, name, cityId);
         return count != null && count > 0;
     }
 
-
-    /**
-     * Récupère les hôtels d'une ville donnée ayant un certain standing (starRating)
-     */
     public List<Hotel> findByCityIdAndStarRating(int cityId, int starRating) {
         String sql = "SELECT * FROM hotel WHERE cityId = ? AND starRating = ?";
         List<Hotel> hotels = jdbcTemplate.query(sql, new HotelRowMapper(), cityId, starRating);
         if (hotels.isEmpty()) {
-            throw new ResourceNotFoundException("No hotels found with star rating " + starRating + " in city id " + cityId);
+            throw new HotelNotFound("No hotels found with star rating " + starRating + " in city id " + cityId);
         }
         return hotels;
     }
 
-    /**
-     * RowMapper pour transformer un ResultSet en objet Hotel
-     */
     private static class HotelRowMapper implements RowMapper<Hotel> {
         @Override
         public Hotel mapRow(ResultSet rs, int rowNum) throws SQLException {

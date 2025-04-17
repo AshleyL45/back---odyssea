@@ -15,7 +15,7 @@ import java.util.Map;
 @RestControllerAdvice
 public class GlobalExceptionHandler {
 
-    @ExceptionHandler(MethodArgumentNotValidException.class) // Gérer les erreurs de validation
+    @ExceptionHandler(MethodArgumentNotValidException.class)
     public ResponseEntity<Map<String, String>> handleValidationExceptions(MethodArgumentNotValidException ex) {
         Map<String, String> errors = new HashMap<>();
         ex.getBindingResult().getAllErrors().forEach((error) -> {
@@ -101,4 +101,15 @@ public class GlobalExceptionHandler {
     public ResponseEntity<ErrorResponse> handleOptionNotFound(OptionNotFound ex) {
         return new ResponseEntity<>(new ErrorResponse(HttpStatus.BAD_REQUEST,"Invalid option", ex.getMessage()), HttpStatus.BAD_REQUEST);
     }
+
+    @ExceptionHandler(HotelNotFound.class)
+    public ResponseEntity<ErrorResponse> handleHotelNotFound(HotelNotFound ex) {
+        ErrorResponse error = new ErrorResponse(
+                HttpStatus.NOT_FOUND,
+                "Hotel not found",
+                ex.getMessage()
+        );
+        return new ResponseEntity<>(error, HttpStatus.NOT_FOUND);
+    }
+
 }
