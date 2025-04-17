@@ -34,7 +34,6 @@ public class HotelDto {
         );
     }
 
-
     public Hotel toEntity() {
         return new Hotel(
                 id,
@@ -46,8 +45,6 @@ public class HotelDto {
         );
     }
 
-  
-    // Getters & Setters
     public Integer getId() {
         return id;
     }

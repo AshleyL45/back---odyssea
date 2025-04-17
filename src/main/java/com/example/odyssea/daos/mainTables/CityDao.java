@@ -130,6 +130,8 @@ public class CityDao {
         return cityOpt.map(city -> new double[]{city.getLatitude(), city.getLongitude()});
     }
 
+
+
     /**
      * Récupère le code IATA d'une ville à partir de son ID.
      */
