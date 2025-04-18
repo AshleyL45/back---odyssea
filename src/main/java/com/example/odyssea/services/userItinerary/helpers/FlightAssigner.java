@@ -1,6 +1,7 @@
 package com.example.odyssea.services.userItinerary.helpers;
 
 import com.example.odyssea.entities.userItinerary.UserItinerary;
+import com.example.odyssea.exceptions.DatabaseException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import com.example.odyssea.daos.mainTables.CityDao;
@@ -45,6 +46,7 @@ public class FlightAssigner {
         City toCity = visitedCities.get(dayOffIndex + 1);
         LocalDate date = day.getDate();
 
+
         logger.info("Fetching flight from {} to {} on {}", fromCity.getName(), toCity.getName(), date);
 
         return planeRideService.getFlights(
@@ -62,9 +64,12 @@ public class FlightAssigner {
                     }
                     FlightItineraryDTO selectedFlight = flights.getFirst();
                     logger.info("Selected flight: {}", selectedFlight);
+                    logger.info("Fetching flights with parameters: departureIata={}, arrivalIata={}, departureDate={}, returnDate={}, totalPeople={}",
+                            fromCity.getIataCode(), toCity.getIataCode(), date, date, totalPeople);
+
                     return Mono.just(selectedFlight);
                 })
-                .doOnError(e -> logger.error("Error while assigning flight: {}", e.getMessage(), e));
+                .doOnError(e -> new DatabaseException("Something went wrong while fetching flights" + e.getMessage()));
     }
 
 

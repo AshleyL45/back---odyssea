@@ -91,7 +91,7 @@ public class UserDailyPlanService {
         );
     }*/
 
-    public List<UserItineraryDayDTO> generateEachDay(DraftData draftData){
+    public List<UserItineraryDayDTO> generateDailyPlan(DraftData draftData){
         int duration = draftData.getDraft().getDuration();
         AtomicInteger index = new AtomicInteger(0);
 
@@ -101,13 +101,25 @@ public class UserDailyPlanService {
     }
 
     private UserItineraryDayDTO createItineraryDay(DraftData draftData, int dayNumber, AtomicInteger index) {
-        UserItineraryDayDTO day = new UserItineraryDayDTO();
         List<Country> countries = draftData.getCountries();
         List<City> cities = draftData.getCities();
         List<Activity> activities = draftData.getActivities();
-        //List<Hotel> hotels = hotelAssigner.getHotels(draftData.getDraft().getHotelStanding(), cities);
+        List<HotelDto> hotels = fetchHotels(draftData);
+        List<City> visitedCities = buildFlightCities(draftData);
         int totalPeople = draftData.getDraft().getNumberAdults() + draftData.getDraft().getNumberKids();
-        // Construction de la liste des villes visitées pour les vols
+
+        UserItineraryDayDTO day = initDay(dayNumber, draftData);
+        assignDayData(day, draftData, countries, cities, activities, hotels, visitedCities, totalPeople, index);
+
+        return day;
+    }
+
+
+    private List<HotelDto> fetchHotels(DraftData draftData){
+        return hotelAssigner.getHotels(draftData.getDraft().getHotelStanding(), draftData.getCities()).block();
+    }
+
+    private LinkedList<City> buildFlightCities(DraftData draftData){
         LinkedList<City> visitedCities = new LinkedList<>(draftData.getCities());
         City departureCity = cityDao.findCityByName(draftData.getDraft().getDepartureCity());
 
@@ -118,26 +130,35 @@ public class UserDailyPlanService {
             visitedCities.addLast(departureCity);
         }
 
+        return  visitedCities;
+    }
 
-        LocalDate date = dayAssigner.assignDate(draftData.getDraft().getStartDate(), dayNumber);
+    private UserItineraryDayDTO initDay(int dayNumber, DraftData draftData) {
+        UserItineraryDayDTO day = new UserItineraryDayDTO();
         day.setDayNumber(dayNumber);
-        boolean isOff = dayAssigner.isDayOff(day);
-        String countryName = locationAssigner.assignCountry(day, countries);
-        String cityName = locationAssigner.assignCity(day, cities, draftData.getDraft().getDuration());
-        Activity activity = activityAssigner.assignActivity(day, activities, index);
-        //Hotel hotel = hotelAssigner.assignHotel(day, hotels);
-        Mono<FlightItineraryDTO> flight = flightAssigner.assignFlight(day,visitedCities, totalPeople);
-        //System.out.println("Flight : " + Objects.requireNonNull(flight.block()));
-
+        LocalDate date = dayAssigner.assignDate(draftData.getDraft().getStartDate(), dayNumber);
         day.setDate(date);
-        day.setDayOff(isOff);
-        day.setCountryName(countryName);
-        day.setCityName(cityName);
-        day.setActivity(activity);
-        day.setHotel(null);
-        day.setFlightItineraryDTO(flight.block());
-
+        day.setDayOff(dayAssigner.isDayOff(day));
         return day;
     }
+
+    private void assignDayData(
+            UserItineraryDayDTO day,
+            DraftData draftData,
+            List<Country> countries,
+            List<City> cities,
+            List<Activity> activities,
+            List<HotelDto> hotels,
+            List<City> visitedCities,
+            int totalPeople,
+            AtomicInteger index
+    ) {
+        day.setCountryName(locationAssigner.assignCountry(day, countries));
+        day.setCityName(locationAssigner.assignCity(day, cities, draftData.getDraft().getDuration()));
+        day.setActivity(activityAssigner.assignActivity(day, activities, index));
+        day.setHotel(hotelAssigner.assignHotel(day, hotels));
+        day.setFlightItineraryDTO(flightAssigner.assignFlight(day, visitedCities, totalPeople).block());
+    }
+
 
 }

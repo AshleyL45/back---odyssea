@@ -11,7 +11,7 @@ public class UserItineraryDayDTO {
 
     private String cityName;
     private String countryName;
-    private Hotel hotel;
+    private HotelDto hotel;
     private Activity activity;
     private int dayNumber;
     private LocalDate date;
@@ -22,7 +22,7 @@ public class UserItineraryDayDTO {
     public UserItineraryDayDTO() {
     }
 
-    public UserItineraryDayDTO(String cityName, String countryName, Hotel hotel, Activity activity, int dayNumber, LocalDate date, boolean dayOff, FlightItineraryDTO flightItineraryDTO) {
+    public UserItineraryDayDTO(String cityName, String countryName, HotelDto hotel, Activity activity, int dayNumber, LocalDate date, boolean dayOff, FlightItineraryDTO flightItineraryDTO) {
         this.cityName = cityName;
         this.countryName = countryName;
         this.hotel = hotel;
@@ -66,11 +66,11 @@ public class UserItineraryDayDTO {
         this.date = date;
     }
 
-    public Hotel getHotel() {
+    public HotelDto getHotel() {
         return hotel;
     }
 
-    public void setHotel(Hotel hotel) {
+    public void setHotel(HotelDto hotel) {
         this.hotel = hotel;
     }
 

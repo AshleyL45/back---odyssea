@@ -72,7 +72,7 @@ public class UserItineraryService {
         UserItineraryDTO personalizedTrip = new UserItineraryDTO();
         Integer userId = currentUserService.getCurrentUserId();
         DraftData draftData = userItineraryDraftService.loadAllDraftData(userId);
-        List<UserItineraryDayDTO> days = userDailyPlanService.generateEachDay(draftData);
+        List<UserItineraryDayDTO> days = userDailyPlanService.generateDailyPlan(draftData);
         LocalDate endDate = draftData.getDraft().getStartDate().plusDays(draftData.getDraft().getDuration());
         List<Option> options = draftData.getOptions();
         //BigDecimal price = calculateTotal(draftData.getCountries().)
