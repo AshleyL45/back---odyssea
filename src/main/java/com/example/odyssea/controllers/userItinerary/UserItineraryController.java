@@ -20,36 +20,29 @@ public class UserItineraryController {
         this.userItineraryService = userItineraryService;
     }
 
-    // Avoir tous les itinéraires personnalisés d'un utilisateur
-    @GetMapping("/all/{userId}")
-    public ResponseEntity<List<UserItinerary>> getAllUserItineraries(@PathVariable int userId){
-        List<UserItinerary> userItineraryDTOs = userItineraryService.getAllUserItineraries(userId);
+    @GetMapping("/all")
+    public ResponseEntity<List<UserItineraryDTO>> getAllItineraries(){
+        List<UserItineraryDTO> userItineraryDTOs = userItineraryService.getAllUserItineraries();
         return ResponseEntity.status(HttpStatus.OK).body(userItineraryDTOs);
     }
 
-    // Avoir un itinéraire en particulier
     @GetMapping("/{userItineraryId}")
-    public ResponseEntity<UserItineraryDTO> getAnItinerary(@PathVariable int userItineraryId){
+    public ResponseEntity<UserItineraryDTO> getItineraryById(@PathVariable int userItineraryId){
         UserItineraryDTO userItinerary = userItineraryService.getAUserItineraryById(userItineraryId);
         return ResponseEntity.status(HttpStatus.OK).body(userItinerary);
     }
 
-    @PostMapping("/itineraryName/{id}")
-    public ResponseEntity<String> updateItineraryName(@PathVariable int id, @RequestBody Map<String, String> itineraryName){
-        String newItineraryName = itineraryName.get("itineraryName");
-        boolean isUpdated = userItineraryService.updateItineraryName(id, newItineraryName);
-        if(isUpdated){
-            return ResponseEntity.ok("The name of your personalized itinerary was successfully saved.");
-        } else {
-            return ResponseEntity.badRequest().body("An error occurred. Please try again.");
-        }
-    }
-
-    //Générer un itinéraire
-    @PostMapping("/generate")
+    @GetMapping("/generate")
         public ResponseEntity<UserItineraryDTO> generateItinerary() {
         UserItineraryDTO userItinerary = userItineraryService.generateItinerary();
         return ResponseEntity.status(HttpStatus.CREATED).body(userItinerary);
+    }
+
+    @PatchMapping("/itineraryName/{id}")
+    public ResponseEntity<String> updateItineraryName(@PathVariable int id, @RequestBody Map<String, String> itineraryName){
+        String newItineraryName = itineraryName.get("itineraryName");
+        userItineraryService.updateItineraryName(id, newItineraryName);
+        return ResponseEntity.status(HttpStatus.OK).body("Your personalized trip's name has been successfully updated.");
     }
 
 }

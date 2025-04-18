@@ -4,11 +4,13 @@ import com.example.odyssea.daos.mainTables.CityDao;
 import com.example.odyssea.daos.userItinerary.UserItineraryDao;
 import com.example.odyssea.daos.userItinerary.UserItineraryOptionDao;
 import com.example.odyssea.daos.userItinerary.UserItineraryStepDao;
+import com.example.odyssea.dtos.mainTables.HotelDto;
 import com.example.odyssea.dtos.userItinerary.*;
 import com.example.odyssea.entities.mainTables.*;
 
 import com.example.odyssea.entities.userItinerary.UserItinerary;
 import com.example.odyssea.entities.userItinerary.UserItineraryStep;
+import com.example.odyssea.exceptions.ValidationException;
 import com.example.odyssea.services.CurrentUserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -17,6 +19,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.*;
+import java.util.stream.Stream;
 
 
 @Service
@@ -45,40 +48,25 @@ public class UserItineraryService {
         this.currentUserService = currentUserService;
     }
 
-    @Transactional
-    public UserItinerary saveUserItinerary(UserItineraryDTO userItineraryDTO) {
-        UserItinerary userItinerary = new UserItinerary();
-        userItinerary.setUserId(userItineraryDTO.getUserId());
-        userItinerary.setStartDate(userItineraryDTO.getStartDate());
-        userItinerary.setEndDate(userItineraryDTO.getEndDate());
-        userItinerary.setTotalDuration(userItineraryDTO.getTotalDuration());
-        userItinerary.setDepartureCity(userItineraryDTO.getDepartureCity());
-        userItinerary.setStartingPrice(userItineraryDTO.getStartingPrice());
-        userItinerary.setItineraryName(userItineraryDTO.getItineraryName());
-        userItinerary.setNumberOfAdults(userItineraryDTO.getNumberOfAdults());
-        userItinerary.setNumberOfKids(userItineraryDTO.getNumberOfKids());
-
-        UserItinerary savedItinerary = userItineraryDao.save(userItinerary);
-
-        if (userItineraryDTO.getOptions() != null || !userItineraryDTO.getOptions().isEmpty()) {
-            for (Option option : userItineraryDTO.getOptions()) {
-                userItineraryOptionDao.save(savedItinerary.getId(), option.getId());
-            }
-        }
-
-        userDailyPlanService.saveUserDailyPlans(savedItinerary, userItineraryDTO.getItineraryDays());
-        return savedItinerary;
-    }
-
 
     public UserItineraryDTO generateItinerary (){
         UserItineraryDTO personalizedTrip = new UserItineraryDTO();
         Integer userId = currentUserService.getCurrentUserId();
         DraftData draftData = userItineraryDraftService.loadAllDraftData(userId);
         List<UserItineraryDayDTO> days = userDailyPlanService.generateDailyPlan(draftData);
+        List<HotelDto> hotels = days
+                .stream()
+                .map(UserItineraryDayDTO::getHotel)
+                .toList();
+
+        List<Activity> activities = days
+                .stream()
+                .filter(Objects::nonNull)
+                .map(UserItineraryDayDTO::getActivity)
+                .toList();
         LocalDate endDate = draftData.getDraft().getStartDate().plusDays(draftData.getDraft().getDuration());
         List<Option> options = draftData.getOptions();
-        //BigDecimal price = calculateTotal(draftData.getCountries().)
+        BigDecimal price = calculateTotalPrice(draftData.getCountries(), draftData.getOptions(), hotels, activities, draftData.getDraft().getNumberAdults(), draftData.getDraft().getNumberKids());
 
         personalizedTrip.setUserId(userId);
         personalizedTrip.setItineraryDays(days);
@@ -90,7 +78,7 @@ public class UserItineraryService {
         personalizedTrip.setNumberOfKids(draftData.getDraft().getNumberKids());
         personalizedTrip.setItineraryName(null);
         personalizedTrip.setOptions(options);
-        personalizedTrip.setStartingPrice(BigDecimal.ZERO);
+        personalizedTrip.setStartingPrice(price);
 
         UserItinerary userItinerarySaved = saveUserItinerary(personalizedTrip);
         personalizedTrip.setId(userItinerarySaved.getId());
@@ -98,50 +86,113 @@ public class UserItineraryService {
         return personalizedTrip;
    }
 
-    // Retourner la liste de tous les itinéraires d'un utilisateur
-    public List<UserItinerary> getAllUserItineraries(int userId) {
-        List<UserItinerary> itineraries = userItineraryDao.findAllUserItineraries(userId);
+    public List<UserItineraryDTO> getAllUserItineraries() {
+        Integer userId = currentUserService.getCurrentUserId();
+        List<UserItinerary> foundItineraries = userItineraryDao.findAllUserItineraries(userId);
+        List<UserItineraryDTO> userItineraries = new ArrayList<>();
 
-        for (UserItinerary itinerary : itineraries) {
-            String cityName = cityDao.findByIATACode(itinerary.getDepartureCity()).getName();
-            itinerary.setDepartureCity(cityName);
+
+        for (UserItinerary itinerary : foundItineraries) {
+            userItineraries.add(toUserItineraryDTO(itinerary));
         }
 
-        return itineraries;
+        return userItineraries;
     }
 
-
-
-    // Calculer le prix total
-    private BigDecimal calculateTotal(List<BigDecimal> countriesPrices, List<BigDecimal> options, Integer numberOfAdults, Integer numberOfKids){
-
-        BigDecimal totalCountriesPrices = countriesPrices.stream()
-                .filter(Objects::nonNull)  // Filtre les valeurs nulles
-                .reduce(BigDecimal.ZERO, BigDecimal::add);
-
-        BigDecimal totalOptions = options.stream()
-                .filter(Objects::nonNull)  // Filtre les valeurs nulles
-                .reduce(BigDecimal.ZERO, BigDecimal::add);
-
-        int totalPeople = (numberOfAdults != null ? numberOfAdults : 0) + (numberOfKids != null ? numberOfKids : 0);
-
-
-        if (totalPeople == 0) {
-            return BigDecimal.ZERO;
-        }
-
-        return totalCountriesPrices.add(totalOptions).multiply(BigDecimal.valueOf(totalPeople));
-    }
-
-    public boolean updateItineraryName(int id, String newItineraryName){
-        return userItineraryDao.updateUserItineraryName(id, newItineraryName);
-    }
-
-    // Retourner un itinéraire
    public UserItineraryDTO getAUserItineraryById(int userItineraryId){
         UserItinerary userItinerary = userItineraryDao.findById(userItineraryId);
         return toUserItineraryDTO(userItinerary);
    }
+
+    public void updateItineraryName(int id, String newItineraryName){
+        userItineraryDao.updateUserItineraryName(id, newItineraryName);
+    }
+
+    @Transactional
+    public UserItinerary saveUserItinerary(UserItineraryDTO userItineraryDTO) {
+        UserItinerary userItinerary = toUserItineraryEntity(userItineraryDTO);
+        UserItinerary savedItinerary = userItineraryDao.save(userItinerary);
+
+        if (userItineraryDTO.getOptions() != null && !userItineraryDTO.getOptions().isEmpty()) {
+            for (Option option : userItineraryDTO.getOptions()) {
+                userItineraryOptionDao.save(savedItinerary.getId(), option.getId());
+            }
+        }
+
+        userDailyPlanService.saveUserDailyPlans(savedItinerary, userItineraryDTO.getItineraryDays());
+        return savedItinerary;
+    }
+
+    private BigDecimal calculateTotalPrice(
+            List<Country> countries,
+            List<Option> options,
+            List<HotelDto> hotels,
+            List<Activity> activities,
+            Integer numberOfAdults,
+            Integer numberOfKids
+    ) {
+        BigDecimal totalPeople = BigDecimal.valueOf(getTotalPeople(numberOfAdults, numberOfKids));
+
+        BigDecimal countrySum = sumCountryPrices(countries);
+        BigDecimal optionSum = sumOptionPrices(options);
+        BigDecimal hotelSum = sumHotelPrices(hotels);
+        BigDecimal activitySum = sumActivityPrices(activities);
+
+        return Stream.of(countrySum, optionSum, hotelSum, activitySum)
+                .reduce(BigDecimal.ZERO, BigDecimal::add)
+                .multiply(totalPeople);
+    }
+
+    private int getTotalPeople(Integer adults, Integer kids) {
+        int total = (adults != null ? adults : 0) + (kids != null ? kids : 0);
+        if (total == 0) {
+            throw new ValidationException("Total number of people isn't valid.");
+        }
+        return total;
+    }
+
+    private BigDecimal sumCountryPrices(List<Country> countries) {
+        return countries.stream()
+                .map(Country::getPrice)
+                .reduce(BigDecimal.ZERO, BigDecimal::add);
+    }
+
+    private BigDecimal sumOptionPrices(List<Option> options) {
+        return options.stream()
+                .filter(Objects::nonNull)
+                .map(Option::getPrice)
+                .reduce(BigDecimal.ZERO, BigDecimal::add);
+    }
+
+    private BigDecimal sumHotelPrices(List<HotelDto> hotels) {
+        return hotels.stream()
+                .filter(Objects::nonNull)
+                .map(HotelDto::getPrice)
+                .map(BigDecimal::valueOf)
+                .reduce(BigDecimal.ZERO, BigDecimal::add);
+    }
+
+    private BigDecimal sumActivityPrices(List<Activity> activities) {
+        return activities.stream()
+                .filter(Objects::nonNull)
+                .map(Activity::getPrice)
+                .map(BigDecimal::valueOf)
+                .reduce(BigDecimal.ZERO, BigDecimal::add);
+    }
+
+    private UserItinerary toUserItineraryEntity(UserItineraryDTO dto) {
+        UserItinerary entity = new UserItinerary();
+        entity.setUserId(dto.getUserId());
+        entity.setStartDate(dto.getStartDate());
+        entity.setEndDate(dto.getEndDate());
+        entity.setTotalDuration(dto.getTotalDuration());
+        entity.setDepartureCity(dto.getDepartureCity());
+        entity.setStartingPrice(dto.getStartingPrice());
+        entity.setItineraryName(dto.getItineraryName());
+        entity.setNumberOfAdults(dto.getNumberOfAdults());
+        entity.setNumberOfKids(dto.getNumberOfKids());
+        return entity;
+    }
 
    @Transactional
     public UserItineraryDTO toUserItineraryDTO (UserItinerary userItinerary){

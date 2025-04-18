@@ -95,14 +95,14 @@ public class UserDailyPlanService {
         if(dayDTO.getHotel() != null){
             return dayDTO.getHotel().getId();
         }
-        throw new UserItineraryDatabaseException("Something went wrong while saving the hotels in database." );
+        throw new UserItineraryDatabaseException("Something went wrong while saving the hotels in database. Id is null." );
     }
 
     private Integer resolveActivityId(UserItineraryDayDTO dayDTO) {
         if (!dayDTO.isDayOff() && dayDTO.getActivity() != null) {
             return dayDTO.getActivity().getId();
         } else if (!dayDTO.isDayOff() && dayDTO.getActivity() == null){
-            throw new UserItineraryDatabaseException("Something went wrong while saving the activity." );
+            throw new UserItineraryDatabaseException("Something went wrong while saving the activity. Id is null." );
         }
 
         return null;
@@ -229,6 +229,5 @@ public class UserDailyPlanService {
         day.setHotel(hotelAssigner.assignHotel(day, hotels));
         day.setFlightItineraryDTO(flightAssigner.assignFlight(day, visitedCities, totalPeople).block());
     }
-
 
 }

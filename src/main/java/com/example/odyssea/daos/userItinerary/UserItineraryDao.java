@@ -1,9 +1,7 @@
 package com.example.odyssea.daos.userItinerary;
 
-import com.example.odyssea.entities.mainTables.Option;
 import com.example.odyssea.entities.userItinerary.UserItinerary;
 import com.example.odyssea.exceptions.UserItineraryDatabaseException;
-import org.springframework.jdbc.core.BeanPropertyRowMapper;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.jdbc.support.GeneratedKeyHolder;
@@ -53,7 +51,7 @@ public class UserItineraryDao {
         return jdbcTemplate.query(sql, userItineraryRowMapper, id)
                 .stream()
                 .findFirst()
-                .orElseThrow(() -> new RuntimeException("The user itinerary id " + id + "you are looking for does not exist."));
+                .orElseThrow(() -> new UserItineraryDatabaseException("The user itinerary id " + id + " you are looking for does not exist."));
     }
 
     public List<UserItinerary> findAllUserItineraries(int userId){
@@ -88,59 +86,50 @@ public class UserItineraryDao {
             userItinerary.setId(key.intValue());
             return userItinerary;
         } catch (Exception e) {
-            throw new UserItineraryDatabaseException(e.getMessage());
+            throw new UserItineraryDatabaseException("Failed to save a personalized trip : " + e.getMessage());
         }
     }
 
 
     public UserItinerary update(int id, UserItinerary userItinerary){
         if(!userItineraryExists(id)){
-            throw new RuntimeException("The user itinerary you are looking for does not exist.");
+            throw new UserItineraryDatabaseException("The user itinerary you are looking for does not exist.");
         }
 
         String sql = "UPDATE userItinerary SET userId = ?, startDate = ?, endDate = ?, startingPrice = ?, totalDuration = ?, departureCity = ?, itineraryName = ?, numberOfAdults = ?, numberOfKids = ? WHERE id = ?";
         int rowsAffected = jdbcTemplate.update(sql, userItinerary.getUserId(), userItinerary.getStartDate(), userItinerary.getEndDate(), userItinerary.getTotalDuration(), userItinerary.getDepartureCity(), userItinerary.getItineraryName(), userItinerary.getNumberOfAdults(), userItinerary.getNumberOfKids(), id);
 
         if(rowsAffected <= 0){
-            throw new RuntimeException("Failed to update the user itinerary with id : " + id);
+            throw new UserItineraryDatabaseException("Failed to update the user itinerary with id : " + id);
         }
 
         return this.findById(id);
 
     }
 
-    public boolean updateUserItineraryName(int id, String newItineraryName){
+    public void updateUserItineraryName(int id, String newItineraryName){
         if(!userItineraryExists(id)){
-            throw new RuntimeException("The user itinerary you are looking for does not exist.");
+            throw new UserItineraryDatabaseException("The personalized trip ID : " + id + " you are looking for does not exist.");
         }
 
         String sql = "UPDATE userItinerary SET itineraryName = ? WHERE id = ?";
 
         int rowsAffected = jdbcTemplate.update(sql, newItineraryName, id);
         if(rowsAffected <= 0){
-            throw new RuntimeException("Failed to update the user itinerary with id : " + id);
+            throw new UserItineraryDatabaseException("Failed to update user itinerary with id : " + id);
         }
 
-        return true;
     }
 
-    /*public List<Option> getOptions (int userItineraryId){ // Gets options of a userItinerary
-        String sql = "SELECT options.* FROM userItinerary \n" +
-                "INNER JOIN options ON userItinerary.optionId = options.id WHERE userItinerary.id = ?";
-        return jdbcTemplate.query(sql, new Object[]{userItineraryId}, new BeanPropertyRowMapper<>(Option.class));
-    }*/
-
-    /*public List<Flight> getFlights (int userItineraryId){ // Gets flights of a userItinerary
-        String sql = "SELECT flight.* FROM userItinerary \n" +
-                "INNER JOIN flight ON userItinerary.flightId = flight.id WHERE userItinerary.id = ?";
-        return jdbcTemplate.query(sql, new Object[]{userItineraryId}, new BeanPropertyRowMapper<>(Flight.class));
-    }*/
-
-    public boolean deleteUserItinerary (int id){ // Deletes all information related with this user itinerary
+    public boolean deleteUserItinerary (int id){
         String sql = "DELETE FROM userItinerary WHERE id = ?";
         int rowsAffected = jdbcTemplate.update(sql, id);
 
-        return rowsAffected > 0;
+        if(!(rowsAffected > 0)){
+            throw new UserItineraryDatabaseException("Failed to delete personalized trip ID : " + id);
+        }
+
+        return true;
     }
 
     public boolean userItineraryExists(int id){

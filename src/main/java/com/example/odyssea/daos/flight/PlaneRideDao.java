@@ -140,26 +140,8 @@ public class PlaneRideDao {
     }
 
     /**
-     * Retrouver un planeRIde par ses segments
+     * Retourne un vol avec ses segments
      */
-
-    public List<PlaneRide> findBySegmentDetails(
-            String departureIata,
-            String arrivalIata,
-            LocalDateTime departureTime,
-            LocalDateTime arrivalTime
-    ) {
-        String sql = "SELECT pr.* FROM planeRide pr " +
-                "JOIN flightSegmentRide fsr ON pr.id = fsr.planeRideId " +
-                "JOIN flightSegment fs ON fsr.flightSegmentId = fs.id " +
-                "WHERE fs.departureAirportIata = ? " +
-                "AND fs.arrivalAirportIata = ? " +
-                "AND fs.departureDateTime = ? " +
-                "AND fs.arrivalDateTime = ?";
-
-        return jdbcTemplate.query(sql, new Object[]{departureIata, arrivalIata, departureTime, arrivalTime}, planeRideRowMapper);
-    }
-
     public FlightItineraryDTO getPlaneRideById(int rideId) {
         String sql = "SELECT \n" +
                 "    fs.id AS segmentId,\n" +
@@ -176,23 +158,23 @@ public class PlaneRideDao {
                 "INNER JOIN \n" +
                 "    planeRide pr ON fsr.planeRideId = pr.id\n" +
                 "WHERE \n" +
-                "    pr.id = ?;"; // la requête ci-dessus
+                "    pr.id = ?;";
 
         List<Map<String, Object>> rows = jdbcTemplate.queryForList(sql, rideId);
 
-        if (rows.isEmpty()) return null;
+        if (rows.isEmpty()) throw new FlightSegmentsNotFound("Flight segments for plane ride ID : " + rideId + " haven't been found.");
 
         List<FlightSegmentDTO> segments = new ArrayList<>();
 
         for (Map<String, Object> row : rows) {
             AirportDTO departure = new AirportDTO(
                     (String) row.get("departureAirportIata"),
-                    ((Timestamp) row.get("departureDateTime")).toLocalDateTime()
+                    ((LocalDateTime) row.get("departureDateTime"))
             );
 
             AirportDTO arrival = new AirportDTO(
                     (String) row.get("arrivalAirportIata"),
-                    ((Timestamp) row.get("arrivalDateTime")).toLocalDateTime()
+                    ((LocalDateTime) row.get("arrivalDateTime"))
             );
 
             AircraftDTO aircraft = new AircraftDTO(
@@ -207,7 +189,7 @@ public class PlaneRideDao {
             segment.setCarrierName((String) row.get("carrierName"));
             segment.setAircraftCode(aircraft);
             segment.setAircraftName((String) row.get("aircraftName"));
-            segment.setDuration(row.get("duration").toString()); // MySQL TIME -> String
+            segment.setDuration(row.get("duration").toString());
 
             segments.add(segment);
         }
@@ -219,6 +201,13 @@ public class PlaneRideDao {
         return new FlightItineraryDTO(planeRideId, segments, totalDuration);
     }
 
+
+    public boolean existsById(Integer id) {
+        String sql = "SELECT COUNT(*) FROM planeRide WHERE id = ?";
+        Integer count = jdbcTemplate.queryForObject(sql, Integer.class, id);
+        return count != null && count > 0;
+    }
+
     private Duration calculateTotalDuration(List<FlightSegmentDTO> segments) {
         if (segments.isEmpty()) return Duration.ZERO;
 
@@ -226,14 +215,5 @@ public class PlaneRideDao {
         LocalDateTime end = segments.getLast().getArrival().getDateTime();
 
         return Duration.between(start, end);
-    }
-
-
-
-
-    public boolean existsById(Integer id) {
-        String sql = "SELECT COUNT(*) FROM planeRide WHERE id = ?";
-        Integer count = jdbcTemplate.queryForObject(sql, Integer.class, id);
-        return count != null && count > 0;
     }
 }

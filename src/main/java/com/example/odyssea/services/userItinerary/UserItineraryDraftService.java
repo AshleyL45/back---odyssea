@@ -12,6 +12,7 @@ import com.example.odyssea.entities.mainTables.Country;
 import com.example.odyssea.entities.mainTables.Option;
 import com.example.odyssea.entities.userItinerary.drafts.UserItineraryDraft;
 import com.example.odyssea.enums.TripDuration;
+import com.example.odyssea.exceptions.ActivityNotFound;
 import com.example.odyssea.exceptions.ValidationException;
 import com.example.odyssea.services.CurrentUserService;
 import org.springframework.stereotype.Service;
@@ -63,7 +64,7 @@ public class UserItineraryDraftService {
         return new DraftData(draft, countries, cities, activities, options);
     }
 
-    public void validateFirstStep (int duration) {
+    public void validateDuration (int duration) {
         if(!(duration == 9 || duration == 17 || duration == 25 || duration == 33)){
             throw new ValidationException("The duration must be of 9, 17, 25 or 33 days.");
         }
@@ -154,7 +155,7 @@ public class UserItineraryDraftService {
 
         for (Integer id : activitiesIds) {
             Activity activity = activityDao.findById(id)
-                    .orElseThrow(() -> new ValidationException("Activity with id " + id + " not found."));
+                    .orElseThrow(() -> new ActivityNotFound("Activity with id " + id + " not found."));
             if (!cityIds.contains(activity.getCityId())) {
                 throw new ValidationException("Activity " + activity.getName() + " does not belong to selected cities.");
             }
