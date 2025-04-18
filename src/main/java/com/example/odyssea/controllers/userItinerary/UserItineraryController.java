@@ -28,11 +28,11 @@ public class UserItineraryController {
     }
 
     // Avoir un itinéraire en particulier
-    /*@GetMapping("/{userItineraryId}")
+    @GetMapping("/{userItineraryId}")
     public ResponseEntity<UserItineraryDTO> getAnItinerary(@PathVariable int userItineraryId){
         UserItineraryDTO userItinerary = userItineraryService.getAUserItineraryById(userItineraryId);
         return ResponseEntity.status(HttpStatus.OK).body(userItinerary);
-    }*/
+    }
 
     @PostMapping("/itineraryName/{id}")
     public ResponseEntity<String> updateItineraryName(@PathVariable int id, @RequestBody Map<String, String> itineraryName){

@@ -1,38 +1,22 @@
 package com.example.odyssea.services.userItinerary;
 
 import com.example.odyssea.daos.mainTables.CityDao;
-import com.example.odyssea.daos.mainTables.CountryDao;
-import com.example.odyssea.daos.flight.PlaneRideDao;
 import com.example.odyssea.daos.userItinerary.UserItineraryDao;
 import com.example.odyssea.daos.userItinerary.UserItineraryOptionDao;
 import com.example.odyssea.daos.userItinerary.UserItineraryStepDao;
-import com.example.odyssea.daos.userItinerary.drafts.UserItineraryDraftDao;
-import com.example.odyssea.dtos.flight.FlightItineraryDTO;
-import com.example.odyssea.dtos.flight.FlightSegmentDTO;
-import com.example.odyssea.dtos.mainTables.HotelDto;
 import com.example.odyssea.dtos.userItinerary.*;
 import com.example.odyssea.entities.mainTables.*;
 
 import com.example.odyssea.entities.userItinerary.UserItinerary;
 import com.example.odyssea.entities.userItinerary.UserItineraryStep;
-import com.example.odyssea.entities.userItinerary.drafts.UserItineraryDraft;
-import com.example.odyssea.exceptions.ValidationException;
 import com.example.odyssea.services.CurrentUserService;
-import com.example.odyssea.services.mainTables.HotelService;
-import com.example.odyssea.services.flight.PlaneRideService;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import reactor.core.publisher.Mono;
 
 import java.math.BigDecimal;
-import java.sql.Date;
 import java.time.LocalDate;
-import java.time.format.DateTimeFormatter;
 import java.util.*;
-import java.util.stream.Collectors;
-import java.util.stream.IntStream;
 
 
 @Service
@@ -61,14 +45,33 @@ public class UserItineraryService {
         this.currentUserService = currentUserService;
     }
 
-    private LocalDate convertToLocalDate(Date date) {
-        if (date == null) {
-            return null;
+    @Transactional
+    public UserItinerary saveUserItinerary(UserItineraryDTO userItineraryDTO) {
+        UserItinerary userItinerary = new UserItinerary();
+        userItinerary.setUserId(userItineraryDTO.getUserId());
+        userItinerary.setStartDate(userItineraryDTO.getStartDate());
+        userItinerary.setEndDate(userItineraryDTO.getEndDate());
+        userItinerary.setTotalDuration(userItineraryDTO.getTotalDuration());
+        userItinerary.setDepartureCity(userItineraryDTO.getDepartureCity());
+        userItinerary.setStartingPrice(userItineraryDTO.getStartingPrice());
+        userItinerary.setItineraryName(userItineraryDTO.getItineraryName());
+        userItinerary.setNumberOfAdults(userItineraryDTO.getNumberOfAdults());
+        userItinerary.setNumberOfKids(userItineraryDTO.getNumberOfKids());
+
+        UserItinerary savedItinerary = userItineraryDao.save(userItinerary);
+
+        if (userItineraryDTO.getOptions() != null || !userItineraryDTO.getOptions().isEmpty()) {
+            for (Option option : userItineraryDTO.getOptions()) {
+                userItineraryOptionDao.save(savedItinerary.getId(), option.getId());
+            }
         }
-        return date.toLocalDate();
+
+        userDailyPlanService.saveUserDailyPlans(savedItinerary, userItineraryDTO.getItineraryDays());
+        return savedItinerary;
     }
 
-   public UserItineraryDTO generateItinerary (){
+
+    public UserItineraryDTO generateItinerary (){
         UserItineraryDTO personalizedTrip = new UserItineraryDTO();
         Integer userId = currentUserService.getCurrentUserId();
         DraftData draftData = userItineraryDraftService.loadAllDraftData(userId);
@@ -88,6 +91,9 @@ public class UserItineraryService {
         personalizedTrip.setItineraryName(null);
         personalizedTrip.setOptions(options);
         personalizedTrip.setStartingPrice(BigDecimal.ZERO);
+
+        UserItinerary userItinerarySaved = saveUserItinerary(personalizedTrip);
+        personalizedTrip.setId(userItinerarySaved.getId());
 
         return personalizedTrip;
    }
@@ -132,27 +138,27 @@ public class UserItineraryService {
     }
 
     // Retourner un itinéraire
-   /* public UserItineraryDTO getAUserItineraryById(int userItineraryId){
+   public UserItineraryDTO getAUserItineraryById(int userItineraryId){
         UserItinerary userItinerary = userItineraryDao.findById(userItineraryId);
-        System.out.println("Days of itinerary : " + toUserItineraryDTO(userItinerary).getItineraryName());
         return toUserItineraryDTO(userItinerary);
-    }*/
+   }
 
-    /*public UserItineraryDTO toUserItineraryDTO (UserItinerary userItinerary){
-        LocalDate startDate = convertToLocalDate(userItinerary.getStartDate());
-        LocalDate endDate = convertToLocalDate(userItinerary.getEndDate());
+   @Transactional
+    public UserItineraryDTO toUserItineraryDTO (UserItinerary userItinerary){
+        LocalDate startDate = userItinerary.getStartDate();
+        LocalDate endDate = userItinerary.getEndDate();
 
         List<UserItineraryStep> daysEntities = userItineraryStepDao.findDailyPlansOfAnItinerary(userItinerary.getId());
+
         List<UserItineraryDayDTO> days = new ArrayList<>();
         for(UserItineraryStep day : daysEntities){
-            days.add( userDailyPlanService.toUserItineraryStep(userItinerary, day));
-
+            days.add(userDailyPlanService.toUserItineraryDay(userItinerary, day));
         }
 
         List<Option> options = userItineraryOptionDao.findOptionsByUserItineraryId(userItinerary.getId());
-
-        //System.out.println("Itinerary ID: " + userItinerary.getId() + ", Days: " + days.size());
-
+        if(options.isEmpty()){
+            options = new ArrayList<>();
+        }
 
         return new UserItineraryDTO(
                 userItinerary.getId(),
@@ -170,6 +176,6 @@ public class UserItineraryService {
 
         );
 
-    }*/
+    }
 
 }

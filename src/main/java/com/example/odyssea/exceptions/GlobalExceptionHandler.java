@@ -58,8 +58,8 @@ public class GlobalExceptionHandler {
     }
 
     @ExceptionHandler(Exception.class)
-    public ResponseEntity<String> handleGlobalException(Exception e) {
-        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Error " + e.getMessage());
+    public ResponseEntity<ErrorResponse> handleGlobalException(Exception e) {
+        return new ResponseEntity<>(new ErrorResponse(HttpStatus.INTERNAL_SERVER_ERROR,"Internal error occurred", e.getMessage()), HttpStatus.INTERNAL_SERVER_ERROR);
     }
 
     @ExceptionHandler(NullPointerException.class)
@@ -122,6 +122,26 @@ public class GlobalExceptionHandler {
                 ex.getMessage()
         );
         return new ResponseEntity<>(error, HttpStatus.NOT_FOUND);
+    }
+
+    @ExceptionHandler(UserItineraryDatabaseException.class)
+    public ResponseEntity<ErrorResponse> handleUserItineraryDatabaseException(UserItineraryDatabaseException ex) {
+        ErrorResponse error = new ErrorResponse(
+                HttpStatus.INTERNAL_SERVER_ERROR,
+                "An error occurred while saving the personalized itinerary",
+                ex.getMessage()
+        );
+        return new ResponseEntity<>(error, HttpStatus.INTERNAL_SERVER_ERROR);
+    }
+
+    @ExceptionHandler(FlightSegmentsNotFound.class)
+    public ResponseEntity<ErrorResponse> handleFlightSegmentNotFound(FlightSegmentsNotFound ex) {
+        ErrorResponse error = new ErrorResponse(
+                HttpStatus.INTERNAL_SERVER_ERROR,
+                "An internal error occurred. Flight segment not found.",
+                ex.getMessage()
+        );
+        return new ResponseEntity<>(error, HttpStatus.INTERNAL_SERVER_ERROR);
     }
 
 }
