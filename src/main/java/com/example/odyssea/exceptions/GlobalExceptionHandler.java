@@ -112,4 +112,33 @@ public class GlobalExceptionHandler {
         return new ResponseEntity<>(error, HttpStatus.NOT_FOUND);
     }
 
+    @ExceptionHandler(JwtTokenMalformedException.class)
+    public ResponseEntity<ErrorResponse> handleMalformedJwt(JwtTokenMalformedException ex) {
+        ErrorResponse err = new ErrorResponse(
+                HttpStatus.BAD_REQUEST,
+                "Jeton invalide",
+                ex.getMessage()
+        );
+        return new ResponseEntity<>(err, HttpStatus.BAD_REQUEST);
+    }
+
+    @ExceptionHandler(JwtTokenExpiredException.class)
+    public ResponseEntity<ErrorResponse> handleExpiredJwt(JwtTokenExpiredException ex) {
+        ErrorResponse err = new ErrorResponse(
+                HttpStatus.UNAUTHORIZED,
+                "Jeton expiré",
+                ex.getMessage()
+        );
+        return new ResponseEntity<>(err, HttpStatus.UNAUTHORIZED);
+    }
+
+    @ExceptionHandler({JwtTokenUnsupportedException.class, JwtTokenSignatureException.class, JwtTokenMissingException.class})
+    public ResponseEntity<ErrorResponse> handleOtherJwtErrors(RuntimeException ex) {
+        ErrorResponse err = new ErrorResponse(
+                HttpStatus.UNAUTHORIZED,
+                "Erreur d'authentification JWT",
+                ex.getMessage()
+        );
+        return new ResponseEntity<>(err, HttpStatus.UNAUTHORIZED);
+    }
 }

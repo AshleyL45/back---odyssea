@@ -1,5 +1,6 @@
 package com.example.odyssea.security;
 
+import com.example.odyssea.exceptions.*;
 import io.jsonwebtoken.*;
 import io.jsonwebtoken.security.Keys;
 import jakarta.annotation.PostConstruct;
@@ -55,15 +56,22 @@ public class JwtUtil {
                 .get("id", Integer.class);
     }
 
-    public boolean validateJwtToken(String token) {
+    public void validateJwtToken(String token) {
         try {
             Jwts.parserBuilder().setSigningKey(key).build().parseClaimsJws(token);
-            return true;
-        } catch (Exception e) {
-            System.out.println("Invalid JWT: " + e.getMessage()); // Log the error
-            return false;
+        } catch (MalformedJwtException ex) {
+            throw new JwtTokenMalformedException("JWT malformé");
+        } catch (ExpiredJwtException ex) {
+            throw new JwtTokenExpiredException("JWT expiré");
+        } catch (UnsupportedJwtException ex) {
+            throw new JwtTokenUnsupportedException("JWT non supporté");
+        } catch (SignatureException ex) {
+            throw new JwtTokenSignatureException("Signature JWT invalide");
+        } catch (IllegalArgumentException ex) {
+            throw new JwtTokenMissingException("Contenu JWT vide ou invalide");
         }
     }
+
 
 
 
