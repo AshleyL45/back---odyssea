@@ -99,7 +99,7 @@ public class UserItineraryService {
         return userItineraries;
     }
 
-   public UserItineraryDTO getAUserItineraryById(int userItineraryId){
+    public UserItineraryDTO getAUserItineraryById(int userItineraryId){
         UserItinerary userItinerary = userItineraryDao.findById(userItineraryId);
         return toUserItineraryDTO(userItinerary);
    }

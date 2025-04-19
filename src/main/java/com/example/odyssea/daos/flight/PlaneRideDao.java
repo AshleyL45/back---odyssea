@@ -2,6 +2,7 @@ package com.example.odyssea.daos.flight;
 
 import com.example.odyssea.dtos.flight.*;
 import com.example.odyssea.entities.mainTables.PlaneRide;
+import com.example.odyssea.exceptions.DatabaseException;
 import com.example.odyssea.exceptions.FlightSegmentsNotFound;
 import com.example.odyssea.exceptions.ResourceNotFoundException;
 import org.springframework.jdbc.core.JdbcTemplate;
@@ -142,7 +143,7 @@ public class PlaneRideDao {
     /**
      * Retourne un vol avec ses segments
      */
-    public FlightItineraryDTO getPlaneRideById(int rideId) {
+    public FlightItineraryDTO getPlaneRideById(Integer rideId) {
         String sql = "SELECT \n" +
                 "    fs.id AS segmentId,\n" +
                 "    fs.departureAirportIata, fs.departureDateTime,\n" +
@@ -159,6 +160,10 @@ public class PlaneRideDao {
                 "    planeRide pr ON fsr.planeRideId = pr.id\n" +
                 "WHERE \n" +
                 "    pr.id = ?;";
+
+        if(rideId == null || rideId == 0 ){
+            return null;
+        }
 
         List<Map<String, Object>> rows = jdbcTemplate.queryForList(sql, rideId);
 
