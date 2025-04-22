@@ -37,8 +37,6 @@ public class JwtFilter extends OncePerRequestFilter {
         if (jwt != null) {
             try {
                 jwtUtil.validateJwtToken(jwt);
-                // ------------------
-                // 1. Token valide → on authentifie
                 String username = jwtUtil.getEmailFromToken(jwt);
                 UserDetails userDetails = userDetailsService.loadUserByUsername(username);
                 UsernamePasswordAuthenticationToken auth =
