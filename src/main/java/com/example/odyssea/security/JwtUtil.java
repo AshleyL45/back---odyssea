@@ -1,6 +1,6 @@
 package com.example.odyssea.security;
 
-import com.example.odyssea.exceptions.*;
+import com.example.odyssea.exceptions.JwtToken.*;
 import io.jsonwebtoken.*;
 import io.jsonwebtoken.security.Keys;
 import jakarta.annotation.PostConstruct;

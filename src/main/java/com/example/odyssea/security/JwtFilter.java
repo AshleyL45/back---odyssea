@@ -1,9 +1,12 @@
 package com.example.odyssea.security;
 
+import com.example.odyssea.exceptions.JwtToken.*;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import org.springframework.security.authentication.BadCredentialsException;
+import org.springframework.security.authentication.InsufficientAuthenticationException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -25,29 +28,40 @@ public class JwtFilter extends OncePerRequestFilter {
     }
 
     @Override
-    protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain chain)
+    protected void doFilterInternal(HttpServletRequest request,
+                                    HttpServletResponse response,
+                                    FilterChain chain)
             throws ServletException, IOException {
 
-        try {
-            String jwt = parseJwt(request);
-            if (jwt != null && jwtUtil.validateJwtToken(jwt)) {
+        String jwt = parseJwt(request);
+        if (jwt != null) {
+            try {
+                jwtUtil.validateJwtToken(jwt);
+                // ------------------
+                // 1. Token valide → on authentifie
                 String username = jwtUtil.getEmailFromToken(jwt);
                 UserDetails userDetails = userDetailsService.loadUserByUsername(username);
-                UsernamePasswordAuthenticationToken authentication =
+                UsernamePasswordAuthenticationToken auth =
                         new UsernamePasswordAuthenticationToken(
-                                userDetails,
-                                null,
-                                userDetails.getAuthorities()
+                                userDetails, null, userDetails.getAuthorities()
                         );
-                authentication.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
-                SecurityContextHolder.getContext().setAuthentication(authentication);
+                auth.setDetails(new WebAuthenticationDetailsSource()
+                        .buildDetails(request));
+                SecurityContextHolder.getContext().setAuthentication(auth);
+                // ------------------
+            } catch (JwtTokenMalformedException | JwtTokenMissingException ex) {
+                throw new BadCredentialsException(ex.getMessage(), ex);
+            } catch (JwtTokenUnsupportedException | JwtTokenSignatureException ex) {
+                throw new BadCredentialsException(ex.getMessage(), ex);
+            } catch (JwtTokenExpiredException ex) {
+                throw new InsufficientAuthenticationException(ex.getMessage(), ex);
             }
-        } catch (Exception e) {
-            System.out.println("Cannot set user authentication: " + e);
-            e.printStackTrace(); // Affiche la trace de pile complète
         }
+
         chain.doFilter(request, response);
     }
+
+
 
     private String parseJwt(HttpServletRequest request) {
         String headerAuth = request.getHeader("Authorization");

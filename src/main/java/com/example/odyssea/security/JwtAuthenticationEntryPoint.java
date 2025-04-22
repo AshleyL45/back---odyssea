@@ -1,11 +1,12 @@
 package com.example.odyssea.security;
 
+import jakarta.servlet.ServletException;                // <– jakarta, pas javax
+import jakarta.servlet.http.HttpServletRequest;         // <– jakarta
+import jakarta.servlet.http.HttpServletResponse;        // <– jakarta
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.web.AuthenticationEntryPoint;
 import org.springframework.stereotype.Component;
 
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 
 @Component
@@ -13,8 +14,9 @@ public class JwtAuthenticationEntryPoint implements AuthenticationEntryPoint {
     @Override
     public void commence(HttpServletRequest request,
                          HttpServletResponse response,
-                         AuthenticationException authException) throws IOException {
+                         AuthenticationException authException)
+            throws IOException, ServletException {          // <– on ajoute ServletException
         response.sendError(HttpServletResponse.SC_UNAUTHORIZED,
-                "Non autorisé : " + authException.getMessage());
+                "Not authorized : " + authException.getMessage());
     }
 }

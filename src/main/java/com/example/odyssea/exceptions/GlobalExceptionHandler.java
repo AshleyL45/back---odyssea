@@ -1,5 +1,6 @@
 package com.example.odyssea.exceptions;
 
+import com.example.odyssea.exceptions.JwtToken.*;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.HttpMessageNotReadableException;
@@ -116,7 +117,7 @@ public class GlobalExceptionHandler {
     public ResponseEntity<ErrorResponse> handleMalformedJwt(JwtTokenMalformedException ex) {
         ErrorResponse err = new ErrorResponse(
                 HttpStatus.BAD_REQUEST,
-                "Jeton invalide",
+                "Invalid token",
                 ex.getMessage()
         );
         return new ResponseEntity<>(err, HttpStatus.BAD_REQUEST);
@@ -126,7 +127,7 @@ public class GlobalExceptionHandler {
     public ResponseEntity<ErrorResponse> handleExpiredJwt(JwtTokenExpiredException ex) {
         ErrorResponse err = new ErrorResponse(
                 HttpStatus.UNAUTHORIZED,
-                "Jeton expiré",
+                "Expired token",
                 ex.getMessage()
         );
         return new ResponseEntity<>(err, HttpStatus.UNAUTHORIZED);
@@ -136,7 +137,7 @@ public class GlobalExceptionHandler {
     public ResponseEntity<ErrorResponse> handleOtherJwtErrors(RuntimeException ex) {
         ErrorResponse err = new ErrorResponse(
                 HttpStatus.UNAUTHORIZED,
-                "Erreur d'authentification JWT",
+                "JWT authentication error",
                 ex.getMessage()
         );
         return new ResponseEntity<>(err, HttpStatus.UNAUTHORIZED);
