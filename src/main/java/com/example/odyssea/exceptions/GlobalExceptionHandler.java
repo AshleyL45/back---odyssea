@@ -113,6 +113,29 @@ public class GlobalExceptionHandler {
         return new ResponseEntity<>(error, HttpStatus.NOT_FOUND);
     }
 
+    @ExceptionHandler(UserItineraryDatabaseException.class)
+    public ResponseEntity<ErrorResponse> handleUserItineraryDatabaseException(UserItineraryDatabaseException ex) {
+        ErrorResponse error = new ErrorResponse(
+                HttpStatus.INTERNAL_SERVER_ERROR,
+                "An error occurred while saving the personalized itinerary",
+                ex.getMessage()
+        );
+        return new ResponseEntity<>(error, HttpStatus.INTERNAL_SERVER_ERROR);
+    }
+
+    @ExceptionHandler(FlightSegmentsNotFound.class)
+    public ResponseEntity<ErrorResponse> handleFlightSegmentNotFound(FlightSegmentsNotFound ex) {
+        ErrorResponse error = new ErrorResponse(
+                HttpStatus.INTERNAL_SERVER_ERROR,
+                "An internal error occurred. Flight segment not found.",
+                ex.getMessage()
+        );
+        return new ResponseEntity<>(error, HttpStatus.INTERNAL_SERVER_ERROR);
+    }
+
+
+
+
     @ExceptionHandler(JwtTokenMalformedException.class)
     public ResponseEntity<ErrorResponse> handleMalformedJwt(JwtTokenMalformedException ex) {
         ErrorResponse err = new ErrorResponse(

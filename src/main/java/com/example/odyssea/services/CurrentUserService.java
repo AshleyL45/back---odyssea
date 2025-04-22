@@ -12,7 +12,7 @@ public class CurrentUserService {
     public Integer getCurrentUserId(){
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();  // Contient les informations sur l'utilisateur connecté
         if (!(auth.getPrincipal() instanceof CustomUserDetails)) {
-            throw new ValidationException("Unauthenticated user. Please login or register");
+            throw new ValidationException("Unauthenticated user. Please login or register.");
         }
         return ((CustomUserDetails) auth.getPrincipal()).getUserId();
     }

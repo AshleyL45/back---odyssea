@@ -3,6 +3,8 @@ package com.example.odyssea.daos.userItinerary;
 import com.example.odyssea.entities.mainTables.Activity;
 import com.example.odyssea.entities.mainTables.Hotel;
 import com.example.odyssea.entities.userItinerary.UserItineraryStep;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.jdbc.core.BeanPropertyRowMapper;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
@@ -12,6 +14,7 @@ import java.util.List;
 
 @Repository
 public class UserItineraryStepDao {
+    private static final Logger log = LoggerFactory.getLogger(UserItineraryStepDao.class);
     private final JdbcTemplate jdbcTemplate;
 
     public UserItineraryStepDao(JdbcTemplate jdbcTemplate) {
@@ -64,18 +67,21 @@ public class UserItineraryStepDao {
         return userItineraryStep;
     }
 
-    public List<Hotel> getHotelInADay(int userItineraryId, int dayNumber){
+    public Hotel getHotelInADay(int userItineraryId, int dayNumber){
         String sql = "SELECT hotel.* FROM userDailyPlan \n" +
                 "INNER JOIN hotel ON userDailyPlan.hotelId = hotel.id\n" +
                 "WHERE userItineraryId = ? AND dayNumber = ?";
-        return jdbcTemplate.query(sql, new Object[]{userItineraryId, dayNumber}, new BeanPropertyRowMapper<>(Hotel.class));
+        return jdbcTemplate.queryForObject(sql, new Object[]{userItineraryId, dayNumber}, new BeanPropertyRowMapper<>(Hotel.class));
     }
 
-    public List<Activity> getActivitiesInADay(int userItineraryId, int dayNumber){
+    public Activity getActivityInADay(int userItineraryId, int dayNumber){
         String sql = "SELECT activity.* FROM userDailyPlan \n" +
                 "INNER JOIN activity ON userDailyPlan.activityId = activity.id\n" +
                 "WHERE userItineraryId = ? AND dayNumber = ?";
-        return jdbcTemplate.query(sql, new Object[]{userItineraryId, dayNumber}, new BeanPropertyRowMapper<>(Activity.class));
+
+
+        List<Activity> activities = jdbcTemplate.query(sql, new Object[]{userItineraryId, dayNumber}, new BeanPropertyRowMapper<>(Activity.class));
+        return activities.isEmpty() ? null : activities.get(0);
     }
 
     public UserItineraryStep update(int userId, int userItineraryId, int dayNumber, UserItineraryStep userItineraryStep){
