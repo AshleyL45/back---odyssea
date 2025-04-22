@@ -24,7 +24,6 @@ import java.util.stream.Stream;
 
 @Service
 public class UserItineraryService {
-    private CityDao cityDao;
     private UserItineraryDao userItineraryDao;
     private UserItineraryStepDao userItineraryStepDao;
     private UserDailyPlanService userDailyPlanService;
@@ -38,8 +37,7 @@ public class UserItineraryService {
     }
 
     @Autowired
-    public UserItineraryService(CityDao cityDao, UserItineraryDao userItineraryDao, UserItineraryStepDao userItineraryStepDao, UserDailyPlanService userDailyPlanService, UserItineraryDraftService userItineraryDraftService, UserItineraryOptionDao userItineraryOptionDao, CurrentUserService currentUserService) {
-        this.cityDao = cityDao;
+    public UserItineraryService(UserItineraryDao userItineraryDao, UserItineraryStepDao userItineraryStepDao, UserDailyPlanService userDailyPlanService, UserItineraryDraftService userItineraryDraftService, UserItineraryOptionDao userItineraryOptionDao, CurrentUserService currentUserService) {
         this.userItineraryDao = userItineraryDao;
         this.userItineraryStepDao = userItineraryStepDao;
         this.userDailyPlanService = userDailyPlanService;
