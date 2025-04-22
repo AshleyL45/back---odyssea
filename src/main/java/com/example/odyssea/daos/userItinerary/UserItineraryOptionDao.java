@@ -4,6 +4,7 @@ import com.example.odyssea.entities.mainTables.Option;
 import com.example.odyssea.entities.userItinerary.UserItinerary;
 import com.example.odyssea.entities.userItinerary.UserItineraryOption;
 import com.example.odyssea.entities.userItinerary.UserItineraryStep;
+import com.example.odyssea.exceptions.UserItineraryDatabaseException;
 import org.springframework.jdbc.core.BeanPropertyRowMapper;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
@@ -44,13 +45,14 @@ public class UserItineraryOptionDao {
     }
 
     public UserItineraryOption save(int userItineraryId, int optionId) {
-        String sql = "INSERT INTO userItineraryOption (userItineraryId, optionId) VALUES (?, ?)";
+        try {
+            String sql = "INSERT INTO userItineraryOption (userItineraryId, optionId) VALUES (?, ?)";
+            jdbcTemplate.update(sql, userItineraryId, optionId);
 
-        jdbcTemplate.update(sql, userItineraryId, optionId);
-
-        UserItineraryOption userItineraryOption = new UserItineraryOption(userItineraryId, optionId);
-
-        return userItineraryOption;
+            return new UserItineraryOption(userItineraryId, optionId);
+        } catch (Exception e) {
+            throw new UserItineraryDatabaseException(e.getMessage());
+        }
     }
 
 

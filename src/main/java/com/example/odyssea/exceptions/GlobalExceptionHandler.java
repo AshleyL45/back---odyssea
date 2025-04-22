@@ -7,6 +7,7 @@ import org.springframework.validation.FieldError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
+import org.springframework.web.reactive.function.client.WebClientException;
 import org.springframework.web.servlet.NoHandlerFoundException;
 
 import java.util.HashMap;
@@ -57,9 +58,20 @@ public class GlobalExceptionHandler {
     }
 
     @ExceptionHandler(Exception.class)
-    public ResponseEntity<String> handleGlobalException(Exception e) {
-        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(e.getMessage());
+    public ResponseEntity<ErrorResponse> handleGlobalException(Exception e) {
+        return new ResponseEntity<>(new ErrorResponse(HttpStatus.INTERNAL_SERVER_ERROR,"Internal error occurred", e.getMessage()), HttpStatus.INTERNAL_SERVER_ERROR);
     }
+
+    @ExceptionHandler(NullPointerException.class)
+    public ResponseEntity<ErrorResponse> handleNullPointers(NullPointerException e) {
+        return new ResponseEntity<>(new ErrorResponse(HttpStatus.INTERNAL_SERVER_ERROR,"Internal error (Null pointer)", e.getMessage()), HttpStatus.INTERNAL_SERVER_ERROR);
+    }
+
+    @ExceptionHandler(WebClientException.class)
+    public ResponseEntity<ErrorResponse> handleWebClient(WebClientException e) {
+        return new ResponseEntity<>(new ErrorResponse(HttpStatus.INTERNAL_SERVER_ERROR,"Internal error from external API", e.getMessage()), HttpStatus.INTERNAL_SERVER_ERROR);
+    }
+
 
     @ExceptionHandler(ValidationException.class)
     public ResponseEntity<ErrorResponse> handleInvalidDuration(ValidationException e){
@@ -111,5 +123,27 @@ public class GlobalExceptionHandler {
         );
         return new ResponseEntity<>(error, HttpStatus.NOT_FOUND);
     }
+
+    @ExceptionHandler(UserItineraryDatabaseException.class)
+    public ResponseEntity<ErrorResponse> handleUserItineraryDatabaseException(UserItineraryDatabaseException ex) {
+        ErrorResponse error = new ErrorResponse(
+                HttpStatus.INTERNAL_SERVER_ERROR,
+                "An error occurred while saving the personalized itinerary",
+                ex.getMessage()
+        );
+        return new ResponseEntity<>(error, HttpStatus.INTERNAL_SERVER_ERROR);
+    }
+
+    @ExceptionHandler(FlightSegmentsNotFound.class)
+    public ResponseEntity<ErrorResponse> handleFlightSegmentNotFound(FlightSegmentsNotFound ex) {
+        ErrorResponse error = new ErrorResponse(
+                HttpStatus.INTERNAL_SERVER_ERROR,
+                "An internal error occurred. Flight segment not found.",
+                ex.getMessage()
+        );
+        return new ResponseEntity<>(error, HttpStatus.INTERNAL_SERVER_ERROR);
+    }
+
+
 
 }

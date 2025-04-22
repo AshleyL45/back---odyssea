@@ -1,9 +1,12 @@
 package com.example.odyssea.daos.userItinerary.drafts;
 
+import com.example.odyssea.entities.mainTables.City;
+import com.example.odyssea.entities.mainTables.Country;
 import com.example.odyssea.entities.userItinerary.drafts.DraftCountries;
 import com.example.odyssea.entities.userItinerary.drafts.DraftOptions;
 import com.example.odyssea.exceptions.DatabaseException;
 import org.springframework.dao.EmptyResultDataAccessException;
+import org.springframework.jdbc.core.BeanPropertyRowMapper;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.stereotype.Repository;
@@ -49,6 +52,14 @@ public class DraftCountriesDao {
         }
 
         jdbcTemplate.batchUpdate(sql, batchArgs);
+    }
+
+    public List<Country> findDraftCountries(Integer userId){
+        Integer draftId = userItineraryDraftDao.getLastDraftIdByUser(userId);
+        String sql = "SELECT country.* FROM draft_countries\n" +
+                "INNER JOIN country ON draft_countries.country_id = country.id WHERE draft_countries.draft_user_itinerary_id = ? ";
+
+        return jdbcTemplate.query(sql, new Object[]{draftId}, new BeanPropertyRowMapper<>(Country.class));
     }
 
 }

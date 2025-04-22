@@ -1,19 +1,13 @@
 package com.example.odyssea.daos.userItinerary.drafts;
 
-import com.example.odyssea.dtos.userItinerary.UserItineraryDraftDTO;
 import com.example.odyssea.entities.userItinerary.drafts.UserItineraryDraft;
 import com.example.odyssea.exceptions.DatabaseException;
-import com.example.odyssea.exceptions.ValidationException;
-import com.example.odyssea.security.SecurityConfig;
 import org.springframework.dao.EmptyResultDataAccessException;
-import org.springframework.data.relational.core.sql.In;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
-import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Repository;
 
 import java.time.LocalDate;
-import java.util.Optional;
 
 @Repository
 public class UserItineraryDraftDao {
@@ -36,9 +30,13 @@ public class UserItineraryDraftDao {
             rs.getObject("created_at", LocalDate.class)
     );
 
-    /*public UserItineraryDraftDTO findByUserId (Integer userId){
-        String sql = "";
-    }*/
+    public UserItineraryDraft getLastDraftByUserId(Integer userId){
+        String sql = "SELECT * FROM userItineraryDraft WHERE user_id = ? ORDER BY created_at DESC LIMIT 1";
+        return jdbcTemplate.query(sql, userItineraryDraftRowMapper, userId)
+                .stream()
+                .findFirst()
+                .orElseThrow(() -> new DatabaseException("No draft found for user with ID : " + userId));
+    }
 
     public Integer getLastDraftIdByUser(int userId) {
         try {
@@ -127,7 +125,6 @@ public class UserItineraryDraftDao {
         }
     }
 
-
     public boolean delete(Integer id){
         boolean doesExist = doesExist(id);
         if(!doesExist){
@@ -138,6 +135,7 @@ public class UserItineraryDraftDao {
 
         return rowsAffected > 0;
     }
+
     public boolean doesExist(Integer id){
         String sql = "SELECT COUNT (*) FROM userItineraryDraft WHERE id = ?";
         int count = jdbcTemplate.queryForObject(sql, Integer.class, id);

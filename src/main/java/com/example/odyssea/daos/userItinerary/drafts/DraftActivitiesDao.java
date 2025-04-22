@@ -1,6 +1,8 @@
 package com.example.odyssea.daos.userItinerary.drafts;
 
+import com.example.odyssea.entities.mainTables.Activity;
 import com.example.odyssea.entities.userItinerary.drafts.DraftActivities;
+import org.springframework.jdbc.core.BeanPropertyRowMapper;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.stereotype.Repository;
@@ -34,5 +36,13 @@ public class DraftActivitiesDao {
         }
 
         jdbcTemplate.batchUpdate(sql, batchArgs);
+    }
+
+    public List<Activity> findDraftActivities(Integer userId){
+        Integer draftId = userItineraryDraftDao.getLastDraftIdByUser(userId);
+        String sql = "SELECT activity.* FROM draft_activities\n" +
+                "INNER JOIN activity ON draft_activities.activity_id = activity.id WHERE draft_activities.draft_user_itinerary_id = ? ";
+
+        return jdbcTemplate.query(sql, new Object[]{draftId}, new BeanPropertyRowMapper<>(Activity.class));
     }
 }

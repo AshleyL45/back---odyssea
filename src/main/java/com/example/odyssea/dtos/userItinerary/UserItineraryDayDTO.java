@@ -3,6 +3,7 @@ package com.example.odyssea.dtos.userItinerary;
 import com.example.odyssea.dtos.flight.FlightItineraryDTO;
 import com.example.odyssea.dtos.mainTables.HotelDto;
 import com.example.odyssea.entities.mainTables.Activity;
+import com.example.odyssea.entities.mainTables.Hotel;
 
 import java.time.LocalDate;
 

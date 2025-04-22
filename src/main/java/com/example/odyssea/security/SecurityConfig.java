@@ -44,7 +44,7 @@ public class SecurityConfig {
                 )
                 .authorizeHttpRequests(authorizeRequests ->
                         authorizeRequests
-                                .requestMatchers("/auth/**", "/hotels/**", "/flights/**", "/activities/**",  "/error", "/userItinerary/**", "/api/**", "/countries/**", "/cities/**", "/mySelection/**", "/options/**").permitAll()
+                                .requestMatchers("/auth/**", "/hotels/**", "/flights/**", "/activities/**",  "/error", "/userItinerary/**", "/api/**", "/countries/**", "/cities/**", "/mySelection/**", "/options/**", "/v3/api-docs/**", "/swagger-ui/**", "/swagger-ui.html").permitAll()
                                 .requestMatchers("/user/**", "/reservations/**").hasRole("USER")
                                 .anyRequest().authenticated()
                 );

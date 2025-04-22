@@ -5,11 +5,18 @@ import com.example.odyssea.daos.mainTables.CityDao;
 import com.example.odyssea.daos.mainTables.CountryDao;
 import com.example.odyssea.daos.mainTables.OptionDao;
 import com.example.odyssea.daos.userItinerary.drafts.*;
+import com.example.odyssea.dtos.userItinerary.DraftData;
 import com.example.odyssea.entities.mainTables.Activity;
 import com.example.odyssea.entities.mainTables.City;
+import com.example.odyssea.entities.mainTables.Country;
+import com.example.odyssea.entities.mainTables.Option;
+import com.example.odyssea.entities.userItinerary.drafts.UserItineraryDraft;
+import com.example.odyssea.enums.TripDuration;
+import com.example.odyssea.exceptions.ActivityNotFound;
 import com.example.odyssea.exceptions.ValidationException;
 import com.example.odyssea.services.CurrentUserService;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
@@ -17,16 +24,16 @@ import java.util.List;
 
 @Service
 public class UserItineraryDraftService {
-    private UserItineraryDraftDao userItineraryDraftDao;
-    private CurrentUserService currentUserService;
-    private CountryDao countryDao;
-    private CityDao cityDao;
-    private ActivityDao activityDao;
-    private DraftCountriesDao draftCountriesDao;
-    private DraftCitiesDao draftCitiesDao;
-    private DraftActivitiesDao draftActivitiesDao;
-    private DraftOptionsDao draftOptionsDao;
-    private OptionDao optionDao;
+    private final UserItineraryDraftDao userItineraryDraftDao;
+    private final CurrentUserService currentUserService;
+    private final CountryDao countryDao;
+    private final CityDao cityDao;
+    private final ActivityDao activityDao;
+    private final DraftCountriesDao draftCountriesDao;
+    private final DraftCitiesDao draftCitiesDao;
+    private final DraftActivitiesDao draftActivitiesDao;
+    private final DraftOptionsDao draftOptionsDao;
+    private final OptionDao optionDao;
 
 
     public UserItineraryDraftService(UserItineraryDraftDao userItineraryDraftDao, CurrentUserService currentUserService, CountryDao countryDao, CityDao cityDao, DraftCountriesDao draftCountriesDao, DraftCitiesDao draftCitiesDao, DraftActivitiesDao draftActivitiesDao, ActivityDao activityDao, OptionDao optionDao, DraftOptionsDao draftOptionsDao) {
@@ -42,42 +49,27 @@ public class UserItineraryDraftService {
         this.draftOptionsDao = draftOptionsDao;
     }
 
-    private int getExpectedCountryCount(int duration) {
-        return switch (duration) {
-            case 9 -> 1;
-            case 17 -> 2;
-            case 25 -> 3;
-            case 33 -> 4;
-            default -> throw new ValidationException("Invalid duration. The duration must be one of 9, 17, 25, or 33.");
-        };
+    private Integer getUserId() {
+        return currentUserService.getCurrentUserId();
     }
 
-    private int getExpectedCityCount(int duration) {
-        return switch (duration) {
-            case 9 -> 2;
-            case 17 -> 4;
-            case 25 -> 6;
-            case 33 -> 8;
-            default -> throw new ValidationException("Invalid duration. The duration must be one of 9, 17, 25, or 33.");
-        };
+    @Transactional(readOnly = true)
+    public DraftData loadAllDraftData(Integer userId){
+        UserItineraryDraft draft = userItineraryDraftDao.getLastDraftByUserId(userId);
+        List<Country> countries = draftCountriesDao.findDraftCountries(userId);
+        List<City> cities = draftCitiesDao.findDraftCities(userId);
+        List<Activity> activities = draftActivitiesDao.findDraftActivities(userId);
+        List<Option> options = draftOptionsDao.findDraftOptions(userId);
+
+        return new DraftData(draft, countries, cities, activities, options);
     }
 
-    private int getExpectedActivityCount(int duration) {
-        return switch (duration) {
-            case 9 -> 6;
-            case 17 -> 12;
-            case 25 -> 18;
-            case 33 -> 24;
-            default -> throw new ValidationException("Invalid duration. The duration must be one of 9, 17, 25, or 33.");
-        };
-    }
-
-    public void validateFirstStep (int duration) {
+    public void validateDuration (int duration) {
         if(!(duration == 9 || duration == 17 || duration == 25 || duration == 33)){
             throw new ValidationException("The duration must be of 9, 17, 25 or 33 days.");
         }
 
-        Integer userId = currentUserService.getCurrentUserId();
+        Integer userId = getUserId();
         userItineraryDraftDao.saveFirstStep(userId, duration);
     }
 
@@ -95,7 +87,7 @@ public class UserItineraryDraftService {
             throw new ValidationException("Date must be in the future at least 7 days after today.");
         }
 
-        Integer userId = currentUserService.getCurrentUserId();
+        Integer userId = getUserId();
         userItineraryDraftDao.saveDate(userId, validDate);
     }
 
@@ -104,17 +96,18 @@ public class UserItineraryDraftService {
             throw new ValidationException("Departure city cannot be null.");
         }
         cityDao.findCityByName(departureCity);
-        Integer userId = currentUserService.getCurrentUserId();
+        Integer userId = getUserId();
         userItineraryDraftDao.saveDepartureCity(userId, departureCity);
     }
 
     public void validateCountries(List<Integer> countriesIds){
-        Integer userId = currentUserService.getCurrentUserId();
+        Integer userId = getUserId();
         Integer duration = userItineraryDraftDao.getDurationByUserId(userId);
 
-        int expectedNumberOfCountries = getExpectedCountryCount(duration);
+        TripDuration tripDuration = TripDuration.fromDays(duration);
+        int expectedCountries = tripDuration.getExpectedCountries();
 
-        if (countriesIds.size() != expectedNumberOfCountries) {
+        if (countriesIds.size() != expectedCountries) {
             throw new ValidationException("The number of countries selected does not match the required number for the duration.");
         }
 
@@ -127,13 +120,14 @@ public class UserItineraryDraftService {
     }
 
     public void validateCities(List<Integer> citiesIds){
-        Integer userId = currentUserService.getCurrentUserId();
+        Integer userId = getUserId();
         Integer duration = userItineraryDraftDao.getDurationByUserId(userId);
         List<Integer> countryIds = draftCountriesDao.getCountriesByDraftId(userId);
 
-        int expectedNumberOfCities = getExpectedCityCount(duration);
-        if(citiesIds == null || citiesIds.size() != expectedNumberOfCities){
-            throw new ValidationException("You must select exactly " + expectedNumberOfCities + " cities for your trip duration.");
+        TripDuration tripDuration = TripDuration.fromDays(duration);
+        int expectedCities = tripDuration.getExpectedCities();
+        if(citiesIds == null || citiesIds.size() != expectedCities){
+            throw new ValidationException("You must select exactly " + expectedCities + " cities for your trip duration.");
         }
 
 
@@ -149,18 +143,19 @@ public class UserItineraryDraftService {
     }
 
     public void validateActivities(List<Integer> activitiesIds){
-        Integer userId = currentUserService.getCurrentUserId();
+        Integer userId = getUserId();
         Integer duration = userItineraryDraftDao.getDurationByUserId(userId);
         List<Integer> cityIds = draftCitiesDao.getCitiesByDraftId(userId);
 
-        int expectedNumberOfActivities = getExpectedActivityCount(duration);
-        if(activitiesIds == null || activitiesIds.size() != expectedNumberOfActivities){
-            throw new ValidationException("You must select exactly " + expectedNumberOfActivities + " activities for your trip duration.");
+        TripDuration tripDuration = TripDuration.fromDays(duration);
+        int expectedActivities = tripDuration.getExpectedActivities();
+        if(activitiesIds == null || activitiesIds.size() != expectedActivities){
+            throw new ValidationException("You must select exactly " + expectedActivities + " activities for your trip duration.");
         }
 
         for (Integer id : activitiesIds) {
             Activity activity = activityDao.findById(id)
-                    .orElseThrow(() -> new ValidationException("Activity with id " + id + " not found."));
+                    .orElseThrow(() -> new ActivityNotFound("Activity with id " + id + " not found."));
             if (!cityIds.contains(activity.getCityId())) {
                 throw new ValidationException("Activity " + activity.getName() + " does not belong to selected cities.");
             }
@@ -170,7 +165,7 @@ public class UserItineraryDraftService {
     }
 
     public void validateHotelStanding(Integer hotelStanding){
-        Integer userId = currentUserService.getCurrentUserId();
+        Integer userId = getUserId();
         if(hotelStanding != 4 && hotelStanding != 5){
             throw new ValidationException("Hotel standing must be between 4 and 5");
         }
@@ -178,7 +173,7 @@ public class UserItineraryDraftService {
     }
 
     public void validateTravelersNumber(Integer numberAdults, Integer numberKids){
-        Integer userId = currentUserService.getCurrentUserId();
+        Integer userId = getUserId();
         if(numberAdults <= 0){
             throw new ValidationException("There must be at least an adult");
         } else if(numberAdults + numberKids > 15){
@@ -192,7 +187,7 @@ public class UserItineraryDraftService {
             return;
         }
 
-        Integer userId = currentUserService.getCurrentUserId();
+        Integer userId = getUserId();
         for(Integer id : optionsIds){
             optionDao.findById(id);
         }
