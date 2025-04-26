@@ -57,7 +57,7 @@ public class ActivityController {
     }
 
     @PostMapping("/importAndGet")
-    public ResponseEntity<?> importAndGetActivities(@RequestParam int cityId, @RequestParam(defaultValue = "1000") int radius) {
+    public ResponseEntity<?> importAndGetActivities(@RequestParam int cityId, @RequestParam(defaultValue = "10000") int radius) {
         activityService.checkCityExists(cityId);
         List<Activity> activities = activityService.getTop5ActivitiesByCityId(cityId);
 
