@@ -2,6 +2,8 @@ package com.example.odyssea.daos.mainTables;
 
 import com.example.odyssea.entities.MySelection;
 import com.example.odyssea.entities.itinerary.Itinerary;
+import com.example.odyssea.exceptions.SelectionAlreadyExistException;
+import com.example.odyssea.exceptions.SelectionNotFoundException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.stereotype.Repository;
@@ -51,13 +53,24 @@ public class MySelectionDao {
         return jdbcTemplate.query(sql, mySelectionRowMapper, userId, itineraryId)
                 .stream()
                 .findFirst()
-                .orElseThrow(() -> new RuntimeException("Selection with userId: " + userId + " and itineraryId: " + itineraryId + " does not exist"));
+                .orElseThrow(() -> new SelectionNotFoundException("Selection with userId: " + userId + " and itineraryId: " + itineraryId + " does not exist"));
     }
 
     // Insère une nouvelle sélection dans la table mySelection
     public MySelection save(MySelection mySelection) {
-        String sql = "INSERT INTO mySelection (userId, itineraryId) VALUES (?, ?)";
-        jdbcTemplate.update(sql, mySelection.getUserId(), mySelection.getItineraryId());
+
+        String checkSql = "SELECT COUNT(*) FROM mySelection WHERE userId = ? AND itineraryId = ?";
+        Integer count = jdbcTemplate.queryForObject(checkSql, Integer.class,
+                mySelection.getUserId(), mySelection.getItineraryId());
+
+        if (count != null && count > 0) {
+            throw new SelectionAlreadyExistException("Selection already exists for userId: "
+                    + mySelection.getUserId() + " and itineraryId: " + mySelection.getItineraryId());
+        }
+
+        String insertSql = "INSERT INTO mySelection (userId, itineraryId) VALUES (?, ?)";
+        jdbcTemplate.update(insertSql, mySelection.getUserId(), mySelection.getItineraryId());
+
         return mySelection;
     }
 

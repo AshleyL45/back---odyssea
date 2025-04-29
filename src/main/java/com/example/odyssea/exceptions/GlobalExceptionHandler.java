@@ -133,9 +133,6 @@ public class GlobalExceptionHandler {
         return new ResponseEntity<>(error, HttpStatus.INTERNAL_SERVER_ERROR);
     }
 
-
-
-
     @ExceptionHandler(JwtTokenMalformedException.class)
     public ResponseEntity<ErrorResponse> handleMalformedJwt(JwtTokenMalformedException ex) {
         ErrorResponse err = new ErrorResponse(
@@ -165,4 +162,27 @@ public class GlobalExceptionHandler {
         );
         return new ResponseEntity<>(err, HttpStatus.UNAUTHORIZED);
     }
+
+    @ExceptionHandler(SelectionAlreadyExistException.class)
+    public ResponseEntity<ErrorResponse> handleSelectionAlreadyExist(SelectionAlreadyExistException ex) {
+        ErrorResponse err = new ErrorResponse(
+                HttpStatus.CONFLICT,
+                "This itinerary is already in your selection.",
+                ex.getMessage()
+        );
+        return new ResponseEntity<>(err, HttpStatus.CONFLICT);
+    }
+
+    @ExceptionHandler(SelectionNotFoundException.class)
+    public ResponseEntity<ErrorResponse> handleSelectionNotFound(SelectionNotFoundException ex) {
+        ErrorResponse err = new ErrorResponse(
+                HttpStatus.CONFLICT,
+                "This itinerary is not in your selection.",
+                ex.getMessage()
+        );
+        return new ResponseEntity<>(err, HttpStatus.CONFLICT);
+    }
+
+
+
 }

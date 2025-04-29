@@ -2,11 +2,13 @@ package com.example.odyssea.controllers.mainTables;
 
 import com.example.odyssea.entities.MySelection;
 import com.example.odyssea.entities.itinerary.Itinerary;
+import com.example.odyssea.exceptions.SuccessResponse;
 import com.example.odyssea.services.mainTables.MySelectionService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/mySelection")
@@ -25,15 +27,15 @@ public class MySelectionController {
     }
 
     // Récupère les sélections d'un utilisateur sous forme d'itinéraires
-    @GetMapping("/{userId}")
-    public ResponseEntity<List<Itinerary>> getAllUserFavorites(@PathVariable int userId){
-        return ResponseEntity.ok(mySelectionService.getUserFavorites(userId));
+    @GetMapping("/")
+    public ResponseEntity<List<Itinerary>> getAllUserFavorites(){
+        return ResponseEntity.ok(mySelectionService.getUserFavorites());
     }
 
     // Récupère les sélections d'un utilisateur donné
-    @GetMapping("/user/{userId}")
-    public ResponseEntity<List<MySelection>> getSelectionsByUser(@PathVariable int userId) {
-        return ResponseEntity.ok(mySelectionService.getSelectionsByUserId(userId));
+    @GetMapping("/user")
+    public ResponseEntity<List<MySelection>> getSelectionsByUser() {
+        return ResponseEntity.ok(mySelectionService.getSelectionsByUserId());
     }
 
     // Récupère les sélections pour un itinéraire donné
@@ -43,31 +45,29 @@ public class MySelectionController {
     }
 
     // Récupère la sélection correspondant à un utilisateur et un itinéraire donnés
-    @GetMapping("/user/{userId}/itinerary/{itineraryId}")
-    public ResponseEntity<MySelection> getSelection(@PathVariable int userId, @PathVariable int itineraryId) {
-        return ResponseEntity.ok(mySelectionService.getSelection(userId, itineraryId));
+    @GetMapping("/itinerary/{itineraryId}")
+    public ResponseEntity<MySelection> getSelection(@PathVariable int itineraryId) {
+        return ResponseEntity.ok(mySelectionService.getSelection(itineraryId));
     }
 
     // Crée une nouvelle sélection
-    @PostMapping("/add")
-    public ResponseEntity<MySelection> createSelection(@RequestBody MySelection selection) {
-        return ResponseEntity.ok(mySelectionService.createSelection(selection));
+    @PostMapping("/add/{itineraryId}")
+    public ResponseEntity<SuccessResponse> createSelection(@RequestBody Map<String, Integer> itinerary) {
+        Integer itineraryId = itinerary.get("itineraryId");
+        return ResponseEntity.ok(new SuccessResponse(true));
     }
 
     // Met à jour une sélection pour un utilisateur donné
-    @PutMapping("/user/{userId}/itinerary/{itineraryId}")
-    public ResponseEntity<MySelection> updateSelection(@PathVariable int userId, @PathVariable int itineraryId, @RequestBody MySelection selection) {
-        return ResponseEntity.ok(mySelectionService.updateSelection(userId, itineraryId, selection));
+    @PutMapping("/{itineraryId}")
+    public ResponseEntity<MySelection> updateSelection(@PathVariable int itineraryId, @RequestBody MySelection selection) {
+        return ResponseEntity.ok(mySelectionService.updateSelection(itineraryId, selection));
     }
 
     // Supprime une sélection correspondant à un utilisateur et un itinéraire donnés
-    @DeleteMapping("/{userId}/remove/{itineraryId}")
-    public ResponseEntity<String> deleteSelection(@PathVariable int userId, @PathVariable int itineraryId) {
-        boolean isDeleted = mySelectionService.deleteSelection(userId, itineraryId);
-       if(isDeleted){
-           return ResponseEntity.ok("Selection successfully deleted.");
-       } else {
-           return ResponseEntity.badRequest().body("Cannot delete reservation of user id " + userId + " with itinerary id " + itineraryId);
-       }
+    @DeleteMapping("/remove/{itineraryId}")
+    public ResponseEntity<SuccessResponse> deleteSelection(@PathVariable  Map<String, Integer> itinerary) {
+        Integer itineraryId = itinerary.get("itineraryId");
+        mySelectionService.deleteFromSelection(itineraryId);
+        return ResponseEntity.ok(new SuccessResponse(true));
     }
 }
