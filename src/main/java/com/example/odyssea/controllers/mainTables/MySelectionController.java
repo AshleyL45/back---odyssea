@@ -44,16 +44,11 @@ public class MySelectionController {
         return ResponseEntity.ok(mySelectionService.getSelectionsByItineraryId(itineraryId));
     }
 
-    // Récupère la sélection correspondant à un utilisateur et un itinéraire donnés
-    @GetMapping("/itinerary/{itineraryId}")
-    public ResponseEntity<MySelection> getSelection(@PathVariable int itineraryId) {
-        return ResponseEntity.ok(mySelectionService.getSelection(itineraryId));
-    }
-
     // Crée une nouvelle sélection
     @PostMapping("/add/{itineraryId}")
     public ResponseEntity<SuccessResponse> createSelection(@RequestBody Map<String, Integer> itinerary) {
         Integer itineraryId = itinerary.get("itineraryId");
+        mySelectionService.addToSelection(itineraryId);
         return ResponseEntity.ok(new SuccessResponse(true));
     }
 

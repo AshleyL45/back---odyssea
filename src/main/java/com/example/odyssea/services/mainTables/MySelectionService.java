@@ -3,6 +3,7 @@ package com.example.odyssea.services.mainTables;
 import com.example.odyssea.daos.mainTables.MySelectionDao;
 import com.example.odyssea.entities.MySelection;
 import com.example.odyssea.entities.itinerary.Itinerary;
+import com.example.odyssea.exceptions.SelectionNotFoundException;
 import com.example.odyssea.services.CurrentUserService;
 import org.springframework.expression.spel.ast.Selection;
 import org.springframework.stereotype.Service;
@@ -57,7 +58,7 @@ public class MySelectionService {
         return mySelectionDao.findAll().stream()
                 .filter(selection -> selection.getUserId() == userId && selection.getItineraryId() == itineraryId)
                 .findFirst()
-                .orElseThrow(() -> new RuntimeException("Selection with userId: " + userId + " and itineraryId: " + itineraryId + " does not exist"));
+                .orElseThrow(() -> new SelectionNotFoundException("Selection with userId: " + userId + " and itineraryId: " + itineraryId + " does not exist"));
     }
 
     // Crée une nouvelle sélection

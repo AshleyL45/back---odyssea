@@ -66,10 +66,9 @@ public class SecurityConfig {
                                 "/api/**",
                                 "/countries/**",
                                 "/cities/**",
-                                "/mySelection/**",
                                 "/options/**", "/v3/api-docs/**", "/swagger-ui/**", "/swagger-ui.html"
                         ).permitAll()
-                        .requestMatchers("/user/**", "/reservations/**").hasRole("USER")
+                        .requestMatchers("/user/**", "/reservations/**", "/mySelection/**").hasRole("USER")
                         .anyRequest().authenticated()
                 )
                 // ajoute notre filtre JWT avant le filtre d’authentification standard

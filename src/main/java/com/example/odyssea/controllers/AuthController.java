@@ -4,8 +4,12 @@ import com.example.odyssea.daos.userAuth.UserDao;
 import com.example.odyssea.security.JwtToken;
 import com.example.odyssea.entities.userAuth.User;
 import com.example.odyssea.security.JwtUtil;
+import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseCookie;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.BadCredentialsException;
@@ -15,6 +19,7 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
 
+import java.time.Duration;
 import java.util.Map;
 
 @RestController
@@ -24,6 +29,8 @@ public class AuthController {
     private final UserDao userDao;
     private final PasswordEncoder encoder;
     private final JwtUtil jwtUtils;
+    @Value("${jwt.expiration}")
+    private int jwtExpirationMs;
 
     public AuthController(AuthenticationManager authenticationManager, UserDao userDao, PasswordEncoder encoder, JwtUtil jwtUtils) {
         this.authenticationManager = authenticationManager;
@@ -50,7 +57,7 @@ public class AuthController {
     }
 
     @PostMapping("/login")
-    public ResponseEntity<?> authenticateUser(@RequestBody User user) {
+    public ResponseEntity<?> authenticateUser(@RequestBody User user, HttpServletResponse response) {
         try {
             // Authentification avec Spring Security
             Authentication authentication = authenticationManager.authenticate(
@@ -65,10 +72,20 @@ public class AuthController {
             User userWithId = userDao.findByEmail(user.getEmail());
 
             // Générer le JWT
-            JwtToken jwtToken = jwtUtils.generateToken(userDetails.getUsername(), userWithId.getId(), userWithId.getFirstName(), userWithId.getLastName());
+            JwtToken jwtToken = jwtUtils.generateTokenWithId(userWithId.getId());
+
+            ResponseCookie cookie = ResponseCookie.from("jwt", jwtToken.getToken())
+                    .httpOnly(true)
+                    .secure(false)         // A changer si Https
+                    .path("/")
+                    .sameSite("Strict")
+                    .maxAge(Duration.ofSeconds(jwtExpirationMs))
+                    .build();
+
+            response.addHeader(HttpHeaders.SET_COOKIE, cookie.toString());
 
             // Retourner le token JWT
-            return ResponseEntity.ok(jwtToken);
+            return ResponseEntity.ok("Login successful.");
 
         } catch (BadCredentialsException ex) {
             // Identifiants invalides

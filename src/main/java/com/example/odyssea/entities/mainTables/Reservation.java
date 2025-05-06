@@ -4,14 +4,15 @@ import jakarta.validation.constraints.*;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
-import java.util.List;
 
 public class Reservation {
 
-    @NotNull(message = "User id cannot be null.")
+    private int reservationId;
+
+    @NotNull(message = "User reservationId cannot be null.")
     private int userId;
 
-    @NotNull(message = "Itinerary id cannot be null.")
+    @NotNull(message = "Itinerary reservationId cannot be null.")
     private int itineraryId;
 
     @NotBlank(message = "Status cannot be blank.")
@@ -35,12 +36,15 @@ public class Reservation {
     @PositiveOrZero(message = "Number of kids must be positive or equal to zero.")
     private int numberOfKids;
 
-    private List<Integer> optionId;
+    @NotNull(message = "Type cannot be null.")
+    private String type;
 
     public Reservation() {
     }
 
-    public Reservation(int userId, int itineraryId, String status, LocalDate departureDate, LocalDate returnDate, BigDecimal totalPrice, LocalDate purchaseDate, int numberOfAdults, int numberOfKids, List<Integer> optionId) {
+
+    public Reservation(int reservationId, int userId, int itineraryId, String status, LocalDate departureDate, LocalDate returnDate, BigDecimal totalPrice, LocalDate purchaseDate, int numberOfAdults, int numberOfKids, String type) {
+        this.reservationId = reservationId;
         this.userId = userId;
         this.itineraryId = itineraryId;
         this.status = status;
@@ -50,8 +54,9 @@ public class Reservation {
         this.purchaseDate = purchaseDate;
         this.numberOfAdults = numberOfAdults;
         this.numberOfKids = numberOfKids;
-        this.optionId = optionId;
+        this.type = type;
     }
+
 
     public int getUserId() {
         return userId;
@@ -107,10 +112,20 @@ public class Reservation {
     public void setNumberOfKids(int numberOfKids) {
         this.numberOfKids = numberOfKids;
     }
-    public List<Integer> getOptionIds() {
-        return optionId;
+
+    public int getReservationId() {
+        return reservationId;
     }
-    public void setOptionIds(List<Integer> optionId) {
-        this.optionId = optionId;
+
+    public void setReservationId(int reservationId) {
+        this.reservationId = reservationId;
+    }
+
+    public String getType() {
+        return type;
+    }
+
+    public void setType(String type) {
+        this.type = type;
     }
 }

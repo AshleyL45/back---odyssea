@@ -21,4 +21,9 @@ public class CustomUserDetailsService implements UserDetailsService {
         User user = userDao.findByEmail(email);
         return new CustomUserDetails(user);
     }
+
+    public UserDetails loadById(Integer id){
+        User user = userDao.findById(id);
+        return new CustomUserDetails(user);
+    }
 }

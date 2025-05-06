@@ -1,22 +1,15 @@
 package com.example.odyssea.dtos.reservation;
 
-import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Positive;
 import jakarta.validation.constraints.PositiveOrZero;
 
-import java.math.BigDecimal;
-import java.time.LocalDate;
 import java.util.List;
 
-public class ReservationRequestDTO {
+public class BookingRequest {
 
-    @NotNull(message = "User id cannot be null.")
-    private int userId;
     @NotNull(message = "Itinerary id cannot be null.")
     private int itineraryId;
-    @NotBlank(message = "Status cannot be blank.")
-    private String status;
     @NotNull(message = "Departure date cannot be null.")
     private String departureDate;
     @NotNull(message = "Return date cannot be null.")
@@ -27,13 +20,11 @@ public class ReservationRequestDTO {
     private int numberOfKids;
     private List<Integer> optionIds;
 
-    public ReservationRequestDTO() {
+    public BookingRequest() {
     }
 
-    public ReservationRequestDTO(int userId, int itineraryId, String status, String departureDate, String returnDate, int numberOfAdults, int numberOfKids, List<Integer> optionIds) {
-        this.userId = userId;
+    public BookingRequest(int itineraryId, String departureDate, String returnDate, int numberOfAdults, int numberOfKids, List<Integer> optionIds) {
         this.itineraryId = itineraryId;
-        this.status = status;
         this.departureDate = departureDate;
         this.returnDate = returnDate;
         this.numberOfAdults = numberOfAdults;
@@ -42,28 +33,12 @@ public class ReservationRequestDTO {
     }
 
 
-    public int getUserId() {
-        return userId;
-    }
-
-    public void setUserId(int userId) {
-        this.userId = userId;
-    }
-
     public int getItineraryId() {
         return itineraryId;
     }
 
     public void setItineraryId(int itineraryId) {
         this.itineraryId = itineraryId;
-    }
-
-    public String getStatus() {
-        return status;
-    }
-
-    public void setStatus(String status) {
-        this.status = status;
     }
 
     public String getDepartureDate() {
@@ -105,5 +80,14 @@ public class ReservationRequestDTO {
     public void setOptionIds(List<Integer> optionIds) {
         this.optionIds = optionIds;
     }
+
+    public void setNumberOfAdults(int numberOfAdults) {
+        this.numberOfAdults = numberOfAdults;
+    }
+
+    public void setNumberOfKids(int numberOfKids) {
+        this.numberOfKids = numberOfKids;
+    }
+
 }
 

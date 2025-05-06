@@ -1,7 +1,13 @@
 package com.example.odyssea.daos.mainTables;
 
+import com.example.odyssea.entities.mainTables.Option;
+import com.example.odyssea.entities.userItinerary.UserItinerary;
+import org.springframework.jdbc.core.BeanPropertyRowMapper;
 import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.jdbc.core.RowMapper;
 import org.springframework.stereotype.Repository;
+
+import java.util.List;
 
 @Repository
 public class ReservationOptionDao {
@@ -11,9 +17,20 @@ public class ReservationOptionDao {
         this.jdbcTemplate = jdbcTemplate;
     }
 
+
+    public List<Option> getBookingOptions(int bookingId) {
+        String sql = "SELECT o.* " +
+                "FROM options o " +
+                "INNER JOIN `reservationOption` ro ON o.id = ro.option_id " +
+                "INNER JOIN reservation r ON r.reservationId = ro.reservationId " +
+                "WHERE r.reservationId = ?";
+
+        return jdbcTemplate.query(sql, new Object[]{bookingId}, new BeanPropertyRowMapper<>(Option.class));
+    }
+
     // Ajouter une option d'une réservation
     public void insertReservationOption(int userId, int itineraryId, int optionId) {
-        String sql = "INSERT INTO reservationOption (user_id, itinerary_id, option_id) VALUES (?, ?)";
+        String sql = "INSERT INTO reservationOption (user_id, itinerary_id, option_id) VALUES (?, ?, ?)";
         jdbcTemplate.update(sql, userId, itineraryId, optionId);
     }
 

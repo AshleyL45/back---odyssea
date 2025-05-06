@@ -38,8 +38,18 @@ public class JwtUtil {
         return new JwtToken(token);
     }
 
+    public JwtToken generateTokenWithId(Integer id){
+        String token = Jwts.builder()
+                .setSubject(String.valueOf(id))
+                .setIssuedAt(new Date())
+                .setExpiration(new Date((new Date()).getTime() + jwtExpirationMs))
+                .signWith(key, SignatureAlgorithm.HS256)
+                .compact();
+        return new JwtToken(token);
+    }
 
-    public String getEmailFromToken(String token) {
+
+    public String getIdFromToken(String token) {
         return Jwts.parserBuilder()
                 .setSigningKey(key).build()
                 .parseClaimsJws(token)

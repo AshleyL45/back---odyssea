@@ -183,6 +183,13 @@ public class GlobalExceptionHandler {
         return new ResponseEntity<>(err, HttpStatus.CONFLICT);
     }
 
-
-
+    @ExceptionHandler(InvalidBookingStatusException.class)
+    public ResponseEntity<ErrorResponse> handleInvalidBookingStatus(InvalidBookingStatusException ex) {
+        ErrorResponse err = new ErrorResponse(
+                HttpStatus.BAD_REQUEST,
+                "Booking status must be PENDING, CONFIRMED or CANCELLED",
+                ex.getMessage()
+        );
+        return new ResponseEntity<>(err, HttpStatus.BAD_REQUEST);
+    }
 }

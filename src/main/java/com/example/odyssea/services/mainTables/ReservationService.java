@@ -1,114 +1,157 @@
 package com.example.odyssea.services.mainTables;
 
+import com.example.odyssea.daos.ReservationDraftDao;
 import com.example.odyssea.daos.itinerary.ItineraryDao;
 import com.example.odyssea.daos.mainTables.OptionDao;
 import com.example.odyssea.daos.mainTables.ReservationDao;
-import com.example.odyssea.dtos.reservation.ItineraryReservationDTO;
-import com.example.odyssea.dtos.reservation.ReservationRecapDTO;
-import com.example.odyssea.dtos.reservation.ReservationRequestDTO;
+import com.example.odyssea.daos.mainTables.ReservationOptionDao;
+import com.example.odyssea.daos.mainTables.ReservationOptionDraftDao;
+import com.example.odyssea.dtos.reservation.BookingConfirmation;
+import com.example.odyssea.dtos.reservation.BookingRequest;
+import com.example.odyssea.entities.ReservationDraft;
 import com.example.odyssea.entities.itinerary.Itinerary;
+import com.example.odyssea.entities.mainTables.Option;
 import com.example.odyssea.entities.mainTables.Reservation;
+import com.example.odyssea.exceptions.InvalidBookingStatusException;
+import com.example.odyssea.exceptions.ReservationNotFoundException;
+import com.example.odyssea.exceptions.ValidationException;
+import com.example.odyssea.services.CurrentUserService;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
-import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
+import java.util.stream.Collectors;
 
 @Service
 public class ReservationService {
 
     private final ReservationDao reservationDao;
+    private final ReservationOptionDao reservationOptionDao;
     private final ItineraryDao itineraryDao;
     private final OptionDao optionDao;
+    private final CurrentUserService currentUserService;
+    private final ReservationDraftDao reservationDraftDao;
+    private final ReservationOptionDraftDao reservationOptionDraftDao;
 
-    public ReservationService(ReservationDao reservationDao, ItineraryDao itineraryDao, OptionDao optionDao) {
+    public ReservationService(ReservationDao reservationDao, ReservationOptionDao reservationOptionDao, ItineraryDao itineraryDao, OptionDao optionDao, CurrentUserService currentUserService, ReservationDraftDao reservationDraftDao, ReservationOptionDraftDao reservationOptionDraftDao) {
         this.reservationDao = reservationDao;
+        this.reservationOptionDao = reservationOptionDao;
         this.itineraryDao = itineraryDao;
         this.optionDao = optionDao;
+        this.currentUserService = currentUserService;
+        this.reservationDraftDao = reservationDraftDao;
+        this.reservationOptionDraftDao = reservationOptionDraftDao;
     }
 
-    private BigDecimal calculateTotalPrice(ReservationRequestDTO reservationRequest) {
-        BigDecimal itineraryPrice = itineraryDao.findById(reservationRequest.getItineraryId()).getPrice();
-        BigDecimal optionPrice = BigDecimal.ZERO;
 
-        for (Integer optionId : reservationRequest.getOptionIds()) {
-            BigDecimal optionItemPrice = optionDao.findById(optionId).getPrice();
-            optionPrice = optionPrice.add(optionItemPrice);
+    @Transactional
+    public void createReservation() {
+        Integer userId = getUserId();
+        ReservationDraft draft = reservationDraftDao.getLastDraftByUserId(userId);
+
+        if (draft.getUserId() == null || draft.getItineraryId() == null || draft.getDepartureDate() == null) {
+            throw new ValidationException("Missing required draft data");
         }
 
-        BigDecimal totalPrice = itineraryPrice
-                .multiply(BigDecimal.valueOf(reservationRequest.getNumberOfAdults()))
-                .add(itineraryPrice.multiply(BigDecimal.valueOf(reservationRequest.getNumberOfKids())))
-                .add(optionPrice);
-        return totalPrice;
-    }
+        LocalDate returnDate = draft.getDepartureDate().plusDays(12);
+        BigDecimal totalPrice = calculateTotalPrice(draft);
 
-    public Reservation createReservation(ReservationRequestDTO reservationRequest) {
-
-        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd-MM-yyyy");
-
-        LocalDate departureDate = LocalDate.parse(reservationRequest.getDepartureDate(), formatter);
-        LocalDate returnDate = LocalDate.parse(reservationRequest.getReturnDate(), formatter);
-
-
-        BigDecimal totalPrice = calculateTotalPrice(reservationRequest);
-
-        Reservation reservation = new Reservation(
-                reservationRequest.getUserId(),
-                reservationRequest.getItineraryId(),
-                reservationRequest.getStatus(),
-                departureDate,
-                returnDate,
-                totalPrice,
-                LocalDate.now(),
-                reservationRequest.getNumberOfAdults(),
-                reservationRequest.getNumberOfKids(),
-                new ArrayList<>()
-        );
+        Reservation reservation = new Reservation();
+        reservation.setUserId(draft.getUserId());
+        reservation.setItineraryId(draft.getItineraryId());
+        reservation.setDepartureDate(draft.getDepartureDate());
+        reservation.setReturnDate(returnDate);
+        reservation.setNumberOfAdults(draft.getNumberOfAdults());
+        reservation.setNumberOfKids(draft.getNumberOfKids());
+        reservation.setType(draft.getType());
+        reservation.setPurchaseDate(LocalDate.now());
+        reservation.setTotalPrice(totalPrice);
 
         reservationDao.save(reservation);
 
-        if (reservationRequest.getOptionIds() != null && !reservationRequest.getOptionIds().isEmpty()) {
-            for (Integer optionId : reservationRequest.getOptionIds()) {
-                reservationDao.insertOptions(reservation);
-            }
+        List<Integer> optionIds = reservationOptionDraftDao.getOptionsByDraftId(draft.getDraftId())
+                .stream().map(Option::getId).toList();
+
+        if(!optionIds.isEmpty()){
+            reservationOptionDraftDao.saveOptions(draft.getDraftId(), optionIds);
+        }
+    }
+
+
+    public List<BookingConfirmation> getAllBookings() {
+        return getBookingsAndMap(reservationDao.findAll());
+    }
+
+    public List<BookingConfirmation> getAllUserReservations() {
+        Integer userId = getUserId();
+        return getBookingsAndMap(reservationDao.findAllUserReservations(userId));
+    }
+
+
+    public BookingConfirmation getBookingById(int bookingId) {
+        Integer userId = getUserId();
+        Reservation reservation = reservationDao.findById(userId, bookingId);
+
+        if (reservation.getUserId() != userId) {
+            throw new ReservationNotFoundException("Reservation does not belong to the current user.");
         }
 
-        return reservationDao.getReservationWithOptions(reservationRequest.getUserId(), reservationRequest.getItineraryId());
-    }
-
-    public List<Reservation> getAllReservations() {
-        return reservationDao.findAll();
-    }
-
-    public Reservation getReservation(int userId, int itineraryId) {
-        return reservationDao.findById(userId, itineraryId);
-    }
-
-    public List<ItineraryReservationDTO> getAllUserReservations(int userId){
-        return reservationDao.findAllUserReservations(userId);
-    }
-
-    public ReservationRecapDTO getReservationDetails(int userId, int itineraryId){
-        return reservationDao.findReservationDetails(userId, itineraryId);
-    }
-
-    public Itinerary getLastDoneReservation(int userId, String status){
-        return reservationDao.findLastDoneItinerary(userId, status);
+        return createBookingConfirmation(reservation);
     }
 
 
-    public boolean updateReservationStatus(int userId, int itineraryId, String status){
-        return reservationDao.updateReservationStatus(userId, itineraryId, status);
+    public void updateReservationStatus(int bookingId, String status) {
+        Integer userId = getUserId();
+        if(!Objects.equals(status, "PENDING") && !Objects.equals(status, "CONFIRMED") && !Objects.equals(status, "CANCELLED")){
+            throw new InvalidBookingStatusException("Invalid booking status.");
+        }
+        reservationDao.updateReservationStatus(userId, bookingId, status);
     }
 
-    public Reservation updateReservation(int userId, int itineraryId, Reservation reservation) {
-        return reservationDao.update(userId, itineraryId, reservation);
+
+    public Reservation updateReservation(int bookingId, Reservation reservation) {
+        Integer userId = getUserId();
+        return reservationDao.update(userId, bookingId, reservation);
     }
 
-    public boolean deleteReservation(int userId, int itineraryId) {
-        return reservationDao.delete(userId, itineraryId);
+
+    public void deleteReservation(int bookingId) {
+        reservationDao.delete(bookingId);
     }
+
+
+    private Integer getUserId() {
+        return currentUserService.getCurrentUserId();
+    }
+
+    private List<BookingConfirmation> getBookingsAndMap(List<Reservation> reservations) {
+        return reservations.stream()
+                .map(this::createBookingConfirmation)
+                .collect(Collectors.toList());
+    }
+
+    private BookingConfirmation createBookingConfirmation(Reservation reservation) {
+        Itinerary itinerary = itineraryDao.findById(reservation.getItineraryId());
+        List<Option> options = reservationOptionDao.getBookingOptions(reservation.getReservationId());
+        return BookingConfirmation.fromEntities(reservation, itinerary, options);
+    }
+
+
+    private BigDecimal calculateTotalPrice(ReservationDraft draft) {
+        BigDecimal itineraryPrice = itineraryDao.findById(draft.getItineraryId()).getPrice();
+        BigDecimal optionPrice = reservationOptionDraftDao.getOptionsByDraftId(draft.getDraftId()).stream()
+                .map(option -> optionDao.findById(option.getId()).getPrice())
+                .reduce(BigDecimal.ZERO, BigDecimal::add);
+
+        return itineraryPrice
+                .multiply(BigDecimal.valueOf(draft.getNumberOfAdults()))
+                .add(itineraryPrice.multiply(BigDecimal.valueOf(draft.getNumberOfKids())))
+                .add(optionPrice);
+    }
+
+
 }

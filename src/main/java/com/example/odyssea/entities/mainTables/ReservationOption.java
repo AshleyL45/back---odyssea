@@ -5,31 +5,20 @@ import jakarta.validation.constraints.NotNull;
 public class ReservationOption {
 
     @NotNull(message = "User ID is required")
-    private int userId;
-
-    @NotNull(message = "Itinerary ID is required")
-    private int itineraryId;
-
+    private int reservationId;
     @NotNull(message = "Option ID is required")
     private int optionId;
 
     public ReservationOption() {
     }
 
-    public int getUserId() {
-        return userId;
-    }
-
-    public void setUserId(int userId) {
-        this.userId = userId;
-    }
 
     public int getItineraryId() {
-        return itineraryId;
+        return reservationId;
     }
 
-    public void setItineraryId(int itineraryId) {
-        this.itineraryId = itineraryId;
+    public void setItineraryId(int reservationId) {
+        this.reservationId = reservationId;
     }
 
     public int getOptionId() {

@@ -3,6 +3,7 @@ package com.example.odyssea.security;
 import com.example.odyssea.exceptions.JwtToken.*;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
+import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.security.authentication.BadCredentialsException;
@@ -37,8 +38,10 @@ public class JwtFilter extends OncePerRequestFilter {
         if (jwt != null) {
             try {
                 jwtUtil.validateJwtToken(jwt);
-                String username = jwtUtil.getEmailFromToken(jwt);
-                UserDetails userDetails = userDetailsService.loadUserByUsername(username);
+
+                Integer id = Integer.valueOf(jwtUtil.getIdFromToken(jwt));
+                UserDetails userDetails = userDetailsService.loadById(id);
+
                 UsernamePasswordAuthenticationToken auth =
                         new UsernamePasswordAuthenticationToken(
                                 userDetails, null, userDetails.getAuthorities()
@@ -46,7 +49,6 @@ public class JwtFilter extends OncePerRequestFilter {
                 auth.setDetails(new WebAuthenticationDetailsSource()
                         .buildDetails(request));
                 SecurityContextHolder.getContext().setAuthentication(auth);
-                // ------------------
             } catch (JwtTokenMalformedException | JwtTokenMissingException ex) {
                 throw new BadCredentialsException(ex.getMessage(), ex);
             } catch (JwtTokenUnsupportedException | JwtTokenSignatureException ex) {
@@ -59,13 +61,26 @@ public class JwtFilter extends OncePerRequestFilter {
         chain.doFilter(request, response);
     }
 
-
-
     private String parseJwt(HttpServletRequest request) {
+        Cookie[] cookies = request.getCookies();
+        if (cookies != null) {
+            for (Cookie cookie : cookies) {
+                if ("jwt".equals(cookie.getName())) {
+                    return cookie.getValue();
+                }
+            }
+        }
+        return null;
+    }
+
+
+
+
+    /*private String parseJwt(HttpServletRequest request) {
         String headerAuth = request.getHeader("Authorization");
         if (headerAuth != null && headerAuth.startsWith("Bearer ")) {
             return headerAuth.substring(7);
         }
         return null;
-    }
+    }*/
 }

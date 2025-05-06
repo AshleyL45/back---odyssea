@@ -31,7 +31,7 @@ public class DraftCitiesDao {
         String sql = """
         SELECT dc.city_id
          FROM draft_cities dc
-         JOIN userItineraryDraft uid ON dc.draft_user_itinerary_id = uid.id
+         JOIN userItineraryDraft uid ON dc.draft_user_itinerary_id = uid.reservationId
          WHERE uid.user_id = ?
     """;
         return jdbcTemplate.queryForList(sql, Integer.class, userId);
@@ -52,7 +52,7 @@ public class DraftCitiesDao {
     public List<City> findDraftCities(Integer userId){
         Integer draftId = userItineraryDraftDao.getLastDraftIdByUser(userId);
         String sql = "SELECT city.* FROM draft_cities\n" +
-                "INNER JOIN city ON draft_cities.city_id = city.id WHERE draft_cities.draft_user_itinerary_id = ? ";
+                "INNER JOIN city ON draft_cities.city_id = city.reservationId WHERE draft_cities.draft_user_itinerary_id = ? ";
 
         return jdbcTemplate.query(sql, new Object[]{draftId}, new BeanPropertyRowMapper<>(City.class));
     }

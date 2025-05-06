@@ -149,7 +149,7 @@ Utilisation de l'outil Trello pour organiser les tâches : "À faire", "En cours
         │   │               ├── reservation
         │   │               │   ├── ItineraryReservationDTO.java
         │   │               │   ├── ReservationRecapDTO.java
-        │   │               │   └── ReservationRequestDTO.java
+        │   │               │   └── BookingRequest.java
         │   │               └── userItinerary
         │   │               │   ├── CitySelectionDTO.java
         │   │               │   ├── CountrySelectionDTO.java
