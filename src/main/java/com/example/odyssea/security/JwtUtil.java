@@ -25,20 +25,8 @@ public class JwtUtil {
         this.key = Keys.hmacShaKeyFor(jwtSecret.getBytes(StandardCharsets.UTF_8));
     }
 
-    public JwtToken generateToken(String email, int id, String firstName, String lastName) {
-        String token = Jwts.builder()
-                .setSubject(email)
-                .claim("id", id)
-                .claim("firstName", firstName)
-                .claim("lastName", lastName)
-                .setIssuedAt(new Date())
-                .setExpiration(new Date((new Date()).getTime() + jwtExpirationMs))
-                .signWith(key, SignatureAlgorithm.HS256)
-                .compact();
-        return new JwtToken(token);
-    }
 
-    public JwtToken generateTokenWithId(Integer id){
+    public JwtToken generateToken(Integer id){
         String token = Jwts.builder()
                 .setSubject(String.valueOf(id))
                 .setIssuedAt(new Date())

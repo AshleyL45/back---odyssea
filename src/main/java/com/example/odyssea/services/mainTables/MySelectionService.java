@@ -26,39 +26,10 @@ public class MySelectionService {
         return currentUserService.getCurrentUserId();
     }
 
-    // Retourne toutes les sélections
-    public List<MySelection> getAllSelections() {
-        return mySelectionDao.findAll();
-    }
-
-    // Retourne les sélections pour un utilisateur donné
-    public List<MySelection> getSelectionsByUserId() {
-        Integer userId = getUserId();
-        return mySelectionDao.findAll().stream()
-                .filter(selection -> selection.getUserId() == userId)
-                .collect(Collectors.toList());
-    }
-
     // Retourne les sélections d'un utilisateur sous forme de liste d'itinéraires
     public List<Itinerary> getUserFavorites(){
         Integer userId = getUserId();
         return mySelectionDao.findAllUserFavorites(userId);
-    }
-
-    // Retourne les sélections pour un itinéraire donné
-    public List<MySelection> getSelectionsByItineraryId(int itineraryId) {
-        return mySelectionDao.findAll().stream()
-                .filter(selection -> selection.getItineraryId() == itineraryId)
-                .collect(Collectors.toList());
-    }
-
-    // Retourne la sélection correspondant à un utilisateur et un itinéraire donnés
-    public MySelection getSelection(int itineraryId) {
-        Integer userId = getUserId();
-        return mySelectionDao.findAll().stream()
-                .filter(selection -> selection.getUserId() == userId && selection.getItineraryId() == itineraryId)
-                .findFirst()
-                .orElseThrow(() -> new SelectionNotFoundException("Selection with userId: " + userId + " and itineraryId: " + itineraryId + " does not exist"));
     }
 
     // Crée une nouvelle sélection
@@ -77,6 +48,6 @@ public class MySelectionService {
     // Supprime une sélection correspondant à un utilisateur et un itinéraire donnés
     public void deleteFromSelection(int itineraryId) {
         Integer userId = getUserId();
-        mySelectionDao.delete(userId, itineraryId);;
+        mySelectionDao.delete(userId, itineraryId);
     }
 }

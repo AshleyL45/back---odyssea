@@ -3,7 +3,7 @@ package com.example.odyssea.dtos.mainTables;
 import java.math.BigDecimal;
 import java.util.List;
 
-public class ItineraryResponseDTO {
+public class ItineraryDetails {
     private int id;
     private String name;
     private String description;
@@ -14,10 +14,10 @@ public class ItineraryResponseDTO {
     private String themeName;
     private List<DailyPlanDto> days;
 
-    public ItineraryResponseDTO() {
+    public ItineraryDetails() {
     }
 
-    public ItineraryResponseDTO(int id, String name, String description, String shortDescription, int stock, BigDecimal price, int totalDuration, String themeName, List<DailyPlanDto> days) {
+    public ItineraryDetails(int id, String name, String description, String shortDescription, int stock, BigDecimal price, int totalDuration, String themeName, List<DailyPlanDto> days) {
         this.id = id;
         this.name = name;
         this.description = description;

@@ -1,126 +1,91 @@
 package com.example.odyssea.controllers;
 
-import com.example.odyssea.daos.userAuth.UserDao;
-import com.example.odyssea.security.JwtToken;
 import com.example.odyssea.entities.userAuth.User;
-import com.example.odyssea.security.JwtUtil;
+import com.example.odyssea.dtos.ApiResponse;
+import com.example.odyssea.services.AuthService;
+import com.example.odyssea.services.UserService;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseCookie;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.authentication.AuthenticationManager;
-import org.springframework.security.authentication.BadCredentialsException;
-import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.userdetails.UserDetails;
-import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
 
-import java.time.Duration;
 import java.util.Map;
 
 @RestController
 @RequestMapping("/auth")
+@Tag(name = "Authentication", description = "Handles all operations related to logging in, registering and updating user's account information.")
 public class AuthController {
-    private final AuthenticationManager authenticationManager;
-    private final UserDao userDao;
-    private final PasswordEncoder encoder;
-    private final JwtUtil jwtUtils;
-    @Value("${jwt.expiration}")
-    private int jwtExpirationMs;
+    private final UserService userService;
+    private final AuthService authService;
 
-    public AuthController(AuthenticationManager authenticationManager, UserDao userDao, PasswordEncoder encoder, JwtUtil jwtUtils) {
-        this.authenticationManager = authenticationManager;
-        this.userDao = userDao;
-        this.encoder = encoder;
-        this.jwtUtils = jwtUtils;
+    public AuthController(UserService userService, AuthService authService) {
+        this.userService = userService;
+        this.authService = authService;
     }
 
+    @Operation(
+            summary = "Register a new user",
+            description = "Creates a new user account with the provided information."
+    )
     @PostMapping("/register")
-    public ResponseEntity<String> registerUser(@Valid @RequestBody User user) {
-        boolean alreadyExists = userDao.existsByEmail(user.getEmail());
-        if (alreadyExists) {
-            return ResponseEntity.badRequest().body("Error: Email is already in use!");
-        }
-        User newUser = new User(
-                user.getEmail(),
-                encoder.encode(user.getPassword()),
-                "USER",
-                user.getFirstName(),
-                user.getLastName()
+    public ResponseEntity<ApiResponse<Void>> registerUser(@Valid @RequestBody User user) {
+        userService.register(user);
+        return ResponseEntity.ok(
+                ApiResponse.success("User successfully registered.", HttpStatus.OK)
         );
-        boolean isUserSaved = userDao.save(newUser);
-        return isUserSaved ? ResponseEntity.ok("User registered successfully!") : ResponseEntity.badRequest().body("Error: User registration failed.");
     }
 
+    @Operation(
+            summary = "Authenticate user",
+            description = "Authenticates a user using email and password, returns a JWT in a cookie."
+    )
     @PostMapping("/login")
-    public ResponseEntity<?> authenticateUser(@RequestBody User user, HttpServletResponse response) {
-        try {
-            // Authentification avec Spring Security
-            Authentication authentication = authenticationManager.authenticate(
-                    new UsernamePasswordAuthenticationToken(
-                            user.getEmail(),
-                            user.getPassword()
-                    )
-            );
-
-            // Récupération des détails de l'utilisateur
-            UserDetails userDetails = (UserDetails) authentication.getPrincipal();
-            User userWithId = userDao.findByEmail(user.getEmail());
-
-            // Générer le JWT
-            JwtToken jwtToken = jwtUtils.generateTokenWithId(userWithId.getId());
-
-            ResponseCookie cookie = ResponseCookie.from("jwt", jwtToken.getToken())
-                    .httpOnly(true)
-                    .secure(false)         // A changer si Https
-                    .path("/")
-                    .sameSite("Strict")
-                    .maxAge(Duration.ofSeconds(jwtExpirationMs))
-                    .build();
-
-            response.addHeader(HttpHeaders.SET_COOKIE, cookie.toString());
-
-            // Retourner le token JWT
-            return ResponseEntity.ok("Login successful.");
-
-        } catch (BadCredentialsException ex) {
-            // Identifiants invalides
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Invalid username or password.");
-        }
+    public ResponseEntity<ApiResponse<Void>> authenticateUser(@RequestBody User user, HttpServletResponse response) {
+        authService.login(user, response);
+        return ResponseEntity.ok(
+                ApiResponse.success("User successfully logged in.", HttpStatus.OK)
+        );
     }
 
-    @PutMapping("/{id}/update")
-    public ResponseEntity<String> changeUserInformation(@PathVariable int id, @RequestBody User user){
-        User userToUpdate = userDao.update(id, user);
-        if (userToUpdate != null) {
-            return ResponseEntity.ok("Account successfully updated.");
-        } else {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("User not found or update failed.");
-        }
+    @Operation(
+            summary = "Update account information",
+            description = "Updates the user's account information (e.g., name, email)."
+    )
+    @PutMapping("/")
+    public ResponseEntity<ApiResponse<Void>> changeUserInformation(@RequestBody User user){
+        userService.changeUserInformation(user);
+        return ResponseEntity.ok(
+                ApiResponse.success("Account successfully updated.", HttpStatus.OK)
+        );
     }
 
-    @PatchMapping("/{id}/password")
-    public ResponseEntity<String> changeUserPassword(@PathVariable int id, @RequestBody Map<String, String> passwordRequest){
+    @Operation(
+            summary = "Change user password",
+            description = "Updates the user's password. The request must contain the new password."
+    )
+    @PatchMapping("/password")
+    public ResponseEntity<ApiResponse<Void>> changeUserPassword(@RequestBody Map<String, String> passwordRequest){
         String newPassword = passwordRequest.get("password");
-        if (newPassword == null || newPassword.isBlank()) {
-            return ResponseEntity.badRequest().body("Password cannot be empty");
-        }
+        userService.changePassword(newPassword);
 
-        userDao.updatePassword(id, newPassword);
-        return ResponseEntity.ok("Password successfully updated.");
+        return ResponseEntity.ok(
+                ApiResponse.success("Password successfully updated.", HttpStatus.OK)
+        );
     }
 
-    @DeleteMapping("/{id}/deleteAccount")
-    public ResponseEntity<String> deleteUser(@PathVariable int id){
-        boolean isDeleted = userDao.delete(id);
-        if(isDeleted){
-            return ResponseEntity.ok("Account successfully deleted.");
-        } else {
-            return ResponseEntity.badRequest().body("Error: User deletion failed.");
-        }
+    @Operation(
+            summary = "Delete user account",
+            description = "Deletes the authenticated user's account."
+    )
+
+    @DeleteMapping("/")
+    public ResponseEntity<ApiResponse<Void>> deleteUser(){
+        userService.deleteAccount();
+        return ResponseEntity.ok(
+                ApiResponse.success("Account successfully deleted.", HttpStatus.OK)
+        );
     }
 }

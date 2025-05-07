@@ -1,6 +1,7 @@
 package com.example.odyssea.daos.userAuth;
 
 import com.example.odyssea.entities.userAuth.User;
+import com.example.odyssea.exceptions.DatabaseException;
 import com.example.odyssea.exceptions.UserNotFoundException;
 import com.example.odyssea.exceptions.UsernameNotFoundException;
 import org.springframework.jdbc.core.JdbcTemplate;
@@ -49,13 +50,15 @@ public class UserDao {
                 .orElseThrow(() -> new UserNotFoundException("User with id : " + id + " doesn't exist."));
     }
 
-    public boolean save(User user) {
+    public void save(User user) {
         String sql = "INSERT INTO user (email, password, role, firstName, lastName) VALUES (?, ?, ?, ?, ?)";
         int rowsAffected = jdbcTemplate.update(sql, user.getEmail(), user.getPassword(), user.getRole(), user.getFirstName(), user.getLastName());
-        return rowsAffected > 0;
+        if(rowsAffected <= 0){
+            throw new DatabaseException("Could not save user.");
+        }
     }
 
-    public User update(int id, User user) {
+    public void update(int id, User user) {
         if (!userExistsById(id)) {
             throw new UserNotFoundException("User with id : " + id + " doesn't exist.");
         }
@@ -72,10 +75,8 @@ public class UserDao {
         );
 
         if (rowsAffected <= 0) {
-            throw new RuntimeException("Failed to update user with id : " + id);
+            throw new DatabaseException("Failed to update user.");
         }
-
-        return this.findById(id);
     }
 
     public void updatePassword(int id, String newPassword) {
@@ -90,15 +91,17 @@ public class UserDao {
         int rowsAffected = jdbcTemplate.update(sql, hashedPassword, id);
 
         if (rowsAffected <= 0) {
-            throw new RuntimeException("Failed to update password for user with id : " + id);
+            throw new DatabaseException("Failed to update password for user with id : " + id);
         }
     }
 
 
-    public boolean delete(int id) {
+    public void delete(int id) {
         String sql = "DELETE FROM user WHERE id = ?";
         int rowsAffected = jdbcTemplate.update(sql, id);
-        return rowsAffected > 0;
+        if (rowsAffected <= 0) {
+            throw new DatabaseException("Failed to delete account for user with id : " + id);
+        }
     }
 
 

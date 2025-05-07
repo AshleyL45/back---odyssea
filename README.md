@@ -143,7 +143,7 @@ Utilisation de l'outil Trello pour organiser les tâches : "À faire", "En cours
         │   │               │   ├── DailyPlanDto.java
         │   │               │   ├── DailyPlanWithCityDto.java
         │   │               │   ├── HotelDto.java
-        │   │               │   ├── ItineraryResponseDTO.java
+        │   │               │   ├── ItineraryDetails.java
         │   │               │   ├── ItineraryThemes.java
         │   │               │   └── MySelectionDto.java
         │   │               ├── reservation

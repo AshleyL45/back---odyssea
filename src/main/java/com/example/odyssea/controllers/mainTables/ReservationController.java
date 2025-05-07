@@ -1,14 +1,10 @@
 package com.example.odyssea.controllers.mainTables;
 
-import com.example.odyssea.controllers.SuccessResponse;
+import com.example.odyssea.dtos.ApiResponse;
 import com.example.odyssea.dtos.reservation.BookingConfirmation;
-import com.example.odyssea.dtos.reservation.BookingRequest;
 import com.example.odyssea.entities.mainTables.Reservation;
 import com.example.odyssea.services.mainTables.ReservationService;
 import io.swagger.v3.oas.annotations.Operation;
-import io.swagger.v3.oas.annotations.media.Content;
-import io.swagger.v3.oas.annotations.media.Schema;
-import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
@@ -29,82 +25,85 @@ public class ReservationController {
 
     @Operation(
             summary = "Fetch all bookings of all users",
-            description = "Returns a list of all bookings for all users.",
-            responses = {
-                    @ApiResponse(
-                            responseCode = "200",
-                            description = "Bookings successfully found.",
-                            content = @Content(
-                                    mediaType = "application/json",
-                                    schema = @Schema(implementation = SuccessResponse.class)
-                            )
-                    )
-            }
+            description = "Returns a list of all bookings for all users. Requires admin privileges."
     )
-
     @GetMapping
-    public ResponseEntity<SuccessResponse> getAllReservations() {
+    public ResponseEntity<ApiResponse<List<BookingConfirmation>>> getAllReservations() {
         List<BookingConfirmation> bookingConfirmations = reservationService.getAllBookings();
-        return ResponseEntity.ok(new SuccessResponse<>(HttpStatus.OK, "Bookings successfully found.", bookingConfirmations));
+        return ResponseEntity.ok(
+                ApiResponse.success("Bookings successfully found.", bookingConfirmations, HttpStatus.OK)
+        );
     }
 
     @Operation(
             summary = "Fetch all bookings of the current user",
-            description = "Returns a list of all bookings made by the current user."
+            description = "Returns a list of all bookings made by the currently authenticated user."
     )
     @GetMapping("/")
-    public ResponseEntity<SuccessResponse> getAllUserReservations(){
+    public ResponseEntity<ApiResponse<List<BookingConfirmation>>> getAllUserReservations() {
         List<BookingConfirmation> bookingConfirmations = reservationService.getAllUserReservations();
-        return ResponseEntity.ok(new SuccessResponse<>(HttpStatus.OK, "Bookings successfully found.", bookingConfirmations));
+        return ResponseEntity.ok(
+                ApiResponse.success("Bookings successfully found.", bookingConfirmations, HttpStatus.OK)
+        );
     }
 
     @Operation(
             summary = "Fetch a specific booking by its ID",
-            description = "Returns details of a specific booking identified by its booking ID."
+            description = "Returns detailed information about a booking, identified by its booking ID."
     )
-    @GetMapping("/{bookingId}")
-    public ResponseEntity<SuccessResponse> getReservationById(@PathVariable int bookingId) {
-        BookingConfirmation booking = reservationService.getBookingById(bookingId);
-        return ResponseEntity.ok(new SuccessResponse<>(HttpStatus.OK, "Booking successfully found.", booking));
+    @GetMapping("/{id}")
+    public ResponseEntity<ApiResponse<BookingConfirmation>> getReservationById(@PathVariable int id) {
+        BookingConfirmation booking = reservationService.getBookingById(id);
+        return ResponseEntity.ok(
+                ApiResponse.success("Booking successfully found.", booking, HttpStatus.OK)
+        );
     }
 
     @Operation(
             summary = "Create a new booking",
-            description = "Creates a new booking based on the provided booking request."
+            description = "Creates a new booking for the authenticated user based on the booking request data."
     )
     @PostMapping
-    public ResponseEntity<SuccessResponse> createReservation() {
+    public ResponseEntity<ApiResponse<Void>> createReservation() {
         reservationService.createReservation();
-        return ResponseEntity.ok(new SuccessResponse<>(HttpStatus.CREATED, "Booking successfully created."));
+        return ResponseEntity.status(HttpStatus.CREATED).body(
+                ApiResponse.success("Booking successfully created.", HttpStatus.CREATED)
+        );
     }
 
     @Operation(
             summary = "Update the status of a booking",
-            description = "Updates the status of an existing booking identified by the booking ID."
+            description = "Updates the status (e.g. confirmed, cancelled) of an existing booking identified by its ID."
     )
-    @PatchMapping("/{bookingId}")
-    public ResponseEntity<SuccessResponse> updateBookingStatus(@PathVariable int bookingId, @RequestBody String status){
-        reservationService.updateReservationStatus(bookingId, status);
-        return ResponseEntity.ok(new SuccessResponse<>(HttpStatus.NO_CONTENT, "Booking status successfully updated."));
+    @PatchMapping("/{id}")
+    public ResponseEntity<ApiResponse<Void>> updateBookingStatus(@PathVariable int id, @RequestBody String status) {
+        reservationService.updateReservationStatus(id, status);
+        return ResponseEntity.status(HttpStatus.NO_CONTENT).body(
+                ApiResponse.success("Booking status successfully updated.", HttpStatus.NO_CONTENT)
+        );
     }
 
     @Operation(
             summary = "Update a specific booking",
-            description = "Updates the details of a specific booking identified by its booking ID."
+            description = "Modifies all or part of an existing booking identified by its booking ID."
     )
-    @PutMapping("/{bookingId}")
-    public ResponseEntity<SuccessResponse> updateBooking(@PathVariable int bookingId, @Valid @RequestBody Reservation reservation) {
-        Reservation reservationUpdated = reservationService.updateReservation(bookingId, reservation);
-        return ResponseEntity.ok(new SuccessResponse<>(HttpStatus.OK, "Booking successfully updated", reservationUpdated));
+    @PutMapping("/{id}")
+    public ResponseEntity<ApiResponse<Reservation>> updateBooking(@PathVariable int id, @Valid @RequestBody Reservation reservation) {
+        Reservation reservationUpdated = reservationService.updateReservation(id, reservation);
+        return ResponseEntity.ok(
+                ApiResponse.success("Booking successfully updated", reservationUpdated, HttpStatus.OK)
+        );
     }
 
     @Operation(
             summary = "Delete a specific booking",
-            description = "Deletes a specific booking identified by its booking ID."
+            description = "Deletes a booking identified by its booking ID. Requires appropriate user permissions."
     )
-    @DeleteMapping("/{bookingId}")
-    public ResponseEntity<SuccessResponse> deleteBooking(@PathVariable int bookingId) {
-        reservationService.deleteReservation(bookingId);
-        return ResponseEntity.ok(new SuccessResponse<>(HttpStatus.NO_CONTENT, "Booking successfully deleted."));
+    @DeleteMapping("/{id}")
+    public ResponseEntity<ApiResponse<Void>> deleteBooking(@PathVariable int id) {
+        reservationService.deleteReservation(id);
+        return ResponseEntity.status(HttpStatus.NO_CONTENT).body(
+                ApiResponse.success("Booking successfully deleted.", HttpStatus.NO_CONTENT)
+        );
     }
 }

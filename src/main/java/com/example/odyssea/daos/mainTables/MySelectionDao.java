@@ -2,6 +2,7 @@ package com.example.odyssea.daos.mainTables;
 
 import com.example.odyssea.entities.MySelection;
 import com.example.odyssea.entities.itinerary.Itinerary;
+import com.example.odyssea.exceptions.DatabaseException;
 import com.example.odyssea.exceptions.SelectionAlreadyExistException;
 import com.example.odyssea.exceptions.SelectionNotFoundException;
 import org.springframework.jdbc.core.JdbcTemplate;
@@ -19,17 +20,12 @@ public class MySelectionDao {
         this.jdbcTemplate = jdbcTemplate;
     }
 
-    // RowMapper pour convertir un enregistrement de la table myselection en objet MySelection
+    // RowMapper pour convertir un enregistrement de la table mySelection en objet MySelection
     private final RowMapper<MySelection> mySelectionRowMapper = (rs, rowNum) -> new MySelection(
             rs.getInt("userId"),
             rs.getInt("itineraryId")
     );
 
-    // Retourne toutes les sélections de la table myselection
-    public List<MySelection> findAll() {
-        String sql = "SELECT * FROM mySelection";
-        return jdbcTemplate.query(sql, mySelectionRowMapper);
-    }
 
     // Retourne tous les itinéraires de la séléction d'un user
     public List<Itinerary> findAllUserFavorites(int userId){
@@ -86,15 +82,19 @@ public class MySelectionDao {
                 itineraryId
         );
         if (rowsAffected <= 0) {
-            throw new RuntimeException("Failed to update selection with userId: " + userId + " and itineraryId: " + itineraryId);
+            throw new DatabaseException("Failed to update selection with userId: " + userId + " and itineraryId: " + itineraryId);
         }
         return findById(mySelection.getUserId(), mySelection.getItineraryId());
     }
 
     // Supprime une sélection identifiée par le couple (userId, itineraryId)
-    public boolean delete(int userId, int itineraryId) {
+    public void delete(int userId, int itineraryId) {
         String sql = "DELETE FROM mySelection WHERE userId = ? AND itineraryId = ?";
+        MySelection selection = findById(userId,itineraryId);
+
         int rowsAffected = jdbcTemplate.update(sql, userId, itineraryId);
-        return rowsAffected > 0;
+        if (rowsAffected <= 0) {
+            throw new DatabaseException("Failed to delete selection with userId: " + userId + " and itineraryId: " + itineraryId);
+        }
     }
 }

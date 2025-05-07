@@ -1,7 +1,6 @@
 package com.example.odyssea.controllers.itinerary;
 
-import com.example.odyssea.dtos.mainTables.DailyPlanWithCityDto;
-import com.example.odyssea.dtos.mainTables.ItineraryResponseDTO;
+import com.example.odyssea.dtos.mainTables.ItineraryDetails;
 import com.example.odyssea.dtos.mainTables.ItineraryThemes;
 import com.example.odyssea.entities.itinerary.Itinerary;
 import com.example.odyssea.services.itinerary.ItineraryService;
@@ -40,7 +39,7 @@ public class ItineraryController {
     }
 
     @GetMapping("/{id}/details")
-    public ResponseEntity<ItineraryResponseDTO> getItineraryDetails(@PathVariable int id) {
+    public ResponseEntity<ItineraryDetails> getItineraryDetails(@PathVariable int id) {
         return ResponseEntity.ok(itineraryService.getItineraryDetails(id));
     }
 
@@ -49,28 +48,5 @@ public class ItineraryController {
         return ResponseEntity.ok(itineraryService.searchItineraries(query));
     }
 
-    @PostMapping
-    public ResponseEntity<Itinerary> createItinerary(@RequestBody Itinerary itinerary) {
-        Itinerary created = itineraryService.createItinerary(itinerary);
-        return new ResponseEntity<>(created, HttpStatus.CREATED);
-    }
 
-    @PutMapping("/{id}")
-    public ResponseEntity<Itinerary> updateItinerary(@PathVariable int id, @RequestBody Itinerary itinerary) {
-        Itinerary updated = itineraryService.updateItinerary(id, itinerary);
-        return new ResponseEntity<>(updated, HttpStatus.OK);
-    }
-
-    @DeleteMapping("/{id}")
-    public ResponseEntity<Void> deleteItinerary(@PathVariable int id) {
-        boolean deleted = itineraryService.deleteItinerary(id);
-        return deleted ? new ResponseEntity<>(HttpStatus.NO_CONTENT)
-                : new ResponseEntity<>(HttpStatus.NOT_FOUND);
-    }
-
-    @GetMapping("/{id}/daily")
-    public ResponseEntity<List<DailyPlanWithCityDto>> getDailyPlanWithCity(@PathVariable int id) {
-        List<DailyPlanWithCityDto> dailyPlan = itineraryService.getDailyPlanWithCity(id);
-        return ResponseEntity.ok(dailyPlan);
-    }
 }

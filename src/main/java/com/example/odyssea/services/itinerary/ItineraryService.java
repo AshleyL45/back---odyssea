@@ -5,7 +5,7 @@ import com.example.odyssea.daos.itinerary.ItineraryStepDao;
 import com.example.odyssea.daos.mainTables.ThemeDao;
 import com.example.odyssea.dtos.mainTables.DailyPlanDto;
 import com.example.odyssea.dtos.mainTables.DailyPlanWithCityDto;
-import com.example.odyssea.dtos.mainTables.ItineraryResponseDTO;
+import com.example.odyssea.dtos.mainTables.ItineraryDetails;
 import com.example.odyssea.dtos.mainTables.ItineraryThemes;
 import com.example.odyssea.entities.itinerary.Itinerary;
 import org.springframework.stereotype.Service;
@@ -25,10 +25,6 @@ public class ItineraryService {
         this.themeDao = themeDao;
     }
 
-    public List<DailyPlanWithCityDto> getDailyPlanWithCity(int itineraryId) {
-        return itineraryStepDao.findByItineraryIdWithCity(itineraryId);
-    }
-
 
     public List<Itinerary> getAllItineraries() {
         return itineraryDao.findAll();
@@ -46,10 +42,10 @@ public class ItineraryService {
         return itineraryDao.searchItinerary(query);
     }
 
-    public ItineraryResponseDTO getItineraryDetails(int id){
+    public ItineraryDetails getItineraryDetails(int id){
         Itinerary itinerary = itineraryDao.findById(id);
         List<DailyPlanDto> daysDetails = itineraryStepDao.findByItineraryId(itinerary.getId());
-        return new ItineraryResponseDTO(
+        return new ItineraryDetails(
                 itinerary.getId(),
                 itinerary.getName(),
                 itinerary.getDescription(),
@@ -62,15 +58,8 @@ public class ItineraryService {
         );
     }
 
-    public Itinerary createItinerary(Itinerary itinerary) {
-        return itineraryDao.save(itinerary);
+    private List<DailyPlanWithCityDto> getDailyPlanWithCity(int itineraryId) {
+        return itineraryStepDao.findByItineraryIdWithCity(itineraryId);
     }
 
-    public Itinerary updateItinerary(int id, Itinerary itinerary) {
-        return itineraryDao.update(id, itinerary);
-    }
-
-    public boolean deleteItinerary(int id) {
-        return itineraryDao.delete(id);
-    }
 }

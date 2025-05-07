@@ -23,7 +23,7 @@ public class InteractiveMapService {
         return itineraryDao.findById(id);
     }
 
-    public Itinerary createItinerary(Itinerary itinerary) {
+    /*public Itinerary createItinerary(Itinerary itinerary) {
         return itineraryDao.save(itinerary);
     }
 
@@ -33,5 +33,5 @@ public class InteractiveMapService {
 
     public boolean deleteItinerary(int id) {
         return itineraryDao.delete(id);
-    }
+    }*/
 }
