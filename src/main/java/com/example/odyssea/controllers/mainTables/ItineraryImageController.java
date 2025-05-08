@@ -20,10 +20,6 @@ public class ItineraryImageController {
         this.service = service;
     }
 
-    /**
-     * 1) Lister les rôles disponibles pour un itinéraire
-     * GET /api/itinerary-images/{itineraryId}
-     */
     @GetMapping("/{itineraryId}")
     public ResponseEntity<List<String>> listImageRoles(@PathVariable int itineraryId) {
         List<String> roles = service.listRoles(itineraryId);
@@ -33,10 +29,6 @@ public class ItineraryImageController {
         return ResponseEntity.ok(roles);
     }
 
-    /**
-     * 2) Récupérer le BLOB pour un rôle donné
-     * GET /api/itinerary-images/{itineraryId}/{role}
-     */
     @GetMapping("/{itineraryId}/{role}")
     public ResponseEntity<byte[]> getImage(
             @PathVariable int itineraryId,
@@ -54,14 +46,6 @@ public class ItineraryImageController {
                 .body(data);
     }
 
-    // --- Si votre ancien ItineraryController avait besoin de getImagesForItinerary(...),
-    //     vous pouvez tout aussi bien exposer ici ce DTO list également, par exemple :
-
-    /**
-     * 3) (Optionnel) Renvoyer tous les ItineraryImageDto pour un itinéraire
-     *    si vous voulez regrouper tous vos contrôles d’images au même endroit.
-     * GET /api/itinerary-images/{itineraryId}/dtos
-     */
     @GetMapping("/{itineraryId}/dtos")
     public ResponseEntity<List<ItineraryImageDto>> getImageDtos(@PathVariable int itineraryId) {
         List<ItineraryImageDto> dtos = service.getImagesForItinerary(itineraryId);

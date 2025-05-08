@@ -1,4 +1,3 @@
-// src/main/java/com/example/odyssea/daos/mainTables/ItineraryImageDao.java
 package com.example.odyssea.daos.mainTables;
 
 import com.example.odyssea.dtos.mainTables.ItineraryImageDto;
@@ -15,9 +14,6 @@ public class ItineraryImageDao {
         this.jdbc = jdbc;
     }
 
-    /**
-     * Récupère pour un itinéraire donné tous les liens image + rôle.
-     */
     public List<ItineraryImageDto> findByItineraryId(int itineraryId) {
         String sql = """
             SELECT itineraryId, imageId, role
@@ -35,9 +31,6 @@ public class ItineraryImageDao {
         );
     }
 
-    /**
-     * Liste tous les rôles disponibles pour un itinéraire.
-     */
     public List<String> findRolesByItinerary(int itineraryId) {
         String sql = "SELECT role FROM itineraryImages WHERE itineraryId = ?";
         return jdbc.queryForList(sql, String.class, itineraryId);

@@ -1,4 +1,3 @@
-// src/main/java/com/example/odyssea/daos/mainTables/ImageDao.java
 package com.example.odyssea.daos.mainTables;
 
 import org.springframework.jdbc.core.JdbcTemplate;
@@ -14,9 +13,6 @@ public class ImageDao {
         this.jdbc = jdbc;
     }
 
-    /**
-     * Récupère le BLOB de l’image associée à un imageId donné.
-     */
     public byte[] findDataById(int imageId) {
         String sql = "SELECT data FROM images WHERE id = ?";
         return jdbc.queryForObject(
@@ -29,9 +25,6 @@ public class ImageDao {
         );
     }
 
-    /**
-     * (Optionnel) Récupère le BLOB de l’image pour un itinéraire et un rôle donnés.
-     */
     public byte[] findDataByItineraryAndRole(int itineraryId, String role) {
         String sql = """
             SELECT i.data

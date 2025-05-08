@@ -1,4 +1,3 @@
-// src/main/java/com/example/odyssea/services/mainTables/ItineraryImageService.java
 package com.example.odyssea.services.mainTables;
 
 import com.example.odyssea.daos.mainTables.ItineraryImageDao;
@@ -19,19 +18,15 @@ public class ItineraryImageService {
         this.imageDao = imageDao;
     }
 
-    /** Pour l’ancien ItineraryController */
     public List<ItineraryImageDto> getImagesForItinerary(int itineraryId) {
         return itineraryImageDao.findByItineraryId(itineraryId);
     }
 
-    /** Pour lister les rôles dans ItineraryImageController */
     public List<String> listRoles(int itineraryId) {
         return itineraryImageDao.findRolesByItinerary(itineraryId);
     }
 
-    /** Pour renvoyer le blob selon le rôle */
     public byte[] getImageData(int itineraryId, String role) {
-        // on peut aussi directement interroger avec un JOIN dans ImageDao
         return imageDao.findDataByItineraryAndRole(itineraryId, role);
     }
 }
