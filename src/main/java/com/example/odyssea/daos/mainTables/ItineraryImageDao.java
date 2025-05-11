@@ -1,6 +1,5 @@
 package com.example.odyssea.daos.mainTables;
 
-import com.example.odyssea.dtos.mainTables.ItineraryImageDto;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Repository;
 
@@ -14,25 +13,12 @@ public class ItineraryImageDao {
         this.jdbc = jdbc;
     }
 
-    public List<ItineraryImageDto> findByItineraryId(int itineraryId) {
+    public List<String> findRolesByItinerary(int itineraryId) {
         String sql = """
-            SELECT itineraryId, imageId, role
+            SELECT role
               FROM itineraryImages
              WHERE itineraryId = ?
             """;
-        return jdbc.query(
-                sql,
-                (rs, rowNum) -> new ItineraryImageDto(
-                        rs.getInt("itineraryId"),
-                        rs.getInt("imageId"),
-                        rs.getString("role")
-                ),
-                itineraryId
-        );
-    }
-
-    public List<String> findRolesByItinerary(int itineraryId) {
-        String sql = "SELECT role FROM itineraryImages WHERE itineraryId = ?";
         return jdbc.queryForList(sql, String.class, itineraryId);
     }
 }
