@@ -133,6 +133,26 @@ public class GlobalExceptionHandler {
         return new ResponseEntity<>(error, HttpStatus.INTERNAL_SERVER_ERROR);
     }
 
+    @ExceptionHandler(ImageNotFoundException.class)
+    public ResponseEntity<ErrorResponse> handleImageNotFound(ImageNotFoundException ex) {
+        ErrorResponse err = new ErrorResponse(
+                HttpStatus.NOT_FOUND,
+                "Image not found",
+                ex.getMessage()
+        );
+        return new ResponseEntity<>(err, HttpStatus.NOT_FOUND);
+    }
+
+    @ExceptionHandler(ImageProcessingException.class)
+    public ResponseEntity<ErrorResponse> handleImageProcessing(ImageProcessingException ex) {
+        ErrorResponse err = new ErrorResponse(
+                HttpStatus.INTERNAL_SERVER_ERROR,
+                "Image processing error",
+                ex.getMessage()
+        );
+        return new ResponseEntity<>(err, HttpStatus.INTERNAL_SERVER_ERROR);
+    }
+
 
 
 

@@ -15,7 +15,6 @@ public class ImageDao {
         this.jdbc = jdbc;
     }
 
-    // Lit directement la colonne `data` (longblob) pour un id d'image
     public byte[] findDataById(int imageId) {
         String sql = "SELECT data FROM images WHERE id = ?";
         return jdbc.queryForObject(
@@ -28,7 +27,6 @@ public class ImageDao {
         );
     }
 
-    // Lit la colonne `data` pour l'image liée à un itinéraire ET un rôle
     public byte[] findDataByItineraryAndRole(int itineraryId, String role) {
         String sql = """
             SELECT i.data
