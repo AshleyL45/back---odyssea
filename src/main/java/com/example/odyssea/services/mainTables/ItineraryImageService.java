@@ -23,28 +23,30 @@ public class ItineraryImageService {
         try {
             List<String> roles = itineraryImageDao.findRolesByItinerary(itineraryId);
             if (roles == null || roles.isEmpty()) {
-                throw new ImageNotFoundException("No image roles found for itinerary ID=" + itineraryId);
+                throw new ImageNotFoundException("No images recorded for this itinerary");
             }
             return roles;
         } catch (DataAccessException ex) {
-            throw new ImageProcessingException("Error retrieving image roles for itinerary ID=" + itineraryId, ex);
+            throw new ImageProcessingException("Unable to retrieve image roles", ex);
         }
     }
 
     public byte[] getImageData(int itineraryId, String role) {
         try {
+            List<String> roles = itineraryImageDao.findRolesByItinerary(itineraryId);
+            if (roles == null || roles.isEmpty()) {
+                throw new ImageNotFoundException("No images recorded for this itinerary");
+            }
+            if (!roles.contains(role)) {
+                throw new ImageNotFoundException("Requested image role not found");
+            }
             byte[] data = imageDao.findDataByItineraryAndRole(itineraryId, role);
             if (data == null || data.length == 0) {
-                throw new ImageNotFoundException(
-                        String.format("No image found for itinerary ID=%d and role='%s'", itineraryId, role)
-                );
+                throw new ImageNotFoundException("No image data available");
             }
             return data;
         } catch (DataAccessException ex) {
-            throw new ImageProcessingException(
-                    String.format("Error retrieving image data for itinerary ID=%d and role='%s'", itineraryId, role),
-                    ex
-            );
+            throw new ImageProcessingException("Unable to retrieve image data", ex);
         }
     }
 }
