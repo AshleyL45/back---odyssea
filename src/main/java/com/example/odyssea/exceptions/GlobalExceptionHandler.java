@@ -5,6 +5,7 @@ import com.example.odyssea.exceptions.JwtToken.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.security.authentication.InternalAuthenticationServiceException;
@@ -12,6 +13,8 @@ import org.springframework.security.core.AuthenticationException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.servlet.NoHandlerFoundException;
+import org.springframework.http.HttpHeaders;
+
 
 @RestControllerAdvice
 public class GlobalExceptionHandler {
@@ -91,6 +94,32 @@ public class GlobalExceptionHandler {
                 ApiResponse.error("Flight segment not found.", HttpStatus.INTERNAL_SERVER_ERROR)
         );
     }
+
+    @ExceptionHandler(ImageNotFoundException.class)
+    public ResponseEntity<ApiResponse<Void>> handleImageNotFound(ImageNotFoundException ex) {
+        /*HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(MediaType.APPLICATION_JSON);*/
+
+        logger.error("Image not found: {}", ex.getMessage());
+        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(
+                ApiResponse.error("Image not found", HttpStatus.INTERNAL_SERVER_ERROR)
+        );
+    }
+
+    @ExceptionHandler(ImageProcessingException.class)
+    public ResponseEntity<ApiResponse<Void>> handleImageProcessing(ImageProcessingException ex) {
+        /*HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(MediaType.APPLICATION_JSON);*/
+
+        logger.error("Image processing error : {}", ex.getMessage());
+        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(
+                ApiResponse.error("An error occurred while processing the image.", HttpStatus.INTERNAL_SERVER_ERROR)
+        );
+    }
+
+
+
+
 
     @ExceptionHandler(JwtTokenMalformedException.class)
     public ResponseEntity<ApiResponse<Void>> handleMalformedJwt(JwtTokenMalformedException ex) {
