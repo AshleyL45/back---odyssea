@@ -132,8 +132,7 @@ public class UserItineraryDraftService {
 
 
         for (Integer id : citiesIds) {
-            City city = cityDao.findById(id)
-                    .orElseThrow(() -> new ValidationException("City with id " + id + " not found."));
+            City city = cityDao.findById(id);
             if (!countryIds.contains(city.getCountryId())) {
                 throw new ValidationException("City " + city.getName() + " does not belong to selected countries.");
             }

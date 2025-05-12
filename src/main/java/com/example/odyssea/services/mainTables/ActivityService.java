@@ -77,8 +77,7 @@ public class ActivityService {
     }
 
     public void importActivitiesFromGooglePlaces(int cityId, int radius) {
-        City city = cityDao.findById(cityId)
-                .orElseThrow(() -> new CityNotFound("City not found with id: " + cityId));
+        City city = cityDao.findById(cityId);
 
         double latitude = city.getLatitude();
         double longitude = city.getLongitude();
@@ -128,9 +127,23 @@ public class ActivityService {
     }
 
     public void checkCityExists(int cityId) {
-        boolean exists = cityDao.findById(cityId).isPresent();
-        if (!exists) {
-            throw new CityNotFound("City with id " + cityId + " not found.");
-        }
+        cityDao.findById(cityId);
     }
+
+    public List<Activity> importAndGetActivities(int cityId, int radius) {
+        checkCityExists(cityId);
+        List<Activity> activities = getTop5ActivitiesByCityId(cityId);
+
+        if (activities.size() < 5) {
+            importActivitiesFromGooglePlaces(cityId, radius);
+            activities = getTop5ActivitiesByCityId(cityId);
+        }
+
+        if (activities.isEmpty()) {
+            throw new ActivityNotFound("No activities found for city ID " + cityId);
+        }
+
+        return activities;
+    }
+
 }

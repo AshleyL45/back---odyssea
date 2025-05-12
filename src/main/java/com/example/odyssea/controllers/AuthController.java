@@ -2,6 +2,7 @@ package com.example.odyssea.controllers;
 
 import com.example.odyssea.entities.userAuth.User;
 import com.example.odyssea.dtos.ApiResponse;
+import com.example.odyssea.security.JwtToken;
 import com.example.odyssea.services.AuthService;
 import com.example.odyssea.services.UserService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -40,13 +41,13 @@ public class AuthController {
 
     @Operation(
             summary = "Authenticate user",
-            description = "Authenticates a user using email and password, returns a JWT in a cookie."
+            description = "Authenticates a user using email and password, returns a JWT."
     )
     @PostMapping("/login")
-    public ResponseEntity<ApiResponse<Void>> authenticateUser(@RequestBody User user, HttpServletResponse response) {
-        authService.login(user, response);
+    public ResponseEntity<ApiResponse<JwtToken>> authenticateUser(@RequestBody User user) {
+        JwtToken token = authService.login(user);
         return ResponseEntity.ok(
-                ApiResponse.success("User successfully logged in.", HttpStatus.OK)
+                ApiResponse.success("User successfully logged in.",token, HttpStatus.OK)
         );
     }
 

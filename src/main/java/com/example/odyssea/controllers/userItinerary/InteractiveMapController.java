@@ -22,7 +22,7 @@ public class InteractiveMapController {
     @GetMapping("/user/{userId}/itinerary/{itineraryId}")
     public ResponseEntity<List<InteractiveMapDto>> getItineraryForUser(
             @PathVariable int userId,
-            @PathVariable int itineraryId) {
+            @PathVariable int itineraryId) { //TODO Supprimer le userId et prendre celui de l'utilisateur connecté
         List<InteractiveMapDto> itineraries = interactiveMapRepository.getItineraryForUser(userId, itineraryId);
         return ResponseEntity.ok(itineraries);
     }

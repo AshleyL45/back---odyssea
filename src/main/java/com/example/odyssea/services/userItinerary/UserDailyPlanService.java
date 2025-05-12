@@ -126,14 +126,9 @@ public class UserDailyPlanService {
 
     public UserItineraryDayDTO toUserItineraryDay (UserItinerary userItinerary, UserItineraryStep userItineraryStep) {
 
-        String cityName = cityDao.findById(userItineraryStep.getCityId())
-                .map(City::getName)
-                .orElseThrow(() -> new CityNotFound("City with ID " + userItineraryStep.getCityId() + " has not been found"));
+        String cityName = cityDao.findById(userItineraryStep.getCityId()).getName();
 
-
-        String countryName = countryDao.findByCityName(cityName)
-                .map(Country::getName)
-                .orElseThrow(() -> new CountryNotFound("Country with name " + cityName + "has not been found"));
+        String countryName = countryDao.findByCityName(cityName).getName();
 
         LocalDate date = userItinerary.getStartDate()
                 .plusDays(userItineraryStep.getDayNumber() - 1);

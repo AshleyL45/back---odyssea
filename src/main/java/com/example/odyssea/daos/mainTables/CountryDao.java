@@ -56,13 +56,12 @@ public class CountryDao {
     /**
      * Recherche un pays par son identifiant
      */
-    public Optional<Country> findById(int id) {
+    public Country findById(int id) {
         String sql = "SELECT * FROM country WHERE id = ?";
-        List<Country> countries = jdbcTemplate.query(sql, new CountryRowMapper(), id);
-        if (countries.isEmpty()) {
-            throw new CountryNotFound("Country with id " + id + " not found.");
-        }
-        return Optional.of(countries.get(0));
+        return jdbcTemplate.query(sql, new CountryRowMapper(), id)
+                .stream()
+                .findFirst()
+                .orElseThrow(() -> new CountryNotFound("Country with id " + id + " not found."));
     }
 
     /**
@@ -88,19 +87,18 @@ public class CountryDao {
     /**
      * Recherche le pays associé à une ville donnée par son nom
      */
-    public Optional<Country> findByCityName(String cityName) {
+    public Country findByCityName(String cityName) {
         String sql = "SELECT c.* FROM country c JOIN city ct ON c.id = ct.countryId WHERE ct.name = ?";
-        List<Country> countries = jdbcTemplate.query(sql, new CountryRowMapper(), cityName);
-        if (countries.isEmpty()) {
-            throw new ResourceNotFoundException("No country found for city name " + cityName);
-        }
-        return Optional.of(countries.get(0));
+        return jdbcTemplate.query(sql, new CountryRowMapper(), cityName)
+                .stream()
+                .findFirst()
+                .orElseThrow(() -> new ResourceNotFoundException("No country found for city name " + cityName));
     }
 
     /**
      * Retrouve un pays à partir de son nom
      */
-    public Country findByName(String countryName){
+    public Country findByName(String countryName) {
         String sql = "SELECT * FROM country WHERE name = ?";
         return jdbcTemplate.query(sql, new CountryRowMapper(), countryName)
                 .stream()

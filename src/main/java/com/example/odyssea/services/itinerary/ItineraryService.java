@@ -6,7 +6,7 @@ import com.example.odyssea.daos.mainTables.ThemeDao;
 import com.example.odyssea.dtos.mainTables.DailyPlanDto;
 import com.example.odyssea.dtos.mainTables.DailyPlanWithCityDto;
 import com.example.odyssea.dtos.mainTables.ItineraryDetails;
-import com.example.odyssea.dtos.mainTables.ItineraryThemes;
+import com.example.odyssea.dtos.mainTables.ItinerarySummary;
 import com.example.odyssea.entities.itinerary.Itinerary;
 import org.springframework.stereotype.Service;
 
@@ -16,11 +16,13 @@ import java.util.List;
 public class ItineraryService {
 
     private final ItineraryDao itineraryDao;
+    private final ItineraryStepService itineraryStepService;
     private final ItineraryStepDao itineraryStepDao;
     private final ThemeDao themeDao;
 
-    public ItineraryService(ItineraryDao itineraryDao, ItineraryStepDao itineraryStepDao, ThemeDao themeDao) {
+    public ItineraryService(ItineraryDao itineraryDao, ItineraryStepService itineraryStepService, ItineraryStepDao itineraryStepDao, ThemeDao themeDao) {
         this.itineraryDao = itineraryDao;
+        this.itineraryStepService = itineraryStepService;
         this.itineraryStepDao = itineraryStepDao;
         this.themeDao = themeDao;
     }
@@ -30,12 +32,8 @@ public class ItineraryService {
         return itineraryDao.findAll();
     }
 
-    public List<ItineraryThemes> getAllItinerariesWithThemes(){
-        return itineraryDao.findAllItinerariesWithTheme();
-    }
-
-    public Itinerary getItineraryById(int id) {
-        return itineraryDao.findById(id);
+    public List<ItinerarySummary> getAllItinerariesSummaries(){
+        return itineraryDao.findAllItinerariesSummaries();
     }
 
     public List<Itinerary> searchItineraries(String query){
@@ -44,7 +42,7 @@ public class ItineraryService {
 
     public ItineraryDetails getItineraryDetails(int id){
         Itinerary itinerary = itineraryDao.findById(id);
-        List<DailyPlanDto> daysDetails = itineraryStepDao.findByItineraryId(itinerary.getId());
+        List<DailyPlanDto> daysDetails = itineraryStepService.getDailyPlansByItineraryId(itinerary.getId());
         return new ItineraryDetails(
                 itinerary.getId(),
                 itinerary.getName(),
@@ -58,7 +56,7 @@ public class ItineraryService {
         );
     }
 
-    private List<DailyPlanWithCityDto> getDailyPlanWithCity(int itineraryId) {
+    private List<DailyPlanWithCityDto> getDailyPlanWithCity(int itineraryId) {//TODO Demander à Ashley
         return itineraryStepDao.findByItineraryIdWithCity(itineraryId);
     }
 

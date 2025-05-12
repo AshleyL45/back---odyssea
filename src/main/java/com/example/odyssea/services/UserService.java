@@ -23,7 +23,7 @@ public class UserService {
     public void register(User user){
         boolean alreadyExists = userDao.existsByEmail(user.getEmail());
         if (alreadyExists) {
-            throw new UserAlreadyExistsException("Email" + user.getEmail() + "already in use.");
+            throw new UserAlreadyExistsException("Email " + user.getEmail() + " already in use.");
         }
         User newUser = new User(
                 user.getEmail(),

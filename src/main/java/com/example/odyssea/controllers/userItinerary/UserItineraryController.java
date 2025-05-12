@@ -1,5 +1,6 @@
 package com.example.odyssea.controllers.userItinerary;
 
+import com.example.odyssea.dtos.ApiResponse;
 import com.example.odyssea.dtos.userItinerary.UserItineraryDTO;
 import com.example.odyssea.services.userItinerary.UserItineraryService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -22,49 +23,62 @@ public class UserItineraryController {
     }
 
     @Operation(
-            summary = "Fetch all user itineraries",
+            summary = "Fetch all personalized itineraries of a user.",
             description = "Returns a list of all personalized itineraries for all users."
     )
-
     @GetMapping("/all")
-    public ResponseEntity<List<UserItineraryDTO>> getAllItineraries(){
+    public ResponseEntity<ApiResponse<List<UserItineraryDTO>>> getAllItineraries() {
         List<UserItineraryDTO> userItineraryDTOs = userItineraryService.getAllUserItineraries();
-        return ResponseEntity.status(HttpStatus.OK).body(userItineraryDTOs);
+        ApiResponse<List<UserItineraryDTO>> response = ApiResponse.success(
+                "All personalized itineraries retrieved successfully.",
+                userItineraryDTOs,
+                HttpStatus.OK
+        );
+        return ResponseEntity.ok(response);
     }
-
 
     @Operation(
             summary = "Get a user itinerary by ID",
             description = "Returns the details of a specific itinerary based on its unique ID."
     )
-
     @GetMapping("/{userItineraryId}")
-    public ResponseEntity<UserItineraryDTO> getItineraryById(@PathVariable int userItineraryId){
+    public ResponseEntity<ApiResponse<UserItineraryDTO>> getItineraryById(@PathVariable int userItineraryId) {
         UserItineraryDTO userItinerary = userItineraryService.getAUserItineraryById(userItineraryId);
-        return ResponseEntity.status(HttpStatus.OK).body(userItinerary);
+        ApiResponse<UserItineraryDTO> response = ApiResponse.success(
+                "Personalized itinerary retrieved successfully.",
+                userItinerary,
+                HttpStatus.OK
+        );
+        return ResponseEntity.ok(response);
     }
-
 
     @Operation(
             summary = "Generate a personalized itinerary",
-            description = "Automatically generates a new itinerary based on saved user preferences."
+            description = "Automatically generates a new personalized itinerary based on user preferences."
     )
-
     @GetMapping("/generate")
-        public ResponseEntity<UserItineraryDTO> generateItinerary() {
+    public ResponseEntity<ApiResponse<UserItineraryDTO>> generateItinerary() {
         UserItineraryDTO userItinerary = userItineraryService.generateItinerary();
-        return ResponseEntity.status(HttpStatus.CREATED).body(userItinerary);
+        ApiResponse<UserItineraryDTO> response = ApiResponse.success(
+                "Personalized itinerary generated successfully.",
+                userItinerary,
+                HttpStatus.CREATED
+        );
+        return new ResponseEntity<>(response, HttpStatus.CREATED);
     }
 
     @Operation(
             summary = "Update itinerary name",
-            description = "Allows the user to rename an existing itinerary using its ID."
+            description = "Allows the user to rename an existing personalized itinerary using its ID."
     )
     @PatchMapping("/itineraryName/{id}")
-    public ResponseEntity<String> updateItineraryName(@PathVariable int id, @RequestBody ItineraryName itineraryName){
-        String newItineraryName = itineraryName.getItineraryName();
-        userItineraryService.updateItineraryName(id, newItineraryName);
-        return ResponseEntity.status(HttpStatus.OK).body("Your personalized trip's name has been successfully updated.");
+    public ResponseEntity<ApiResponse<Void>> updateItineraryName(@PathVariable int id, @RequestBody ItineraryName itineraryName) {
+        userItineraryService.updateItineraryName(id, itineraryName.getItineraryName());
+        ApiResponse<Void> response = ApiResponse.success(
+                "Itinerary name updated successfully.",
+                HttpStatus.OK
+        );
+        return ResponseEntity.ok(response);
     }
 
 }

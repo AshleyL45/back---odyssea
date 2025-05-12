@@ -28,7 +28,7 @@ public class CityService {
     /**
      * Récupère une ville spécifique par son identifiant
      */
-    public Optional<City> getCityById(int id) {
+    public City getCityById(int id) {
         return cityDao.findById(id);
     }
 
@@ -42,26 +42,18 @@ public class CityService {
     /**
      * Met à jour les informations d'une ville existante
      */
-    public boolean updateCity(int id, City city) {
-        Optional<City> existing = cityDao.findById(id);
-        if (existing.isEmpty()) {
-            return false;
-        }
+    public void updateCity(int id, City city) {
+        cityDao.findById(id);
         city.setId(id);
         cityDao.update(city);
-        return true;
     }
 
     /**
      * Supprime une ville par son identifiant
      */
-    public boolean deleteCity(int id) {
-        Optional<City> existing = cityDao.findById(id);
-        if (existing.isEmpty()) {
-            return false;
-        }
+    public void deleteCity(int id) {
+        cityDao.findById(id);
         cityDao.deleteById(id);
-        return true;
     }
 
     /**
@@ -74,14 +66,15 @@ public class CityService {
     /**
      * Retrouve une ville par ses coordonnées géographiques
      */
-    public Optional<City> getCityByCoordinates(double latitude, double longitude) {
+    public City getCityByCoordinates(double latitude, double longitude) {
         return cityDao.findByCoordinates(latitude, longitude);
     }
 
     /**
      * Obtient uniquement les coordonnées d'une ville en fonction de son ID
      */
-    public Optional<double[]> getCityCoordinates(int id) {
-        return cityDao.getCoordinatesByCityId(id);
+    public double[] getCityCoordinates(int id) {
+        City city = cityDao.findById(id); // on récupère la ville directement
+        return new double[]{city.getLatitude(), city.getLongitude()};
     }
 }

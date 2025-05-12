@@ -37,7 +37,9 @@ public class CityDao {
      */
     public void update(City city) {
         String sql = "UPDATE city SET countryId = ?, name = ?, iataCode = ?, longitude = ?, latitude = ? WHERE id = ?";
-        int rowsAffected = jdbcTemplate.update(sql, city.getCountryId(), city.getName(), city.getIataCode(), city.getLongitude(), city.getLatitude(), city.getId());
+        int rowsAffected = jdbcTemplate.update(sql,
+                city.getCountryId(), city.getName(), city.getIataCode(),
+                city.getLongitude(), city.getLatitude(), city.getId());
 
         if (rowsAffected == 0) {
             throw new ResourceNotFoundException("City with id " + city.getId() + " not found for update.");
@@ -59,14 +61,12 @@ public class CityDao {
     /**
      * Recherche d'une ville par son ID
      */
-    public Optional<City> findById(int id) {
+    public City findById(int id) {
         String sql = "SELECT * FROM city WHERE id = ?";
-        List<City> cities = jdbcTemplate.query(sql, new CityRowMapper(), id);
-
-        if (cities.isEmpty()) {
-            throw new CityNotFound("City with id " + id + " not found.");
-        }
-        return Optional.of(cities.get(0));
+        return jdbcTemplate.query(sql, new CityRowMapper(), id)
+                .stream()
+                .findFirst()
+                .orElseThrow(() -> new CityNotFound("City with id " + id + " not found."));
     }
 
     /**
@@ -83,54 +83,42 @@ public class CityDao {
     public List<City> findByCountryId(int countryId) {
         String sql = "SELECT * FROM city WHERE countryId = ?";
         List<City> cities = jdbcTemplate.query(sql, new CityRowMapper(), countryId);
-
         if (cities.isEmpty()) {
             throw new ResourceNotFoundException("No cities found for country with id " + countryId);
         }
         return cities;
     }
 
-    public City findByIATACode(String iataCode){
-        String sql = "SELECT * FROM city WHERE iataCode = ?";
-        return jdbcTemplate.query(sql, new CityRowMapper(), iataCode)
-                .stream()
-                .findFirst()
-                .orElseThrow(() -> new RuntimeException("No cities found with IATA code : " + iataCode));
-    }
-
     /**
      * Retrouve une ville en fonction de ses coordonnées exactes (latitude et longitude)
      */
-    public Optional<City> findByCoordinates(double latitude, double longitude) {
+    public City findByCoordinates(double latitude, double longitude) {
         String sql = "SELECT * FROM city WHERE latitude = ? AND longitude = ?";
-        List<City> cities = jdbcTemplate.query(sql, new CityRowMapper(), latitude, longitude);
-
-        if (cities.isEmpty()) {
-            throw new ResourceNotFoundException("City not found for coordinates: latitude " + latitude + ", longitude " + longitude);
-        }
-        return Optional.of(cities.get(0));
+        return jdbcTemplate.query(sql, new CityRowMapper(), latitude, longitude)
+                .stream()
+                .findFirst()
+                .orElseThrow(() -> new ResourceNotFoundException(
+                        "City not found for coordinates: latitude " + latitude + ", longitude " + longitude));
     }
 
     /**
      * Retrouver le code IATA et l'id en fonction du nom de la ville
      */
-    public City findCityByName(String cityName){
+    public City findCityByName(String cityName) {
         String sql = "SELECT * FROM city WHERE name = ?";
         return jdbcTemplate.query(sql, new CityRowMapper(), cityName)
                 .stream()
                 .findFirst()
-                .orElseThrow(() -> new CityNotFound("The city " + cityName + " doesn't exist."));
+                .orElseThrow(() -> new CityNotFound("The city '" + cityName + "' doesn't exist."));
     }
 
     /**
      * Obtient uniquement les coordonnées (latitude et longitude) d'une ville donnée par son ID
      */
-    public Optional<double[]> getCoordinatesByCityId(int id) {
-        Optional<City> cityOpt = findById(id);
-        return cityOpt.map(city -> new double[]{city.getLatitude(), city.getLongitude()});
+    public double[] getCoordinatesByCityId(int id) {
+        City city = findById(id);
+        return new double[]{city.getLatitude(), city.getLongitude()};
     }
-
-
 
     /**
      * Récupère le code IATA d'une ville à partir de son ID.

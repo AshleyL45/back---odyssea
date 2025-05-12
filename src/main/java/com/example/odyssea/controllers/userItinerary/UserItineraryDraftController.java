@@ -1,14 +1,11 @@
 package com.example.odyssea.controllers.userItinerary;
 
+import com.example.odyssea.dtos.ApiResponse;
 import com.example.odyssea.dtos.draft.*;
-import com.example.odyssea.exceptions.ErrorResponse;
-import com.example.odyssea.exceptions.SuccessResponse;
 import com.example.odyssea.services.userItinerary.UserItineraryDraftService;
 import io.swagger.v3.oas.annotations.Operation;
-import io.swagger.v3.oas.annotations.media.Content;
-import io.swagger.v3.oas.annotations.media.Schema;
-import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -16,7 +13,6 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
-import java.util.Map;
 
 @RestController
 @RequestMapping("/generate")
@@ -35,12 +31,12 @@ public class UserItineraryDraftController {
     )
 
     @PostMapping("/step1")
-    public ResponseEntity<SuccessResponse> handleDurationAndDate(@RequestBody DurationDate request){
+    public ResponseEntity<ApiResponse<Void>> handleDurationAndDate(@RequestBody DurationDate request){
         Integer duration = request.getDuration();
         String date = request.getStartDate();
         userItineraryDraftService.validateDuration(duration);
         userItineraryDraftService.validateStartDate(date);
-        return ResponseEntity.ok(new SuccessResponse(true));
+        return ResponseEntity.ok(ApiResponse.success("Duration and date validated.", HttpStatus.OK));
     }
 
 
@@ -50,10 +46,10 @@ public class UserItineraryDraftController {
     )
 
     @PostMapping("/step2")
-    public ResponseEntity<SuccessResponse> handleDepartureCity(@RequestBody DepartureCity departureCity){
+    public ResponseEntity<ApiResponse<Void>> handleDepartureCity(@RequestBody DepartureCity departureCity){
         String city = departureCity.getDepartureCity();
         userItineraryDraftService.validateDepartureCity(city);
-        return ResponseEntity.ok(new SuccessResponse(true));
+        return ResponseEntity.ok(ApiResponse.success("Departure city validated.", HttpStatus.OK));
     }
 
 
@@ -63,11 +59,11 @@ public class UserItineraryDraftController {
     )
 
     @PostMapping("/step3")
-    public ResponseEntity<SuccessResponse> handleTravelersNumber (@RequestBody NumberTravelers request){
+    public ResponseEntity<ApiResponse<Void>> handleTravelersNumber (@RequestBody NumberTravelers request){
         Integer numberAdults = request.getNumberAdults();
         Integer numberKids = request.getNumberKids();
         userItineraryDraftService.validateTravelersNumber(numberAdults, numberKids);
-        return ResponseEntity.ok(new SuccessResponse(true));
+        return ResponseEntity.ok(ApiResponse.success("Number of travelers validated.", HttpStatus.OK));
     }
 
 
@@ -77,10 +73,10 @@ public class UserItineraryDraftController {
     )
 
     @PostMapping("/step4")
-    public ResponseEntity<SuccessResponse> handleCountries(@RequestBody CountryList request){
+    public ResponseEntity<ApiResponse<Void>> handleCountries(@RequestBody CountryList request){
         List<Integer> countries = request.getCountries();
         userItineraryDraftService.validateCountries(countries);
-        return ResponseEntity.ok(new SuccessResponse(true));
+        return ResponseEntity.ok(ApiResponse.success("Countries validated.", HttpStatus.OK));
     }
 
 
@@ -90,10 +86,10 @@ public class UserItineraryDraftController {
     )
 
     @PostMapping("/step5")
-    public ResponseEntity<SuccessResponse> handleCities(@RequestBody CityList request){
+    public ResponseEntity<ApiResponse<Void>> handleCities(@RequestBody CityList request){
         List<Integer> cities = request.getCities();
         userItineraryDraftService.validateCities(cities);
-        return ResponseEntity.ok(new SuccessResponse(true));
+        return ResponseEntity.ok(ApiResponse.success("Cities validated.", HttpStatus.OK));
     }
 
 
@@ -103,10 +99,10 @@ public class UserItineraryDraftController {
     )
 
     @PostMapping("/step6")
-    public ResponseEntity<SuccessResponse> handleActivities(@RequestBody ActivityList request){
+    public ResponseEntity<ApiResponse<Void>> handleActivities(@RequestBody ActivityList request){
         List<Integer> activities = request.getActivities();
         userItineraryDraftService.validateActivities(activities);
-        return ResponseEntity.ok(new SuccessResponse(true));
+        return ResponseEntity.ok(ApiResponse.success("Activities validated.", HttpStatus.OK));
     }
 
 
@@ -116,10 +112,10 @@ public class UserItineraryDraftController {
     )
 
     @PostMapping("/step7")
-    public ResponseEntity<SuccessResponse> handleHotelStanding (@RequestBody HotelStanding request){
+    public ResponseEntity<ApiResponse<Void>> handleHotelStanding (@RequestBody HotelStanding request){
         Integer hotelStanding = request.getHotelStanding();
         userItineraryDraftService.validateHotelStanding(hotelStanding);
-        return ResponseEntity.ok(new SuccessResponse(true));
+        return ResponseEntity.ok(ApiResponse.success("Hotel standing validated.", HttpStatus.OK));
     }
 
 
@@ -129,10 +125,10 @@ public class UserItineraryDraftController {
     )
 
     @PostMapping("/step8")
-    public ResponseEntity<SuccessResponse> handleOptions(@RequestBody OptionList request){
+    public ResponseEntity<ApiResponse<Void>> handleOptions(@RequestBody OptionList request){
         List<Integer> options = request.getOptions();
         userItineraryDraftService.validateOptions(options);
-        return ResponseEntity.ok(new SuccessResponse(true));
+        return ResponseEntity.ok(ApiResponse.success("Step 8: Options validated.", HttpStatus.OK));
     }
 
 

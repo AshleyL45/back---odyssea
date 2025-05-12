@@ -2,7 +2,7 @@ package com.example.odyssea.dtos.mainTables;
 
 import java.math.BigDecimal;
 
-public class ItineraryThemes {
+public class ItinerarySummary {
     private int id;
     private String name;
     private String description;
@@ -13,10 +13,10 @@ public class ItineraryThemes {
     private String themeName;
     private String countriesVisited;
 
-    public ItineraryThemes() {
+    public ItinerarySummary() {
     }
 
-    public ItineraryThemes(int id, String name, String description, String shortDescription, BigDecimal price, int totalDuration, int themeId, String themeName, String countriesVisited) {
+    public ItinerarySummary(int id, String name, String description, String shortDescription, BigDecimal price, int totalDuration, int themeId, String themeName, String countriesVisited) {
         this.id = id;
         this.name = name;
         this.description = description;

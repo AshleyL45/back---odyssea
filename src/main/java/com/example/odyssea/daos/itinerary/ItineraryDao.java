@@ -1,6 +1,6 @@
 package com.example.odyssea.daos.itinerary;
 
-import com.example.odyssea.dtos.mainTables.ItineraryThemes;
+import com.example.odyssea.dtos.mainTables.ItinerarySummary;
 import com.example.odyssea.entities.itinerary.Itinerary;
 import com.example.odyssea.exceptions.ResourceNotFoundException;
 import com.example.odyssea.mapper.ItineraryThemesMapper;
@@ -37,7 +37,7 @@ public class ItineraryDao {
         return jdbcTemplate.query(sql, itineraryRowMapper);
     }
 
-    public List<ItineraryThemes> findAllItinerariesWithTheme(){
+    public List<ItinerarySummary> findAllItinerariesSummaries(){
         String sql = "SELECT \n" +
                 "    itinerary.*, \n" +
                 "    theme.name AS themeName,\n" +
