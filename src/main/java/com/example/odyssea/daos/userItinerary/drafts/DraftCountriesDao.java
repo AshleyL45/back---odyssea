@@ -35,7 +35,7 @@ public class DraftCountriesDao {
         String sql = """
         SELECT draft_countries.country_id
          FROM draft_countries
-         JOIN userItineraryDraft ON draft_countries.draft_user_itinerary_id = userItineraryDraft.reservationId
+         JOIN userItineraryDraft ON draft_countries.draft_user_itinerary_id = userItineraryDraft.id
          WHERE userItineraryDraft.user_id = ?
     """;
         return jdbcTemplate.queryForList(sql, Integer.class, userId);
@@ -45,6 +45,7 @@ public class DraftCountriesDao {
     public void saveCountries(Integer userId, List<Integer> countriesIds){
         Integer draftId = userItineraryDraftDao.getLastDraftIdByUser(userId);
         String sql = "INSERT INTO draft_countries (draft_user_itinerary_id, country_id, position) VALUES (?, ?, ?)";
+        deleteCountriesByDraftId(draftId);
 
         List<Object[]> batchArgs = new ArrayList<>();
         for (int i = 0; i < countriesIds.size(); i++) {
@@ -57,9 +58,14 @@ public class DraftCountriesDao {
     public List<Country> findDraftCountries(Integer userId){
         Integer draftId = userItineraryDraftDao.getLastDraftIdByUser(userId);
         String sql = "SELECT country.* FROM draft_countries\n" +
-                "INNER JOIN country ON draft_countries.country_id = country.reservationId WHERE draft_countries.draft_user_itinerary_id = ? ";
+                "INNER JOIN country ON draft_countries.country_id = country.id WHERE draft_countries.draft_user_itinerary_id = ? ";
 
         return jdbcTemplate.query(sql, new Object[]{draftId}, new BeanPropertyRowMapper<>(Country.class));
     }
 
+
+    private void deleteCountriesByDraftId(Integer draftId) {
+        String deleteSql = "DELETE FROM draft_countries WHERE draft_user_itinerary_id = ?";
+        jdbcTemplate.update(deleteSql, draftId);
+    }
 }

@@ -39,7 +39,7 @@ public class AuthService {
             UserDetails userDetails = (UserDetails) authentication.getPrincipal();
             User userWithId = userDao.findByEmail(user.getEmail());
 
-           return jwtUtils.generateToken(userWithId.getId());
+           return jwtUtils.generateToken(userWithId.getId(), userWithId.getRole());
 
         } catch (BadCredentialsException e) {
             throw new UserNotFoundException("Invalid username or password : " + e);

@@ -26,9 +26,10 @@ public class JwtUtil {
     }
 
 
-    public JwtToken generateToken(Integer id){
+    public JwtToken generateToken(Integer id, String role){
         String token = Jwts.builder()
                 .setSubject(String.valueOf(id))
+                .claim("role",role )
                 .setIssuedAt(new Date())
                 .setExpiration(new Date((new Date()).getTime() + jwtExpirationMs))
                 .signWith(key, SignatureAlgorithm.HS256)
@@ -43,15 +44,6 @@ public class JwtUtil {
                 .parseClaimsJws(token)
                 .getBody()
                 .getSubject();
-    }
-
-    public Integer extractUserId(String token){
-        return Jwts.parserBuilder()
-                .setSigningKey(key)
-                .build()
-                .parseClaimsJws(token)
-                .getBody()
-                .get("id", Integer.class);
     }
 
     public void validateJwtToken(String token) {

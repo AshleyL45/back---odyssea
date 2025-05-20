@@ -7,12 +7,10 @@ import com.example.odyssea.daos.mainTables.ReservationDao;
 import com.example.odyssea.daos.mainTables.ReservationOptionDao;
 import com.example.odyssea.daos.mainTables.ReservationOptionDraftDao;
 import com.example.odyssea.dtos.reservation.BookingConfirmation;
-import com.example.odyssea.dtos.reservation.BookingRequest;
 import com.example.odyssea.entities.ReservationDraft;
 import com.example.odyssea.entities.itinerary.Itinerary;
 import com.example.odyssea.entities.mainTables.Option;
 import com.example.odyssea.entities.mainTables.Reservation;
-import com.example.odyssea.exceptions.InvalidBookingStatusException;
 import com.example.odyssea.exceptions.ReservationNotFoundException;
 import com.example.odyssea.exceptions.ValidationException;
 import com.example.odyssea.services.CurrentUserService;
@@ -21,9 +19,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
-import java.time.format.DateTimeFormatter;
 import java.util.List;
-import java.util.Objects;
 import java.util.stream.Collectors;
 
 @Service
@@ -36,6 +32,7 @@ public class ReservationService {
     private final CurrentUserService currentUserService;
     private final ReservationDraftDao reservationDraftDao;
     private final ReservationOptionDraftDao reservationOptionDraftDao;
+
 
     public ReservationService(ReservationDao reservationDao, ReservationOptionDao reservationOptionDao, ItineraryDao itineraryDao, OptionDao optionDao, CurrentUserService currentUserService, ReservationDraftDao reservationDraftDao, ReservationOptionDraftDao reservationOptionDraftDao) {
         this.reservationDao = reservationDao;
@@ -82,9 +79,6 @@ public class ReservationService {
     }
 
 
-    public List<BookingConfirmation> getAllBookings() {
-        return getBookingsAndMap(reservationDao.findAll());
-    }
 
     public List<BookingConfirmation> getAllUserReservations() {
         Integer userId = getUserId();
@@ -101,26 +95,6 @@ public class ReservationService {
         }
 
         return createBookingConfirmation(reservation);
-    }
-
-
-    public void updateReservationStatus(int bookingId, String status) {
-        Integer userId = getUserId();
-        if(!Objects.equals(status, "PENDING") && !Objects.equals(status, "CONFIRMED") && !Objects.equals(status, "CANCELLED")){
-            throw new InvalidBookingStatusException("Invalid booking status.");
-        }
-        reservationDao.updateReservationStatus(userId, bookingId, status);
-    }
-
-
-    public Reservation updateReservation(int bookingId, Reservation reservation) {
-        Integer userId = getUserId();
-        return reservationDao.update(userId, bookingId, reservation);
-    }
-
-
-    public void deleteReservation(int bookingId) {
-        reservationDao.delete(bookingId);
     }
 
 

@@ -10,6 +10,7 @@ import com.example.odyssea.entities.mainTables.*;
 
 import com.example.odyssea.entities.userItinerary.UserItinerary;
 import com.example.odyssea.entities.userItinerary.UserItineraryStep;
+import com.example.odyssea.enums.BookingStatus;
 import com.example.odyssea.exceptions.ValidationException;
 import com.example.odyssea.services.CurrentUserService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -77,6 +78,8 @@ public class UserItineraryService {
         personalizedTrip.setItineraryName(null);
         personalizedTrip.setOptions(options);
         personalizedTrip.setStartingPrice(price);
+        personalizedTrip.setBookingDate(LocalDate.now());
+        personalizedTrip.setStatus(BookingStatus.PENDING);
 
         UserItinerary userItinerarySaved = saveUserItinerary(personalizedTrip);
         personalizedTrip.setId(userItinerarySaved.getId());
@@ -107,7 +110,7 @@ public class UserItineraryService {
     }
 
     @Transactional
-    public UserItinerary saveUserItinerary(UserItineraryDTO userItineraryDTO) {
+    private UserItinerary saveUserItinerary(UserItineraryDTO userItineraryDTO) {
         UserItinerary userItinerary = toUserItineraryEntity(userItineraryDTO);
         UserItinerary savedItinerary = userItineraryDao.save(userItinerary);
 
@@ -189,6 +192,8 @@ public class UserItineraryService {
         entity.setItineraryName(dto.getItineraryName());
         entity.setNumberOfAdults(dto.getNumberOfAdults());
         entity.setNumberOfKids(dto.getNumberOfKids());
+        entity.setBookingDate(LocalDate.now());
+        entity.setStatus(BookingStatus.PENDING);
         return entity;
     }
 
@@ -221,7 +226,9 @@ public class UserItineraryService {
                 userItinerary.getNumberOfAdults(),
                 userItinerary.getNumberOfKids(),
                 days,
-                options
+                options,
+                userItinerary.getBookingDate(),
+                userItinerary.getStatus()
 
         );
 

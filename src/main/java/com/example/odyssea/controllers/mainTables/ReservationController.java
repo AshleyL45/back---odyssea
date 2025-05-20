@@ -9,6 +9,7 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
@@ -21,18 +22,6 @@ public class ReservationController {
 
     public ReservationController(ReservationService reservationService) {
         this.reservationService = reservationService;
-    }
-
-    @Operation(
-            summary = "Fetch all bookings of all users",
-            description = "Returns a list of all bookings for all users. Requires admin privileges."
-    )
-    @GetMapping
-    public ResponseEntity<ApiResponse<List<BookingConfirmation>>> getAllReservations() {
-        List<BookingConfirmation> bookingConfirmations = reservationService.getAllBookings();
-        return ResponseEntity.ok(
-                ApiResponse.success("Bookings successfully found.", bookingConfirmations, HttpStatus.OK)
-        );
     }
 
     @Operation(
@@ -71,39 +60,4 @@ public class ReservationController {
         );
     }
 
-    @Operation(
-            summary = "Update the status of a booking",
-            description = "Updates the status (e.g. confirmed, cancelled) of an existing booking identified by its ID."
-    )
-    @PatchMapping("/{id}")
-    public ResponseEntity<ApiResponse<Void>> updateBookingStatus(@PathVariable int id, @RequestBody String status) {
-        reservationService.updateReservationStatus(id, status);
-        return ResponseEntity.status(HttpStatus.NO_CONTENT).body(
-                ApiResponse.success("Booking status successfully updated.", HttpStatus.NO_CONTENT)
-        );
-    }
-
-    @Operation(
-            summary = "Update a specific booking",
-            description = "Modifies all or part of an existing booking identified by its booking ID."
-    )
-    @PutMapping("/{id}")
-    public ResponseEntity<ApiResponse<Reservation>> updateBooking(@PathVariable int id, @Valid @RequestBody Reservation reservation) {
-        Reservation reservationUpdated = reservationService.updateReservation(id, reservation);
-        return ResponseEntity.ok(
-                ApiResponse.success("Booking successfully updated", reservationUpdated, HttpStatus.OK)
-        );
-    }
-
-    @Operation(
-            summary = "Delete a specific booking",
-            description = "Deletes a booking identified by its booking ID. Requires appropriate user permissions."
-    )
-    @DeleteMapping("/{id}")
-    public ResponseEntity<ApiResponse<Void>> deleteBooking(@PathVariable int id) {
-        reservationService.deleteReservation(id);
-        return ResponseEntity.status(HttpStatus.NO_CONTENT).body(
-                ApiResponse.success("Booking successfully deleted.", HttpStatus.NO_CONTENT)
-        );
-    }
 }

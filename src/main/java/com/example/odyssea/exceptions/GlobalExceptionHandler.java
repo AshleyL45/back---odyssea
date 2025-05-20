@@ -4,16 +4,20 @@ import com.example.odyssea.dtos.ApiResponse;
 import com.example.odyssea.exceptions.JwtToken.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.context.support.DefaultMessageSourceResolvable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.HttpMessageNotReadableException;
+import org.springframework.security.authentication.InsufficientAuthenticationException;
 import org.springframework.security.authentication.InternalAuthenticationServiceException;
 import org.springframework.security.core.AuthenticationException;
+import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.servlet.NoHandlerFoundException;
 import org.springframework.http.HttpHeaders;
+import org.springframework.web.servlet.resource.NoResourceFoundException;
 
 
 @RestControllerAdvice
@@ -81,7 +85,7 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(UserItineraryDatabaseException.class)
     public ResponseEntity<ApiResponse<Void>> handleItinerarySaveError(UserItineraryDatabaseException ex) {
-        logger.error("Database error saving itinerary: {}", ex.getMessage());
+        logger.error("Database error saving itinerary: {}", ex);
         return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(
                 ApiResponse.error("An error occurred while saving the itinerary.", HttpStatus.INTERNAL_SERVER_ERROR)
         );
@@ -101,8 +105,8 @@ public class GlobalExceptionHandler {
         headers.setContentType(MediaType.APPLICATION_JSON);*/
 
         logger.error("Image not found: {}", ex.getMessage());
-        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(
-                ApiResponse.error("Image not found", HttpStatus.INTERNAL_SERVER_ERROR)
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(
+                ApiResponse.error("Image not found", HttpStatus.NOT_FOUND)
         );
     }
 
@@ -116,9 +120,6 @@ public class GlobalExceptionHandler {
                 ApiResponse.error("An error occurred while processing the image.", HttpStatus.INTERNAL_SERVER_ERROR)
         );
     }
-
-
-
 
 
     @ExceptionHandler(JwtTokenMalformedException.class)
@@ -137,7 +138,7 @@ public class GlobalExceptionHandler {
         );
     }
 
-    @ExceptionHandler({JwtTokenUnsupportedException.class, JwtTokenSignatureException.class, JwtTokenMissingException.class})
+    @ExceptionHandler({JwtTokenUnsupportedException.class, JwtTokenSignatureException.class, JwtTokenMissingException.class, InsufficientAuthenticationException.class})
     public ResponseEntity<ApiResponse<Void>> handleOtherJwtErrors(RuntimeException ex) {
         logger.error("JWT authentication error: {}", ex.getMessage());
         return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(
@@ -177,9 +178,33 @@ public class GlobalExceptionHandler {
         );
     }
 
+    @ExceptionHandler(MethodArgumentNotValidException.class)
+    public ResponseEntity<ApiResponse<Void>> handleValidationException(MethodArgumentNotValidException ex) {
+        String errorMessage = ex.getBindingResult()
+                .getFieldErrors()
+                .stream()
+                .map(DefaultMessageSourceResolvable::getDefaultMessage)
+                .findFirst()
+                .orElse("Invalid input.");
+
+        return ResponseEntity
+                .badRequest()
+                .body(ApiResponse.error(errorMessage, HttpStatus.BAD_REQUEST));
+    }
+
+
+
+    @ExceptionHandler(NoResourceFoundException.class)
+    public ResponseEntity<ApiResponse<Void>> handleNoEndpointFound(NoResourceFoundException ex){
+        logger.error("Endpoint not found: {}", ex.getMessage(), ex);
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(
+                ApiResponse.error("Invalid endpoint.", HttpStatus.BAD_REQUEST)
+        );
+    }
+
     @ExceptionHandler(AuthenticationException.class)
     public ResponseEntity<ApiResponse<Void>> handleGlobal(AuthenticationException ex) {
-        logger.error("Unhandled exception: {}", ex.getMessage(), ex);
+        logger.error("Authentication error : {}", ex.getMessage(), ex);
         return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(
                 ApiResponse.error("Invalid credentials.", HttpStatus.UNAUTHORIZED)
         );

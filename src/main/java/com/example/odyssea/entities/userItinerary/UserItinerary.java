@@ -1,5 +1,6 @@
 package com.example.odyssea.entities.userItinerary;
 
+import com.example.odyssea.enums.BookingStatus;
 import org.springframework.data.annotation.Id;
 import jakarta.validation.constraints.*;
 
@@ -44,16 +45,13 @@ public class UserItinerary {
     @PositiveOrZero(message = "Number of kids must be zero or positive.")
     private int numberOfKids;
 
-    @PositiveOrZero(message = "Flight ID cannot be negative.")
-    private int flightId;
-
-    @PositiveOrZero(message = "Option ID cannot be negative.")
-    private int optionId;
+    private LocalDate bookingDate;
+    private BookingStatus status;
 
     public UserItinerary() {
     }
 
-    public UserItinerary(int id, int userId, LocalDate startDate, LocalDate endDate, BigDecimal startingPrice, int totalDuration, String departureCity, String itineraryName, int numberOfAdults, int numberOfKids) {
+    public UserItinerary(int id, int userId, LocalDate startDate, LocalDate endDate, BigDecimal startingPrice, int totalDuration, String departureCity, String itineraryName, int numberOfAdults, int numberOfKids, LocalDate bookingDate, BookingStatus status) {
         this.id = id;
         this.userId = userId;
         this.startDate = startDate;
@@ -64,7 +62,10 @@ public class UserItinerary {
         this.itineraryName = itineraryName;
         this.numberOfAdults = numberOfAdults;
         this.numberOfKids = numberOfKids;
+        this.bookingDate = bookingDate;
+        this.status = status;
     }
+
 
     public int getId() {
         return id;
@@ -125,5 +126,21 @@ public class UserItinerary {
     }
     public void setNumberOfKids(int numberOfKids) {
         this.numberOfKids = numberOfKids;
+    }
+
+    public LocalDate getBookingDate() {
+        return bookingDate;
+    }
+
+    public void setBookingDate(LocalDate bookingDate) {
+        this.bookingDate = bookingDate;
+    }
+
+    public BookingStatus getStatus() {
+        return status;
+    }
+
+    public void setStatus(BookingStatus status) {
+        this.status = status;
     }
 }

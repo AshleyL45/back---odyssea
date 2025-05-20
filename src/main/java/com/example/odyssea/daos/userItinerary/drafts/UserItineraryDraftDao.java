@@ -114,6 +114,8 @@ public class UserItineraryDraftDao {
         }
 
     }
+
+
     public void saveTravelsNumber(int userId, int numberAdults, int numberKids){
         int draftId = getLastDraftIdByUser(userId);
 

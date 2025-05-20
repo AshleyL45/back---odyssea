@@ -16,4 +16,5 @@ public class CurrentUserService {
         }
         return ((CustomUserDetails) auth.getPrincipal()).getUserId();
     }
+
 }

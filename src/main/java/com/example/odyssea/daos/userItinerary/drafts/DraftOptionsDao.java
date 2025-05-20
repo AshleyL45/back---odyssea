@@ -35,6 +35,7 @@ public class DraftOptionsDao {
     public void saveOptions(Integer userId, List<Integer> optionIds){
         Integer draftId = userItineraryDraftDao.getLastDraftIdByUser(userId);
         String sql = "INSERT INTO draft_options (draft_user_itinerary_id, option_id) VALUES (?, ?)";
+        deleteOptionsByDraftId(draftId);
 
         List<Object[]> batchArgs = new ArrayList<>();
         for (int i = 0; i < optionIds.size(); i++) {
@@ -51,5 +52,11 @@ public class DraftOptionsDao {
                 "INNER JOIN options ON draft_options.option_id = options.id WHERE draft_options.draft_user_itinerary_id = ? ";
 
         return jdbcTemplate.query(sql, new Object[]{draftId}, new BeanPropertyRowMapper<>(Option.class));
+    }
+
+
+    private void deleteOptionsByDraftId(Integer draftId) {
+        String deleteSql = "DELETE FROM draft_options WHERE draft_user_itinerary_id = ?";
+        jdbcTemplate.update(deleteSql, draftId);
     }
 }

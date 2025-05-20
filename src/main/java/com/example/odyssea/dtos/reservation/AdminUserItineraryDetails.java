@@ -1,15 +1,19 @@
-package com.example.odyssea.dtos.userItinerary;
+package com.example.odyssea.dtos.reservation;
 
+import com.example.odyssea.dtos.userItinerary.UserItineraryDTO;
+import com.example.odyssea.dtos.userItinerary.UserItineraryDayDTO;
 import com.example.odyssea.entities.mainTables.Option;
+import com.example.odyssea.entities.userAuth.User;
 import com.example.odyssea.enums.BookingStatus;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.List;
 
-public class UserItineraryDTO {
+public class AdminUserItineraryDetails {
     private int id;
-    private int userId;
+    private String userFirstName;
+    private String userLastName;
     private LocalDate startDate;
     private LocalDate endDate;
     private int totalDuration;
@@ -23,14 +27,13 @@ public class UserItineraryDTO {
     private LocalDate bookingDate;
     private BookingStatus status;
 
-
-
-    public UserItineraryDTO() {
+    public AdminUserItineraryDetails() {
     }
 
-    public UserItineraryDTO(int id, int userId, LocalDate startDate, LocalDate endDate, int totalDuration, String departureCity, BigDecimal startingPrice, String itineraryName, int numberOfAdults, int numberOfKids, List<UserItineraryDayDTO> itineraryDays, List<Option> options, LocalDate bookingDate, BookingStatus status) {
+    public AdminUserItineraryDetails(int id, String userFirstName, String userLastName, LocalDate startDate, LocalDate endDate, int totalDuration, String departureCity, BigDecimal startingPrice, String itineraryName, int numberOfAdults, int numberOfKids, List<UserItineraryDayDTO> itineraryDays, List<Option> options, LocalDate bookingDate, BookingStatus status) {
         this.id = id;
-        this.userId = userId;
+        this.userFirstName = userFirstName;
+        this.userLastName = userLastName;
         this.startDate = startDate;
         this.endDate = endDate;
         this.totalDuration = totalDuration;
@@ -53,12 +56,20 @@ public class UserItineraryDTO {
         this.id = id;
     }
 
-    public int getUserId() {
-        return userId;
+    public String getUserFirstName() {
+        return userFirstName;
     }
 
-    public void setUserId(int userId) {
-        this.userId = userId;
+    public void setUserFirstName(String userFirstName) {
+        this.userFirstName = userFirstName;
+    }
+
+    public String getUserLastName() {
+        return userLastName;
+    }
+
+    public void setUserLastName(String userLastName) {
+        this.userLastName = userLastName;
     }
 
     public LocalDate getStartDate() {
@@ -155,5 +166,25 @@ public class UserItineraryDTO {
 
     public void setStatus(BookingStatus status) {
         this.status = status;
+    }
+
+    public static AdminUserItineraryDetails fromEntities(User user, UserItineraryDTO itinerary){
+        return new AdminUserItineraryDetails(
+                itinerary.getId(),
+                user.getFirstName(),
+                user.getLastName(),
+                itinerary.getStartDate(),
+                itinerary.getEndDate(),
+                itinerary.getTotalDuration(),
+                itinerary.getDepartureCity(),
+                itinerary.getStartingPrice(),
+                itinerary.getItineraryName(),
+                itinerary.getNumberOfAdults(),
+                itinerary.getNumberOfKids(),
+                itinerary.getItineraryDays(),
+                itinerary.getOptions(),
+                itinerary.getBookingDate(),
+                itinerary.getStatus()
+        );
     }
 }

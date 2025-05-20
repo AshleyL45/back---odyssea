@@ -1,9 +1,13 @@
 package com.example.odyssea.daos.userItinerary;
 
+import com.example.odyssea.entities.mainTables.Reservation;
 import com.example.odyssea.entities.userItinerary.UserItinerary;
+import com.example.odyssea.enums.BookingStatus;
 import com.example.odyssea.exceptions.UserItineraryDatabaseException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
+import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
+import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.jdbc.support.GeneratedKeyHolder;
 import org.springframework.jdbc.support.KeyHolder;
 import org.springframework.stereotype.Repository;
@@ -11,21 +15,28 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 
+import java.math.BigDecimal;
 import java.sql.Date;
 import java.sql.PreparedStatement;
 import java.sql.Statement;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 @Repository
 public class UserItineraryDao {
 
 
     private final JdbcTemplate jdbcTemplate;
-    private static final Logger log = LoggerFactory.getLogger(UserItinerary.class);
+    private final NamedParameterJdbcTemplate namedParameterJdbcTemplate;
+    private static final Logger log = LoggerFactory.getLogger(UserItineraryDao.class);
+    private static final Set<String> ALLOWED_SORT_FIELDS = Set.of("startDate", "bookingDate");
 
 
-    public UserItineraryDao(JdbcTemplate jdbcTemplate) {
+    public UserItineraryDao(JdbcTemplate jdbcTemplate, NamedParameterJdbcTemplate namedParameterJdbcTemplate) {
         this.jdbcTemplate = jdbcTemplate;
+        this.namedParameterJdbcTemplate = namedParameterJdbcTemplate;
     }
 
     private final RowMapper<UserItinerary> userItineraryRowMapper = (rs, _) -> new UserItinerary(
@@ -38,12 +49,51 @@ public class UserItineraryDao {
             rs.getString("departureCity"),
             rs.getString("itineraryName"),
             rs.getInt("numberOfAdults"),
-            rs.getInt("numberOfKids")
+            rs.getInt("numberOfKids"),
+            rs.getDate("booking_date").toLocalDate(),
+            BookingStatus.valueOf(rs.getString("status").toUpperCase())
     );
 
-    public List<UserItinerary> findAll (){
-        String sql = "SELECT * FROM userItinerary";
-        return jdbcTemplate.query(sql, userItineraryRowMapper);
+
+    public List<UserItinerary> getAllUserItinerariesAndFilter(
+            String status,
+            String search,
+            String sortField,
+            String sortDirection
+    ) {
+        boolean hasStatus = status != null && !status.isBlank();
+        boolean hasSearch = search != null && !search.isBlank();
+        boolean hasValidSort = sortField != null && ALLOWED_SORT_FIELDS.contains(sortField);
+
+        StringBuilder sql = new StringBuilder("SELECT * FROM userItinerary ");
+        Map<String, Object> params = new HashMap<>();
+
+        if (hasSearch) {
+            sql.append(" JOIN user u ON userItinerary.userId = u.id");
+        }
+
+        sql.append(" WHERE 1=1");
+
+        if (hasStatus) {
+            sql.append(" AND userItinerary.status = :status");
+            params.put("status", status);
+        }
+
+        if (hasSearch) {
+            sql.append(" AND (LOWER(u.firstName) LIKE LOWER(:search) OR LOWER(u.lastName) LIKE LOWER(:search))");
+            params.put("search", "%" + search + "%");
+        }
+
+        if (hasValidSort) {
+            sql.append(" ORDER BY ").append(sortField);
+            if ("desc".equalsIgnoreCase(sortDirection)) {
+                sql.append(" DESC");
+            } else {
+                sql.append(" ASC");
+            }
+        }
+
+        return namedParameterJdbcTemplate.query(sql.toString(), new MapSqlParameterSource(params), userItineraryRowMapper);
     }
 
     public UserItinerary findById(int id){
@@ -61,7 +111,7 @@ public class UserItineraryDao {
 
     public UserItinerary save(UserItinerary userItinerary) {
         try {
-            String sql = "INSERT INTO userItinerary (userId, startDate, endDate, startingPrice, totalDuration, departureCity, itineraryName, numberOfAdults, numberOfKids) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)";
+            String sql = "INSERT INTO userItinerary (userId, startDate, endDate, startingPrice, totalDuration, departureCity, itineraryName, numberOfAdults, numberOfKids, booking_date, status) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
             KeyHolder keyHolder = new GeneratedKeyHolder();
 
             jdbcTemplate.update(connection -> {
@@ -75,6 +125,9 @@ public class UserItineraryDao {
                 ps.setString(7, userItinerary.getItineraryName());
                 ps.setInt(8, userItinerary.getNumberOfAdults());
                 ps.setInt(9, userItinerary.getNumberOfKids());
+                ps.setDate(10, Date.valueOf(userItinerary.getBookingDate()));
+                ps.setString(11, userItinerary.getStatus().name());
+
                 return ps;
             }, keyHolder);
 
@@ -96,8 +149,8 @@ public class UserItineraryDao {
             throw new UserItineraryDatabaseException("The user itinerary you are looking for does not exist.");
         }
 
-        String sql = "UPDATE userItinerary SET userId = ?, startDate = ?, endDate = ?, startingPrice = ?, totalDuration = ?, departureCity = ?, itineraryName = ?, numberOfAdults = ?, numberOfKids = ? WHERE id = ?";
-        int rowsAffected = jdbcTemplate.update(sql, userItinerary.getUserId(), userItinerary.getStartDate(), userItinerary.getEndDate(), userItinerary.getTotalDuration(), userItinerary.getDepartureCity(), userItinerary.getItineraryName(), userItinerary.getNumberOfAdults(), userItinerary.getNumberOfKids(), id);
+        String sql = "UPDATE userItinerary SET userId = ?, startDate = ?, endDate = ?, startingPrice = ?, totalDuration = ?, departureCity = ?, itineraryName = ?, numberOfAdults = ?, numberOfKids = ?, booking_date = ?, status = ? WHERE id = ?";
+        int rowsAffected = jdbcTemplate.update(sql, userItinerary.getUserId(), userItinerary.getStartDate(), userItinerary.getEndDate(), userItinerary.getTotalDuration(), userItinerary.getDepartureCity(), userItinerary.getItineraryName(), userItinerary.getNumberOfAdults(), userItinerary.getNumberOfKids(), userItinerary.getBookingDate(), userItinerary.getStatus().name(), id);
 
         if(rowsAffected <= 0){
             throw new UserItineraryDatabaseException("Failed to update the user itinerary with id : " + id);
@@ -121,16 +174,34 @@ public class UserItineraryDao {
 
     }
 
-    public boolean deleteUserItinerary (int id){
-        String sql = "DELETE FROM userItinerary WHERE id = ?";
-        int rowsAffected = jdbcTemplate.update(sql, id);
-
-        if(!(rowsAffected > 0)){
-            throw new UserItineraryDatabaseException("Failed to delete personalized trip ID : " + id);
+    public void updateStatus(int id, BookingStatus newStatus) {
+        if (!userItineraryExists(id)) {
+            throw new UserItineraryDatabaseException("The personalized trip ID: " + id + " does not exist.");
         }
 
-        return true;
+        String sql = "UPDATE userItinerary SET status = ? WHERE id = ?";
+        int rowsAffected = jdbcTemplate.update(sql, newStatus.name(), id);
+
+        if (rowsAffected <= 0) {
+            throw new UserItineraryDatabaseException("Failed to update the status of user itinerary with ID: " + id);
+        }
     }
+
+    public void updatePrice(int id, BigDecimal newPrice) {
+        if (!userItineraryExists(id)) {
+            throw new UserItineraryDatabaseException("The personalized trip ID: " + id + " does not exist.");
+        }
+
+        String sql = "UPDATE userItinerary SET startingPrice = ? WHERE id = ?";
+        int rowsAffected = jdbcTemplate.update(sql, newPrice, id);
+
+        if (rowsAffected <= 0) {
+            throw new UserItineraryDatabaseException("Failed to update the price of user itinerary with ID: " + id);
+        }
+    }
+
+
+
 
     public boolean userItineraryExists(int id){
         String sqlCheck = "SELECT COUNT(*) FROM userItinerary WHERE id = ?";
