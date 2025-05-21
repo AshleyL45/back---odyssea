@@ -1,4 +1,4 @@
-package com.example.odyssea.controllers.userItinerary;
+package com.example.odyssea.dtos.userItinerary;
 
 public class ItineraryName {
     private String itineraryName;

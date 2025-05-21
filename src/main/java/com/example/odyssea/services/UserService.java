@@ -1,6 +1,7 @@
 package com.example.odyssea.services;
 
 import com.example.odyssea.daos.userAuth.UserDao;
+import com.example.odyssea.dtos.UserName;
 import com.example.odyssea.entities.userAuth.User;
 import com.example.odyssea.exceptions.InvalidPasswordException;
 import com.example.odyssea.exceptions.UserAlreadyExistsException;
@@ -39,6 +40,11 @@ public class UserService {
     public void changeUserInformation(User user){
         Integer userId = getUserId();
         userDao.update(userId, user);
+    }
+
+    public UserName getUserName(){
+        User user = userDao.findById(currentUserService.getCurrentUserId());
+        return new UserName(user.getFirstName(), user.getLastName());
     }
 
     public void changePassword(String newPassword){

@@ -1,6 +1,7 @@
 package com.example.odyssea.controllers.userItinerary;
 
 import com.example.odyssea.dtos.ApiResponse;
+import com.example.odyssea.dtos.userItinerary.ItineraryName;
 import com.example.odyssea.dtos.userItinerary.UserItineraryDTO;
 import com.example.odyssea.services.userItinerary.UserItineraryService;
 import io.swagger.v3.oas.annotations.Operation;

@@ -1,6 +1,7 @@
 package com.example.odyssea.services;
 
 import com.example.odyssea.daos.userAuth.UserDao;
+import com.example.odyssea.dtos.UserName;
 import com.example.odyssea.entities.userAuth.User;
 import com.example.odyssea.exceptions.UserNotFoundException;
 import com.example.odyssea.security.JwtToken;

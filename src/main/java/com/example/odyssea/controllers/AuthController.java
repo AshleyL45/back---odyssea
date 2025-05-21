@@ -1,5 +1,6 @@
 package com.example.odyssea.controllers;
 
+import com.example.odyssea.dtos.UserName;
 import com.example.odyssea.entities.userAuth.User;
 import com.example.odyssea.dtos.ApiResponse;
 import com.example.odyssea.security.JwtToken;
@@ -11,6 +12,7 @@ import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.Map;
@@ -50,6 +52,20 @@ public class AuthController {
                 ApiResponse.success("User successfully logged in.",token, HttpStatus.OK)
         );
     }
+
+    @Operation(
+            summary = "Get connected user's name",
+            description = "Returns the first name and last name of the currently authenticated user."
+    )
+    @PreAuthorize("isAuthenticated")
+    @GetMapping("/me")
+    public ResponseEntity<ApiResponse<UserName>> getConnectedUserName() {
+        UserName userName = userService.getUserName();
+        return ResponseEntity.ok(
+                ApiResponse.success("User name successfully retrieved.", userName, HttpStatus.OK)
+        );
+    }
+
 
     @Operation(
             summary = "Update account information",

@@ -112,7 +112,6 @@ public class AdminBookingController {
             @Parameter(description = "Booking ID of the reservation to update", required = true)
             @PathVariable int id,
 
-            @Parameter(description = "New total price", required = true)
             @RequestBody @Valid PriceChange price
             ) {
         adminBookingService.updateReservationPrice(id, price.getNewPrice());
@@ -128,7 +127,9 @@ public class AdminBookingController {
     )
     @PreAuthorize("hasRole('ADMIN')")
     @PatchMapping("/bookings/{id}/status")
-    public ResponseEntity<ApiResponse<Void>> updateBookingStatus(@PathVariable int id, @RequestBody @Valid  BookingStatusUpdate status) {
+    public ResponseEntity<ApiResponse<Void>> updateBookingStatus( @Parameter(description = "Booking ID of the reservation to update", required = true)
+                                                                      @PathVariable int id,
+                                                                  @RequestBody @Valid  BookingStatusUpdate status) {
         adminBookingService.updateReservationStatus(id, status.getNewStatus());
         return ResponseEntity.status(HttpStatus.OK).body(
                 ApiResponse.success("Booking status successfully updated.", HttpStatus.OK)
@@ -146,8 +147,6 @@ public class AdminBookingController {
             @Parameter(description = "ID of the user itinerary", required = true)
             @PathVariable int id,
 
-            @Parameter(description = "New booking status", required = true,
-                    schema = @Schema(implementation = BookingStatus.class))
             @RequestBody @Valid BookingStatusUpdate status
             ) {
         adminBookingService.updateUserItineraryStatus(id, status.getNewStatus());
@@ -166,7 +165,6 @@ public class AdminBookingController {
             @Parameter(description = "ID of the user itinerary to update", required = true)
             @PathVariable int id,
 
-            @Parameter(description = "New price for the itinerary", required = true)
             @RequestBody @Valid PriceChange price
     ) {
         adminBookingService.updatePrice(id, price.getNewPrice());
