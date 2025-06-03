@@ -7,6 +7,7 @@ import com.example.odyssea.entities.mainTables.Hotel;
 import com.example.odyssea.exceptions.DatabaseException;
 import com.example.odyssea.services.mainTables.HotelService;
 import org.springframework.stereotype.Component;
+import org.springframework.util.StopWatch;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
@@ -23,6 +24,8 @@ public class HotelAssigner {
     }
 
     public HotelDto assignHotel(UserItineraryDayDTO day, List<HotelDto> hotelsList){
+        StopWatch watch = new StopWatch();
+        watch.start("Assigning hotel for a day");
         int dayNumber = day.getDayNumber();
         int daysPerHotel = 4;
 
@@ -35,6 +38,8 @@ public class HotelAssigner {
         }
         System.out.println("Hotel Index : " + index);
 
+        watch.stop();
+        System.out.println(watch.prettyPrint());
         return hotelsList.get(index);
     }
 

@@ -4,11 +4,13 @@ import com.example.odyssea.entities.itinerary.Itinerary;
 import com.example.odyssea.entities.mainTables.Option;
 import com.example.odyssea.entities.mainTables.Reservation;
 
+import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.List;
 
 public class BookingConfirmation {
 
+    private int id;
     private Itinerary itinerary;
     private LocalDate departureDate;
     private LocalDate returnDate;
@@ -17,13 +19,15 @@ public class BookingConfirmation {
     private int numberOfKids;
     private List<Option> optionList;
     private LocalDate purchaseDate;
+    private BigDecimal price;
 
 
     public BookingConfirmation() {}
 
-    public BookingConfirmation(Itinerary itinerary, LocalDate departureDate, LocalDate returnDate,
+    public BookingConfirmation(int id, Itinerary itinerary, LocalDate departureDate, LocalDate returnDate,
                                String status, int numberOfAdults, int numberOfKids,
-                               List<Option> optionList, LocalDate purchaseDate) {
+                               List<Option> optionList, LocalDate purchaseDate, BigDecimal price) {
+        this.id = id;
         this.itinerary = itinerary;
         this.departureDate = departureDate;
         this.returnDate = returnDate;
@@ -32,6 +36,7 @@ public class BookingConfirmation {
         this.numberOfKids = numberOfKids;
         this.optionList = optionList;
         this.purchaseDate = purchaseDate;
+        this.price = price;
     }
 
     // Getters et Setters
@@ -106,6 +111,7 @@ public class BookingConfirmation {
     ) {
 
         return new BookingConfirmation(
+                reservation.getReservationId(),
                 itinerary,
                 reservation.getDepartureDate(),
                 reservation.getReturnDate(),
@@ -113,7 +119,24 @@ public class BookingConfirmation {
                 reservation.getNumberOfAdults(),
                 reservation.getNumberOfKids(),
                 options,
-                reservation.getPurchaseDate()
+                reservation.getPurchaseDate(),
+                reservation.getTotalPrice()
         );
+    }
+
+    public BigDecimal getPrice() {
+        return price;
+    }
+
+    public void setPrice(BigDecimal price) {
+        this.price = price;
+    }
+
+    public int getId() {
+        return id;
+    }
+
+    public void setId(int id) {
+        this.id = id;
     }
 }

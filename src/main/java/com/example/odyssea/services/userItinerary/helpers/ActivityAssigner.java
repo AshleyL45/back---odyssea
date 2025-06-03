@@ -6,6 +6,7 @@ import com.example.odyssea.exceptions.ActivityNotFound;
 import com.example.odyssea.exceptions.DatabaseException;
 import com.example.odyssea.exceptions.ValidationException;
 import org.springframework.stereotype.Component;
+import org.springframework.util.StopWatch;
 
 import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -14,6 +15,8 @@ import java.util.concurrent.atomic.AtomicInteger;
 public class ActivityAssigner {
 
     public Activity assignActivity(UserItineraryDayDTO day, List<Activity> activityList, AtomicInteger activityIndex) {
+        StopWatch watch = new StopWatch();
+        watch.start("Assigning activity for a day");
         if (day.isDayOff()) {
             return null;
         }
@@ -26,6 +29,8 @@ public class ActivityAssigner {
             return null;
         }
 
+        watch.stop();
+        System.out.println(watch.prettyPrint());
         return activityList.get(activityIndex.getAndIncrement());
     }
 }

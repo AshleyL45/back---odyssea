@@ -11,6 +11,7 @@ import com.example.odyssea.services.amadeus.TokenService;
 import com.fasterxml.jackson.databind.JsonNode;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
+import org.springframework.util.StopWatch;
 import reactor.core.publisher.Mono;
 import org.springframework.web.reactive.function.client.WebClient;
 
@@ -146,34 +147,50 @@ public class HotelService {
                 return Mono.just(HotelDto.fromEntity(existing.get(0)));
             }
         } catch (HotelNotFound e) {
+            // ignore
         }
 
-        // Appel unique à Amadeus
-        return tokenService.getValidToken().flatMap(token ->
-                webClient.get()
-                        .uri(uriBuilder -> uriBuilder
-                                .path("/v1/reference-data/locations/hotels/by-city")
-                                .queryParam("cityCode", iataCityCode)
-                                .build())
-                        .header("Authorization", "Bearer " + token)
-                        .retrieve()
-                        .bodyToMono(JsonNode.class)
-                        .flatMap(json -> {
-                            JsonNode data = json.path("data").path(0);
-                            if (data.isMissingNode()) {
-                                return Mono.error(new HotelNotFound(
-                                        "No hotel found for city: " + iataCityCode));
-                            }
+        StopWatch sw = new StopWatch();
 
-                            HotelDto dto4 = mapJsonNodeToHotelDto(data, cityId);
-                            dto4.setStarRating(4);
-                            createHotel(dto4);
-                            HotelDto dto5 = mapJsonNodeToHotelDto(data, cityId);
-                            dto5.setStarRating(5);
-                            createHotel(dto5);
+        return tokenService.getValidToken()
+                .flatMap(token -> {
+                    sw.start("🌐 Appel Amadeus hôtels");
 
-                            return Mono.just(requestedStar == 5 ? dto5 : dto4);
-                        })
-        );
+                    return webClient.get()
+                            .uri(uriBuilder -> uriBuilder
+                                    .path("/v1/reference-data/locations/hotels/by-city")
+                                    .queryParam("cityCode", iataCityCode)
+                                    .build())
+                            .header("Authorization", "Bearer " + token)
+                            .retrieve()
+                            .bodyToMono(JsonNode.class)
+                            .doOnSuccess(resp -> {
+                                sw.stop();
+                                System.out.println(sw.prettyPrint());
+                            });
+                })
+                .flatMap(json -> {
+                    StopWatch swHotel = new StopWatch();
+                    swHotel.start("🏨 Mapping + sauvegarde hôtels");
+
+                    JsonNode data = json.path("data").path(0);
+                    if (data.isMissingNode()) {
+                        return Mono.error(new HotelNotFound("No hotel found for city: " + iataCityCode));
+                    }
+
+                    HotelDto dto4 = mapJsonNodeToHotelDto(data, cityId);
+                    dto4.setStarRating(4);
+                    createHotel(dto4);
+
+                    HotelDto dto5 = mapJsonNodeToHotelDto(data, cityId);
+                    dto5.setStarRating(5);
+                    createHotel(dto5);
+
+                    swHotel.stop();
+                    System.out.println(swHotel.prettyPrint());
+
+                    return Mono.just(requestedStar == 5 ? dto5 : dto4);
+                });
     }
+
 }

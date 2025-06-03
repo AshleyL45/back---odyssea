@@ -10,6 +10,7 @@ import com.example.odyssea.dtos.userItinerary.UserItineraryDayDTO;
 import com.example.odyssea.entities.mainTables.City;
 import com.example.odyssea.services.flight.PlaneRideService;
 import org.springframework.stereotype.Component;
+import org.springframework.util.StopWatch;
 import reactor.core.publisher.Mono;
 
 import java.time.LocalDate;
@@ -27,15 +28,15 @@ public class FlightAssigner {
     }
 
     public Mono<FlightItineraryDTO> assignFlight(UserItineraryDayDTO day, List<City> visitedCities, int totalPeople) {
+        StopWatch watch = new StopWatch();
+        watch.start("Assigning flight for a day");
         logger.info("Assigning flight for day: {}", day.getDayNumber());
 
         if (!day.isDayOff()) {
-            logger.info("Day {} is not an off day. Skipping flight assignment.", day.getDayNumber());
             return Mono.empty();
         }
 
         int dayOffIndex = getOffDayIndex(day.getDayNumber());
-        logger.info("Off day index calculated: {}", dayOffIndex);
 
         if (dayOffIndex >= visitedCities.size() - 1) {
             logger.warn("DayOffIndex ({}) exceeds available cities ({}). No flight possible.", dayOffIndex, visitedCities.size());
@@ -49,7 +50,7 @@ public class FlightAssigner {
 
         logger.info("Fetching flight from {} to {} on {}", fromCity.getName(), toCity.getName(), date);
 
-        return planeRideService.getFlights(
+        Mono<FlightItineraryDTO> flightAssigned = planeRideService.getFlights(
                         fromCity.getIataCode(),
                         toCity.getIataCode(),
                         date,
@@ -63,13 +64,14 @@ public class FlightAssigner {
                         return Mono.empty();
                     }
                     FlightItineraryDTO selectedFlight = flights.getFirst();
-                    logger.info("Selected flight: {}", selectedFlight);
-                    logger.info("Fetching flights with parameters: departureIata={}, arrivalIata={}, departureDate={}, returnDate={}, totalPeople={}",
-                            fromCity.getIataCode(), toCity.getIataCode(), date, date, totalPeople);
 
                     return Mono.just(selectedFlight);
                 })
                 .doOnError(e -> new DatabaseException("Something went wrong while fetching flights" + e.getMessage()));
+        watch.stop();
+        System.out.println(watch.prettyPrint());
+
+        return flightAssigned;
     }
 
 

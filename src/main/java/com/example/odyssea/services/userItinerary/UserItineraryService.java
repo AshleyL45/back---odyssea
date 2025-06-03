@@ -16,6 +16,8 @@ import com.example.odyssea.services.CurrentUserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.StopWatch;
+import reactor.core.publisher.Mono;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
@@ -48,44 +50,61 @@ public class UserItineraryService {
     }
 
 
-    public UserItineraryDTO generateItinerary (){
-        UserItineraryDTO personalizedTrip = new UserItineraryDTO();
+    public Mono<UserItineraryDTO> generateItineraryAsync() {
+        StopWatch watch = new StopWatch();
+        watch.start("Generating full itinerary");
+
         Integer userId = currentUserService.getCurrentUserId();
         DraftData draftData = userItineraryDraftService.loadAllDraftData(userId);
-        List<UserItineraryDayDTO> days = userDailyPlanService.generateDailyPlan(draftData);
-        List<HotelDto> hotels = days
-                .stream()
-                .map(UserItineraryDayDTO::getHotel)
-                .toList();
 
-        List<Activity> activities = days
-                .stream()
-                .filter(Objects::nonNull)
-                .map(UserItineraryDayDTO::getActivity)
-                .toList();
-        LocalDate endDate = draftData.getDraft().getStartDate().plusDays(draftData.getDraft().getDuration());
-        List<Option> options = draftData.getOptions();
-        BigDecimal price = calculateTotalPrice(draftData.getCountries(), draftData.getOptions(), hotels, activities, draftData.getDraft().getNumberAdults(), draftData.getDraft().getNumberKids());
+        return userDailyPlanService.generateDailyPlan(draftData)
+                .map(days -> {
+                    List<HotelDto> hotels = days.stream()
+                            .map(UserItineraryDayDTO::getHotel)
+                            .toList();
 
-        personalizedTrip.setUserId(userId);
-        personalizedTrip.setItineraryDays(days);
-        personalizedTrip.setStartDate(draftData.getDraft().getStartDate());
-        personalizedTrip.setEndDate(endDate);
-        personalizedTrip.setTotalDuration(draftData.getDraft().getDuration());
-        personalizedTrip.setDepartureCity(draftData.getDraft().getDepartureCity());
-        personalizedTrip.setNumberOfAdults(draftData.getDraft().getNumberAdults());
-        personalizedTrip.setNumberOfKids(draftData.getDraft().getNumberKids());
-        personalizedTrip.setItineraryName(null);
-        personalizedTrip.setOptions(options);
-        personalizedTrip.setStartingPrice(price);
-        personalizedTrip.setBookingDate(LocalDate.now());
-        personalizedTrip.setStatus(BookingStatus.PENDING);
+                    List<Activity> activities = days.stream()
+                            .filter(Objects::nonNull)
+                            .map(UserItineraryDayDTO::getActivity)
+                            .toList();
 
-        UserItinerary userItinerarySaved = saveUserItinerary(personalizedTrip);
-        personalizedTrip.setId(userItinerarySaved.getId());
+                    BigDecimal price = calculateTotalPrice(
+                            draftData.getCountries(),
+                            draftData.getOptions(),
+                            hotels,
+                            activities,
+                            draftData.getDraft().getNumberAdults(),
+                            draftData.getDraft().getNumberKids());
 
-        return personalizedTrip;
-   }
+                    LocalDate endDate = draftData.getDraft().getStartDate().plusDays(draftData.getDraft().getDuration());
+
+                    UserItineraryDTO personalizedTrip = new UserItineraryDTO();
+                    personalizedTrip.setUserId(userId);
+                    personalizedTrip.setItineraryDays(days);
+                    personalizedTrip.setStartDate(draftData.getDraft().getStartDate());
+                    personalizedTrip.setEndDate(endDate);
+                    personalizedTrip.setTotalDuration(draftData.getDraft().getDuration());
+                    personalizedTrip.setDepartureCity(draftData.getDraft().getDepartureCity());
+                    personalizedTrip.setNumberOfAdults(draftData.getDraft().getNumberAdults());
+                    personalizedTrip.setNumberOfKids(draftData.getDraft().getNumberKids());
+                    personalizedTrip.setItineraryName(null);
+                    personalizedTrip.setOptions(draftData.getOptions());
+                    personalizedTrip.setStartingPrice(price);
+                    personalizedTrip.setBookingDate(LocalDate.now());
+                    personalizedTrip.setStatus(BookingStatus.PENDING);
+
+                    return personalizedTrip;
+                })
+                .map(personalizedTrip -> {
+                    UserItinerary saved = saveUserItinerary(personalizedTrip);
+                    personalizedTrip.setId(saved.getId());
+
+                    watch.stop();
+                    System.out.println(watch.prettyPrint());
+                    return personalizedTrip;
+                });
+    }
+
 
     public List<UserItineraryDTO> getAllUserItineraries() {
         Integer userId = currentUserService.getCurrentUserId();
@@ -111,6 +130,8 @@ public class UserItineraryService {
 
     @Transactional
     private UserItinerary saveUserItinerary(UserItineraryDTO userItineraryDTO) {
+        StopWatch watch = new StopWatch();
+        watch.start("Saving user itinerary in the database");
         UserItinerary userItinerary = toUserItineraryEntity(userItineraryDTO);
         UserItinerary savedItinerary = userItineraryDao.save(userItinerary);
 
@@ -121,6 +142,8 @@ public class UserItineraryService {
         }
 
         userDailyPlanService.saveUserDailyPlans(savedItinerary, userItineraryDTO.getItineraryDays());
+        watch.stop();
+        System.out.println(watch.prettyPrint());
         return savedItinerary;
     }
 

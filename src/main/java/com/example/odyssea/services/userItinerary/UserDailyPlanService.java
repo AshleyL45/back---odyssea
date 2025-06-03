@@ -12,16 +12,13 @@ import com.example.odyssea.dtos.userItinerary.UserItineraryDayDTO;
 import com.example.odyssea.entities.mainTables.*;
 import com.example.odyssea.entities.userItinerary.UserItinerary;
 import com.example.odyssea.entities.userItinerary.UserItineraryStep;
-import com.example.odyssea.exceptions.ActivityNotFound;
 import com.example.odyssea.exceptions.CityNotFound;
-import com.example.odyssea.exceptions.CountryNotFound;
 import com.example.odyssea.exceptions.UserItineraryDatabaseException;
-import com.example.odyssea.services.flight.PlaneRideService;
-import com.example.odyssea.services.mainTables.HotelService;
 import com.example.odyssea.services.userItinerary.helpers.*;
-import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.StopWatch;
+import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 import java.time.LocalDate;
@@ -58,11 +55,15 @@ public class UserDailyPlanService {
 
     @Transactional
     public void saveUserDailyPlans(UserItinerary userItinerary, List<UserItineraryDayDTO> days) {
+        StopWatch watch = new StopWatch();
+        watch.start("Saving each day of the itinerary in the database");
         UserItinerary savedItinerary = userItineraryDao.findById(userItinerary.getId());
 
         days.stream()
                 .map(dayDTO -> buildUserItineraryStep(savedItinerary, dayDTO))
                 .forEach(userItineraryStepDao::save);
+        watch.stop();
+        System.out.println(watch.prettyPrint());
     }
 
     private UserItineraryStep buildUserItineraryStep(UserItinerary itinerary, UserItineraryDayDTO dayDTO) {
@@ -156,32 +157,42 @@ public class UserDailyPlanService {
         );
     }
 
-    public List<UserItineraryDayDTO> generateDailyPlan(DraftData draftData){
+    public Mono<List<UserItineraryDayDTO>> generateDailyPlan(DraftData draftData){
         int duration = draftData.getDraft().getDuration();
         AtomicInteger index = new AtomicInteger(0);
 
-        return IntStream.range(1, duration + 1)
-                .mapToObj(i ->createItineraryDay(draftData, i, index))
+        List<Mono<UserItineraryDayDTO>> days = IntStream.range(1, duration + 1)
+                .mapToObj(i -> createItineraryDay(draftData, i, index))
                 .toList();
+
+        return Flux.mergeSequential(days).collectList();
+
     }
 
-    private UserItineraryDayDTO createItineraryDay(DraftData draftData, int dayNumber, AtomicInteger index) {
+    private Mono<UserItineraryDayDTO> createItineraryDay(DraftData draftData, int dayNumber, AtomicInteger index) {
+        StopWatch watch = new StopWatch();
+        watch.start("Building an itinerary day");
+
         List<Country> countries = draftData.getCountries();
         List<City> cities = draftData.getCities();
         List<Activity> activities = draftData.getActivities();
-        List<HotelDto> hotels = fetchHotels(draftData);
+        //List<HotelDto> hotels = fetchHotels(draftData);
         List<City> visitedCities = buildFlightCities(draftData);
         int totalPeople = draftData.getDraft().getNumberAdults() + draftData.getDraft().getNumberKids();
 
         UserItineraryDayDTO day = initDay(dayNumber, draftData);
-        assignDayData(day, draftData, countries, cities, activities, hotels, visitedCities, totalPeople, index);
 
-        return day;
+        return fetchHotels(draftData)
+                .flatMap(hotels -> assignDayData(day, draftData, countries, cities, activities, hotels, visitedCities, totalPeople, index));
     }
 
 
-    private List<HotelDto> fetchHotels(DraftData draftData){
-        return hotelAssigner.getHotels(draftData.getDraft().getHotelStanding(), draftData.getCities()).block();
+
+    private Mono<List<HotelDto>> fetchHotels(DraftData draftData) {
+        return hotelAssigner.getHotels(
+                draftData.getDraft().getHotelStanding(),
+                draftData.getCities()
+        );
     }
 
     private LinkedList<City> buildFlightCities(DraftData draftData){
@@ -207,7 +218,8 @@ public class UserDailyPlanService {
         return day;
     }
 
-    private void assignDayData(
+
+    private Mono<UserItineraryDayDTO> assignDayData(
             UserItineraryDayDTO day,
             DraftData draftData,
             List<Country> countries,
@@ -218,11 +230,22 @@ public class UserDailyPlanService {
             int totalPeople,
             AtomicInteger index
     ) {
+        StopWatch watch = new StopWatch();
+        watch.start("Assigning Data per day");
+
         day.setCountryName(locationAssigner.assignCountry(day, countries));
         day.setCityName(locationAssigner.assignCity(day, cities, draftData.getDraft().getDuration()));
         day.setActivity(activityAssigner.assignActivity(day, activities, index));
         day.setHotel(hotelAssigner.assignHotel(day, hotels));
-        day.setFlightItineraryDTO(flightAssigner.assignFlight(day, visitedCities, totalPeople).block());
+        watch.stop();
+
+        return flightAssigner.assignFlight(day, visitedCities, totalPeople)
+                .map(flight -> {
+                    day.setFlightItineraryDTO(flight);
+                    return day;
+                })
+                .defaultIfEmpty(day);
+
     }
 
 }

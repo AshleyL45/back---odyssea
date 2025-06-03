@@ -9,6 +9,7 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import reactor.core.publisher.Mono;
 
 import java.util.List;
 
@@ -58,15 +59,18 @@ public class UserItineraryController {
             description = "Automatically generates a new personalized itinerary based on user preferences."
     )
     @GetMapping("/generate")
-    public ResponseEntity<ApiResponse<UserItineraryDTO>> generateItinerary() {
-        UserItineraryDTO userItinerary = userItineraryService.generateItinerary();
-        ApiResponse<UserItineraryDTO> response = ApiResponse.success(
-                "Personalized itinerary generated successfully.",
-                userItinerary,
-                HttpStatus.CREATED
-        );
-        return new ResponseEntity<>(response, HttpStatus.CREATED);
+    public Mono<ResponseEntity<ApiResponse<UserItineraryDTO>>> generateItinerary() {
+        return userItineraryService.generateItineraryAsync()
+                .map(itinerary -> {
+                    ApiResponse<UserItineraryDTO> response = ApiResponse.success(
+                            "Personalized itinerary generated successfully.",
+                            itinerary,
+                            HttpStatus.CREATED
+                    );
+                    return new ResponseEntity<>(response, HttpStatus.CREATED);
+                });
     }
+
 
     @Operation(
             summary = "Update itinerary name",

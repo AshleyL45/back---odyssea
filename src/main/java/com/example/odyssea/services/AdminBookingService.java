@@ -5,7 +5,6 @@ import com.example.odyssea.daos.mainTables.ReservationDao;
 import com.example.odyssea.daos.mainTables.ReservationOptionDao;
 import com.example.odyssea.daos.userAuth.UserDao;
 import com.example.odyssea.daos.userItinerary.UserItineraryDao;
-import com.example.odyssea.dtos.BookingStatusUpdate;
 import com.example.odyssea.dtos.reservation.AdminBookingConfirmation;
 import com.example.odyssea.dtos.reservation.AdminBookingConfirmationDetails;
 import com.example.odyssea.dtos.reservation.AdminUserItineraryDetails;
@@ -16,7 +15,6 @@ import com.example.odyssea.entities.mainTables.Reservation;
 import com.example.odyssea.entities.userAuth.User;
 import com.example.odyssea.entities.userItinerary.UserItinerary;
 import com.example.odyssea.enums.BookingStatus;
-import com.example.odyssea.exceptions.InvalidBookingStatusException;
 import com.example.odyssea.exceptions.ValidationException;
 import com.example.odyssea.services.userItinerary.UserItineraryService;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -25,7 +23,6 @@ import org.springframework.stereotype.Service;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.List;
-import java.util.Objects;
 import java.util.Set;
 
 @Service
@@ -36,7 +33,8 @@ public class AdminBookingService {
     private final ReservationOptionDao reservationOptionDao;
     private final UserItineraryDao userItineraryDao;
     private final UserItineraryService userItineraryService;
-    private static final Set<String> ALLOWED_SORT_FIELDS = Set.of("departureDate", "purchaseDate", "startDate", "bookingDate");
+    private static final Set<String> ALLOWED_SORT_FIELDS = Set.of("startDate", "booking_date");
+    private static final Set<String> ALLOWED_SORT_BOOKING_FIELDS = Set.of("departureDate", "purchaseDate");
     private static final Set<String> ALLOWED_SORT_DIRECTIONS = Set.of("asc", "desc");
 
     public AdminBookingService(UserDao userDao, ReservationDao reservationDao, ItineraryDao itineraryDao, ReservationOptionDao reservationOptionDao, UserItineraryDao userItineraryDao, UserItineraryService userItineraryService) {
@@ -57,7 +55,7 @@ public class AdminBookingService {
             }
         }
 
-        validateSorting(sortField, sortDirection);
+        validatePersonalizedSorting(sortField, sortDirection);
 
         List<UserItinerary> reservations = userItineraryDao.getAllUserItinerariesAndFilter(status, search, sortField, sortDirection);
         List <AdminBookingConfirmation> adminBookingConfirmations = reservations.stream()
@@ -76,7 +74,7 @@ public class AdminBookingService {
             }
         }
 
-        validateSorting(sortField, sortDirection);
+        validateStandardSorting(sortField, sortDirection);
 
         List<Reservation> reservations = reservationDao.getAllBookingsAndFilter(status, search, sortField, sortDirection);
         List <AdminBookingConfirmation> adminBookingConfirmationDetails = reservations.stream()
@@ -165,13 +163,20 @@ public class AdminBookingService {
         return AdminBookingConfirmation.fromEntities(id, user, price, purchaseDate, status);
     }
 
-    private void validateSorting(String sortField, String sortDirection) {
+    private void validateStandardSorting(String sortField, String sortDirection) {
+        validateSorting(sortField, sortDirection, ALLOWED_SORT_BOOKING_FIELDS);
+    }
+
+    private void validatePersonalizedSorting(String sortField, String sortDirection) {
+        validateSorting(sortField, sortDirection, ALLOWED_SORT_FIELDS);
+    }
+
+    private void validateSorting(String sortField, String sortDirection, Set<String> allowedFields) {
         if (sortField != null || sortDirection != null) {
             if (sortField == null || sortDirection == null) {
                 throw new ValidationException("Both sort field and sort direction must be provided together.");
             }
-
-            if (!ALLOWED_SORT_FIELDS.contains(sortField)) {
+            if (!allowedFields.contains(sortField)) {
                 throw new ValidationException("Sort field is invalid.");
             }
             if (!ALLOWED_SORT_DIRECTIONS.contains(sortDirection)) {

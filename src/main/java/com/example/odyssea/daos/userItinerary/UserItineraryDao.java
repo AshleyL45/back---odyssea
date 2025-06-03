@@ -31,7 +31,7 @@ public class UserItineraryDao {
     private final JdbcTemplate jdbcTemplate;
     private final NamedParameterJdbcTemplate namedParameterJdbcTemplate;
     private static final Logger log = LoggerFactory.getLogger(UserItineraryDao.class);
-    private static final Set<String> ALLOWED_SORT_FIELDS = Set.of("startDate", "bookingDate");
+    private static final Set<String> ALLOWED_SORT_FIELDS = Set.of("startDate", "booking_date");
 
 
     public UserItineraryDao(JdbcTemplate jdbcTemplate, NamedParameterJdbcTemplate namedParameterJdbcTemplate) {
