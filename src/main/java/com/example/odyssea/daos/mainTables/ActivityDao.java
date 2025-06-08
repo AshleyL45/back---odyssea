@@ -36,7 +36,7 @@ public class ActivityDao {
     }
 
     public void save(Activity activity) {
-        String sql = "INSERT INTO activity (cityId, name, type, physicalEffort, duration, description, price) VALUES (?, ?, ?, ?, ?, ?, ?)";
+        String sql = "INSERT INTO activity (city_id, name, type, physical_effort, duration, description, price) VALUES (?, ?, ?, ?, ?, ?, ?)";
         jdbcTemplate.update(sql,
                 activity.getCityId(),
                 activity.getName(),
@@ -49,7 +49,7 @@ public class ActivityDao {
     }
 
     public void update(Activity activity) {
-        String sql = "UPDATE activity SET cityId = ?, name = ?, type = ?, physicalEffort = ?, duration = ?, description = ?, price = ? WHERE id = ?";
+        String sql = "UPDATE activity SET city_id = ?, name = ?, type = ?, physical_effort = ?, duration = ?, description = ?, price = ? WHERE id = ?";
         int rowsAffected = jdbcTemplate.update(sql,
                 activity.getCityId(),
                 activity.getName(),
@@ -88,12 +88,12 @@ public class ActivityDao {
     }
 
     public List<Activity> findTop5ByCityId(int cityId) {
-        String sql = "SELECT * FROM activity WHERE cityId = ? LIMIT 5";
+        String sql = "SELECT * FROM activity WHERE city_id = ? LIMIT 5";
         return jdbcTemplate.query(sql, new ActivityRowMapper(), cityId);
     }
 
     public boolean activityExists(int cityId, String name) {
-        String sql = "SELECT COUNT(*) FROM activity WHERE cityId = ? AND name = ?";
+        String sql = "SELECT COUNT(*) FROM activity WHERE city_id = ? AND name = ?";
         Integer count = jdbcTemplate.queryForObject(sql, Integer.class, cityId, name);
         return count != null && count > 0;
     }
@@ -102,10 +102,10 @@ public class ActivityDao {
         @Override
         public Activity mapRow(ResultSet rs, int rowNum) throws SQLException {
             int id = rs.getInt("id");
-            int cityId = rs.getInt("cityId");
+            int cityId = rs.getInt("city_id");
             String name = rs.getString("name");
             String type = rs.getString("type");
-            String physicalEffort = rs.getString("physicalEffort");
+            String physicalEffort = rs.getString("physical_effort");
             LocalTime duration = rs.getTime("duration").toLocalTime();
             String description = rs.getString("description");
             double price = rs.getDouble("price");

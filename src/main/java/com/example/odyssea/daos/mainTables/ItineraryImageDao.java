@@ -16,8 +16,8 @@ public class ItineraryImageDao {
     public List<String> findRolesByItinerary(int itineraryId) {
         String sql = """
             SELECT role
-              FROM itineraryImages
-             WHERE itineraryId = ?
+              FROM itinerary_images
+             WHERE itinerary_id = ?
             """;
         return jdbc.queryForList(sql, String.class, itineraryId);
     }

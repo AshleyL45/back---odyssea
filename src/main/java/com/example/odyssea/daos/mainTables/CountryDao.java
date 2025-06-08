@@ -88,7 +88,7 @@ public class CountryDao {
      * Recherche le pays associé à une ville donnée par son nom
      */
     public Country findByCityName(String cityName) {
-        String sql = "SELECT c.* FROM country c JOIN city ct ON c.id = ct.countryId WHERE ct.name = ?";
+        String sql = "SELECT c.* FROM country c JOIN city ct ON c.id = ct.country_id WHERE ct.name = ?";
         return jdbcTemplate.query(sql, new CountryRowMapper(), cityName)
                 .stream()
                 .findFirst()

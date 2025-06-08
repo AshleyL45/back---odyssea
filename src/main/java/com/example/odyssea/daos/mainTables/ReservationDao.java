@@ -23,7 +23,7 @@ public class ReservationDao {
 
     private final JdbcTemplate jdbcTemplate;
     private final NamedParameterJdbcTemplate namedParameterJdbcTemplate;
-    private static final Set<String> ALLOWED_SORT_FIELDS = Set.of("departureDate", "purchaseDate");
+    private static final Set<String> ALLOWED_SORT_FIELDS = Set.of("departure_date", "purchase_date");
 
 
     public ReservationDao(JdbcTemplate jdbcTemplate, NamedParameterJdbcTemplate namedParameterJdbcTemplate) {
@@ -32,16 +32,16 @@ public class ReservationDao {
     }
 
     private final RowMapper<Reservation> reservationRowMapper = (rs, _) -> new Reservation(
-            rs.getInt("reservationId"),
-            rs.getInt("userId"),
-            rs.getInt("itineraryId"),
+            rs.getInt("reservation_id"),
+            rs.getInt("user_id"),
+            rs.getInt("itinerary_id"),
             rs.getString("status"),
-            rs.getDate("departureDate").toLocalDate(),
-            rs.getDate("returnDate").toLocalDate(),
-            rs.getBigDecimal("totalPrice"),
-            rs.getDate("purchaseDate").toLocalDate(),
-            rs.getInt("numberOfAdults"),
-            rs.getInt("numberOfKids"),
+            rs.getDate("departure_date").toLocalDate(),
+            rs.getDate("return_date").toLocalDate(),
+            rs.getBigDecimal("total_price"),
+            rs.getDate("purchase_date").toLocalDate(),
+            rs.getInt("number_of_adults"),
+            rs.getInt("number_of_kids"),
             rs.getString("type")
     );
 
@@ -66,7 +66,7 @@ public class ReservationDao {
         Map<String, Object> params = new HashMap<>();
 
         if (hasSearch) {
-            sql.append(" JOIN user u ON r.userId = u.id");
+            sql.append(" JOIN user u ON r.user_id = u.id");
         }
 
         sql.append(" WHERE 1=1");
@@ -77,7 +77,7 @@ public class ReservationDao {
         }
 
         if (hasSearch) {
-            sql.append(" AND (LOWER(u.firstName) LIKE LOWER(:search) OR LOWER(u.lastName) LIKE LOWER(:search))");
+            sql.append(" AND (LOWER(u.first_name) LIKE LOWER(:search) OR LOWER(u.last_name) LIKE LOWER(:search))");
             params.put("search", "%" + search + "%");
         }
 
@@ -96,7 +96,7 @@ public class ReservationDao {
 
 
     public Reservation findByBookingId(int bookingId){
-        String sql = "SELECT * FROM reservation WHERE reservationId = ?";
+        String sql = "SELECT * FROM reservation WHERE reservation_id = ?";
         return jdbcTemplate.query(sql, reservationRowMapper, bookingId)
                 .stream()
                 .findFirst()
@@ -105,7 +105,7 @@ public class ReservationDao {
 
     // Récupère une réservation
     public Reservation findById(int userId, int bookingId) {
-        String sql = "SELECT * FROM reservation WHERE userId = ? AND reservationId = ?";
+        String sql = "SELECT * FROM reservation WHERE user_id = ? AND reservation_id = ?";
         return jdbcTemplate.query(sql, reservationRowMapper, userId, bookingId)
                 .stream()
                 .findFirst()
@@ -114,14 +114,14 @@ public class ReservationDao {
 
     //Récupère tous les itinéraires reservés d'un utilisateur
     public List<Reservation> findAllUserReservations(int userId) {
-        String sql = "SELECT * FROM reservation WHERE reservation.userId = ?";
+        String sql = "SELECT * FROM reservation WHERE reservation.user_id = ?";
         return jdbcTemplate.query(sql, reservationRowMapper, userId);
     }
 
 
     // Enregistre une nouvelle réservation dans la base
     public Reservation save(Reservation reservation) {
-        String sql = "INSERT INTO reservation (userId, itineraryId, status, departureDate, returnDate, totalPrice, purchaseDate, numberOfAdults, numberOfKids, type) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)";
+        String sql = "INSERT INTO reservation (user_id, itinerary_id, status, departure_date, return_date, total_price, purchase_date, number_of_adults, number_of_kids, type) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)";
 
         jdbcTemplate.update(sql,
                 reservation.getUserId(),
@@ -145,7 +145,7 @@ public class ReservationDao {
             throw new ReservationNotFoundException("Booking " + bookingId + "does not exist");
         }
 
-        String sql = "UPDATE reservation SET userId = ?, itineraryId = ?, status = ?, departureDate = ?, returnDate = ?, totalPrice = ?, purchaseDate = ?, numberOfAdults = ?, numberOfKids = ?, type = ? WHERE reservationId = ?";
+        String sql = "UPDATE reservation SET user_id = ?, itinerary_id = ?, status = ?, departure_date = ?, return_date = ?, total_price = ?, purchase_date = ?, number_of_adults = ?, number_of_kids = ?, type = ? WHERE reservation_id = ?";
         int rowsAffected = jdbcTemplate.update(sql,
                 reservation.getUserId(),
                 reservation.getItineraryId(),
@@ -172,7 +172,7 @@ public class ReservationDao {
             throw new ReservationNotFoundException("Booking with ID " + bookingId + "does not exist");
         }
 
-        String sql = "UPDATE reservation SET status = ? WHERE reservationId = ?";
+        String sql = "UPDATE reservation SET status = ? WHERE reservation_id = ?";
 
         int rowsAffected = jdbcTemplate.update(sql, status.name(), bookingId);
 
@@ -187,7 +187,7 @@ public class ReservationDao {
             throw new ReservationNotFoundException("Booking with ID " + bookingId + " does not exist");
         }
 
-        String sql = "UPDATE reservation SET totalPrice = ? WHERE reservationId = ?";
+        String sql = "UPDATE reservation SET total_price = ? WHERE reservation_id = ?";
         int rowsAffected = jdbcTemplate.update(sql, newPrice, bookingId);
 
         if (rowsAffected <= 0) {
@@ -198,7 +198,7 @@ public class ReservationDao {
 
     // Vérifie si une réservation existe dans la base
     private boolean reservationExists(int bookingId) {
-        String checkSql = "SELECT COUNT(*) FROM reservation WHERE reservationId = ?";
+        String checkSql = "SELECT COUNT(*) FROM reservation WHERE reservation_id = ?";
         int count = jdbcTemplate.queryForObject(checkSql, Integer.class, bookingId);
         return count > 0;
     }

@@ -28,7 +28,7 @@ public class CityDao {
      * Insertion d'une nouvelle ville
      */
     public void save(City city) {
-        String sql = "INSERT INTO city (countryId, name, iataCode, longitude, latitude) VALUES (?, ?, ?, ?, ?)";
+        String sql = "INSERT INTO city (country_id, name, iata_code, longitude, latitude) VALUES (?, ?, ?, ?, ?)";
         jdbcTemplate.update(sql, city.getCountryId(), city.getName(), city.getIataCode(), city.getLongitude(), city.getLatitude());
     }
 
@@ -36,7 +36,7 @@ public class CityDao {
      * Mise à jour d'une ville existante
      */
     public void update(City city) {
-        String sql = "UPDATE city SET countryId = ?, name = ?, iataCode = ?, longitude = ?, latitude = ? WHERE id = ?";
+        String sql = "UPDATE city SET country_id = ?, name = ?, iata_code = ?, longitude = ?, latitude = ? WHERE id = ?";
         int rowsAffected = jdbcTemplate.update(sql,
                 city.getCountryId(), city.getName(), city.getIataCode(),
                 city.getLongitude(), city.getLatitude(), city.getId());
@@ -81,7 +81,7 @@ public class CityDao {
      * Récupère toutes les villes appartenant à un pays donné
      */
     public List<City> findByCountryId(int countryId) {
-        String sql = "SELECT * FROM city WHERE countryId = ?";
+        String sql = "SELECT * FROM city WHERE country_id = ?";
         List<City> cities = jdbcTemplate.query(sql, new CityRowMapper(), countryId);
         if (cities.isEmpty()) {
             throw new ResourceNotFoundException("No cities found for country with id " + countryId);
@@ -124,7 +124,7 @@ public class CityDao {
      * Récupère le code IATA d'une ville à partir de son ID.
      */
     public String getIataCodeById(int cityId) {
-        String sql = "SELECT iataCode FROM city WHERE id = ?";
+        String sql = "SELECT iata_code FROM city WHERE id = ?";
         return jdbcTemplate.queryForObject(sql, String.class, cityId);
     }
 
@@ -136,9 +136,9 @@ public class CityDao {
         public City mapRow(ResultSet rs, int rowNum) throws SQLException {
             return new City(
                     rs.getInt("id"),
-                    rs.getInt("countryId"),
+                    rs.getInt("country_id"),
                     rs.getString("name"),
-                    rs.getString("iataCode"),
+                    rs.getString("iata_code"),
                     rs.getDouble("longitude"),
                     rs.getDouble("latitude")
             );

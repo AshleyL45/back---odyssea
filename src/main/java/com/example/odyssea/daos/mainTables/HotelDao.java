@@ -37,7 +37,7 @@ public class HotelDao {
         if (!cityExists(hotel.getCityId())) {
             throw new ResourceNotFoundException("City with id " + hotel.getCityId() + " not found.");
         }
-        String sql = "INSERT INTO hotel (cityId, name, starRating, description, price) VALUES (?, ?, ?, ?, ?)";
+        String sql = "INSERT INTO hotel (city_id, name, star_rating, description, price) VALUES (?, ?, ?, ?, ?)";
         jdbcTemplate.update(sql,
                 hotel.getCityId(),
                 hotel.getName(),
@@ -51,7 +51,7 @@ public class HotelDao {
         if (!cityExists(hotel.getCityId())) {
             throw new ResourceNotFoundException("City with id " + hotel.getCityId() + " not found.");
         }
-        String sql = "UPDATE hotel SET cityId = ?, name = ?, starRating = ?, description = ?, price = ? WHERE id = ?";
+        String sql = "UPDATE hotel SET city_id = ?, name = ?, star_rating = ?, description = ?, price = ? WHERE id = ?";
         int rowsAffected = jdbcTemplate.update(sql,
                 hotel.getCityId(),
                 hotel.getName(),
@@ -92,7 +92,7 @@ public class HotelDao {
     }
 
     public List<Hotel> findByCityId(int cityId) {
-        String sql = "SELECT * FROM hotel WHERE cityId = ?";
+        String sql = "SELECT * FROM hotel WHERE city_id = ?";
         List<Hotel> hotels = jdbcTemplate.query(sql, new HotelRowMapper(), cityId);
         if (hotels.isEmpty()) {
             throw new HotelNotFound("No hotels found for city id " + cityId);
@@ -101,13 +101,13 @@ public class HotelDao {
     }
 
     public boolean existsByNameAndCityId(String name, int cityId) {
-        String sql = "SELECT COUNT(*) FROM hotel WHERE name = ? AND cityId = ?";
+        String sql = "SELECT COUNT(*) FROM hotel WHERE name = ? AND city_id = ?";
         Integer count = jdbcTemplate.queryForObject(sql, Integer.class, name, cityId);
         return count != null && count > 0;
     }
 
     public List<Hotel> findByCityIdAndStarRating(int cityId, int starRating) {
-        String sql = "SELECT * FROM hotel WHERE cityId = ? AND starRating = ?";
+        String sql = "SELECT * FROM hotel WHERE city_id = ? AND star_rating = ?";
         List<Hotel> hotels = jdbcTemplate.query(sql, new HotelRowMapper(), cityId, starRating);
         if (hotels.isEmpty()) {
             throw new HotelNotFound("No hotels found with star rating " + starRating + " in city id " + cityId);
@@ -120,9 +120,9 @@ public class HotelDao {
         public Hotel mapRow(ResultSet rs, int rowNum) throws SQLException {
             return new Hotel(
                     rs.getInt("id"),
-                    rs.getInt("cityId"),
+                    rs.getInt("city_id"),
                     rs.getString("name"),
-                    rs.getInt("starRating"),
+                    rs.getInt("star_rating"),
                     rs.getString("description"),
                     rs.getDouble("price")
             );
