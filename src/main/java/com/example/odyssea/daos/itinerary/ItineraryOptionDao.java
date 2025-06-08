@@ -18,19 +18,19 @@ public class ItineraryOptionDao {
     }
 
     private final RowMapper<ItineraryOption> itineraryOptionRowMapper = (rs, rowNum) -> new ItineraryOption(
-            rs.getInt("reservationId"),
-            rs.getInt("optionId")
+            rs.getInt("reservation_id"),
+            rs.getInt("option_id")
     );
 
 
     public List<ItineraryOption> findAll() {
-        String sql = "SELECT * FROM itineraryoption";
+        String sql = "SELECT * FROM itinerary_option";
         return jdbcTemplate.query(sql, itineraryOptionRowMapper);
     }
 
 
     public ItineraryOption findById(int idReservation) {
-        String sql = "SELECT * FROM itineraryoption WHERE reservationId = ?";
+        String sql = "SELECT * FROM itinerary_option WHERE reservation_id = ?";
         return jdbcTemplate.query(sql, itineraryOptionRowMapper, idReservation)
                 .stream()
                 .findFirst()
@@ -40,7 +40,7 @@ public class ItineraryOptionDao {
 
 
     public ItineraryOption save(ItineraryOption itineraryOption) {
-        String sql = "INSERT INTO itineraryoption (reservationId, optionId) VALUES (?, ?)";
+        String sql = "INSERT INTO itinerary_option (reservation_id, option_id) VALUES (?, ?)";
         jdbcTemplate.update(sql, itineraryOption.getIdReservation(), itineraryOption.getIdOption());
 
         String sqlGetId = "SELECT LAST_INSERT_ID()";
@@ -57,7 +57,7 @@ public class ItineraryOptionDao {
             throw new RuntimeException("Vol d'itinéraire avec l'ID : " + id + " n'existe pas");
         }
 
-        String sql = "UPDATE itinérary SET flightId = ? WHERE reservationId = ?";
+        String sql = "UPDATE itinerary SET flight_id = ? WHERE reservation_id = ?";
         int rowsAffected = jdbcTemplate.update(sql, itineraryOption.getIdOption(), id);
 
         if (rowsAffected <= 0) {
@@ -70,7 +70,7 @@ public class ItineraryOptionDao {
 
 
     private boolean itineraryOptionExists(int id) {
-        String checkSql = "SELECT COUNT(*) FROM itineraryoption WHERE reservationId = ?";
+        String checkSql = "SELECT COUNT(*) FROM itinerary_option WHERE reservation_id = ?";
         int count = jdbcTemplate.queryForObject(checkSql, Integer.class, id);
         return count > 0;
     }
@@ -78,7 +78,7 @@ public class ItineraryOptionDao {
 
 
     public boolean delete(int id) {
-        String sql = "DELETE FROM itineraryoption WHERE reservationId = ?";
+        String sql = "DELETE FROM itinerary_option WHERE reservation_id = ?";
         int rowsAffected = jdbcTemplate.update(sql, id);
         return rowsAffected > 0;
     }

@@ -24,11 +24,11 @@ public class ItineraryDao {
             rs.getInt("id"),
             rs.getString("name"),
             rs.getString("description"),
-            rs.getString("shortDescription"),
+            rs.getString("short_description"),
             rs.getInt("stock"),
             rs.getBigDecimal("price"),
-            rs.getInt("totalDuration"),
-            rs.getInt("themeId")
+            rs.getInt("total_duration"),
+            rs.getInt("theme_id")
     );
 
 
@@ -40,16 +40,16 @@ public class ItineraryDao {
     public List<ItinerarySummary> findAllItinerariesSummaries(){
         String sql = "SELECT \n" +
                 "    itinerary.*, \n" +
-                "    theme.name AS themeName,\n" +
-                "    GROUP_CONCAT(DISTINCT country.name ORDER BY country.name ASC SEPARATOR ', ') AS countriesVisited\n" +
+                "    theme.name AS theme_name,\n" +
+                "    GROUP_CONCAT(DISTINCT country.name ORDER BY country.name ASC SEPARATOR ', ') AS countries_visited\n" +
                 "FROM \n" +
-                "    dailyItinerary\n" +
+                "    daily_itinerary\n" +
                 "INNER JOIN \n" +
-                "    country ON country.id = dailyItinerary.countryId\n" +
+                "    country ON country.id = daily_itinerary.country_id\n" +
                 "INNER JOIN \n" +
-                "    itinerary ON dailyItinerary.itineraryId = itinerary.id\n" +
+                "    itinerary ON daily_itinerary.itinerary_id = itinerary.id\n" +
                 "INNER JOIN \n" +
-                "    theme ON itinerary.themeId = theme.id\n" +
+                "    theme ON itinerary.theme_id = theme.id\n" +
                 "GROUP BY \n" +
                 "    itinerary.id;";
         return jdbcTemplate.query(sql, new ItineraryThemesMapper());
