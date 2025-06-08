@@ -23,28 +23,28 @@ public class UserItineraryStepDao {
 
     private final RowMapper<UserItineraryStep> userItineraryStepRowMapper = (rs, _) -> new UserItineraryStep(
             rs.getInt("id"),
-            rs.getInt("userId"),
-            rs.getInt("userItineraryId"),
-            rs.getInt("hotelId"),
-            rs.getInt("cityId"),
-            rs.getInt("dayNumber"),
-            rs.getBoolean("offDay"),
-            rs.getInt("activityId"),
-            rs.getInt("planeRideId")
+            rs.getInt("user_id"),
+            rs.getInt("user_itinerary_id"),
+            rs.getInt("hotel_id"),
+            rs.getInt("city_id"),
+            rs.getInt("day_number"),
+            rs.getBoolean("off_day"),
+            rs.getInt("activity_id"),
+            rs.getInt("plane_ride_id")
     );
 
     public List<UserItineraryStep> findAll (){
-        String sql = "SELECT * FROM userDailyPlan";
+        String sql = "SELECT * FROM user_daily_plan";
         return jdbcTemplate.query(sql, userItineraryStepRowMapper);
     }
 
     public List<UserItineraryStep> findDailyPlansOfAnItinerary(int itineraryId){
-        String sql = "SELECT * FROM userDailyPlan WHERE userItineraryId = ?";
+        String sql = "SELECT * FROM user_daily_plan WHERE user_itinerary_id = ?";
         return jdbcTemplate.query(sql, userItineraryStepRowMapper, itineraryId);
     }
 
     public UserItineraryStep findById(int userId, int userItineraryId, int dayNumber){
-        String sql = "SELECT * FROM userDailyPlan  WHERE userId = ? AND userItineraryId = ? AND dayNumber = ?";
+        String sql = "SELECT * FROM user_daily_plan  WHERE user_id = ? AND user_itinerary_id = ? AND day_number = ?";
         return jdbcTemplate.query(sql, userItineraryStepRowMapper, userId, userItineraryId, dayNumber)
                 .stream()
                 .findFirst()
@@ -61,23 +61,23 @@ public class UserItineraryStepDao {
     }*/
 
     public UserItineraryStep save (UserItineraryStep userItineraryStep){
-        String sql = "INSERT INTO userDailyPlan (userId, userItineraryId, hotelId, cityId, dayNumber, offDay, activityId, planeRideId) VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
+        String sql = "INSERT INTO user_daily_plan (user_id, user_itinerary_id, hotel_id, city_id, day_number, off_day, activity_id, plane_ride_id) VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
         jdbcTemplate.update(sql, userItineraryStep.getUserId(), userItineraryStep.getUserItineraryId(), userItineraryStep.getHotelId(), userItineraryStep.getCityId(), userItineraryStep.getDayNumber(), userItineraryStep.isOffDay(), userItineraryStep.getActivityId(), userItineraryStep.getPlaneRideId());
 
         return userItineraryStep;
     }
 
     public Hotel getHotelInADay(int userItineraryId, int dayNumber){
-        String sql = "SELECT hotel.* FROM userDailyPlan \n" +
-                "INNER JOIN hotel ON userDailyPlan.hotelId = hotel.id\n" +
-                "WHERE userItineraryId = ? AND dayNumber = ?";
+        String sql = "SELECT hotel.* FROM user_daily_plan \n" +
+                "INNER JOIN hotel ON user_daily_plan.hotel_id = hotel.id\n" +
+                "WHERE user_itinerary_id = ? AND day_number = ?";
         return jdbcTemplate.queryForObject(sql, new Object[]{userItineraryId, dayNumber}, new BeanPropertyRowMapper<>(Hotel.class));
     }
 
     public Activity getActivityInADay(int userItineraryId, int dayNumber){
-        String sql = "SELECT activity.* FROM userDailyPlan \n" +
-                "INNER JOIN activity ON userDailyPlan.activityId = activity.id\n" +
-                "WHERE userItineraryId = ? AND dayNumber = ?";
+        String sql = "SELECT activity.* FROM user_daily_plan \n" +
+                "INNER JOIN activity ON user_daily_plan.activity_id = activity.id\n" +
+                "WHERE user_itinerary_id = ? AND day_number = ?";
 
 
         List<Activity> activities = jdbcTemplate.query(sql, new Object[]{userItineraryId, dayNumber}, new BeanPropertyRowMapper<>(Activity.class));
@@ -89,7 +89,7 @@ public class UserItineraryStepDao {
             throw new RuntimeException("The daily itinerary you are looking for does not exist.");
         }
 
-        String sql = "UPDATE userDailyPlan SET userId = ?, userItineraryId = ?, hotelId = ?, cityId = ?, dayNumber = ?, offDay = ?, activityId = ?, planeRideId = ? WHERE userId = ? AND userItineraryId = ? AND dayNumber = ?";
+        String sql = "UPDATE user_daily_plan SET user_id = ?, user_itinerary_id = ?, hotel_id = ?, city_id = ?, day_number = ?, off_day = ?, activity_id = ?, plane_ride_id = ? WHERE user_id = ? AND user_itinerary_id = ? AND day_number = ?";
         int rowsAffected = jdbcTemplate.update(sql, userItineraryStep.getUserId(), userItineraryStep.getUserItineraryId(), userItineraryStep.getHotelId(), userItineraryStep.getCityId(), userItineraryStep.getDayNumber(), userItineraryStep.isOffDay(), userItineraryStep.getActivityId(), userItineraryStep.getPlaneRideId(), userId, userItineraryId, dayNumber);
 
         if(rowsAffected <= 0){
@@ -101,14 +101,14 @@ public class UserItineraryStepDao {
     }
 
     public boolean delete(int userId, int userItineraryId, int dayNumber) {
-        String sql = "DELETE FROM userDailyPlan WHERE userId = ? AND userItineraryId = ? AND dayNumber = ?";
+        String sql = "DELETE FROM user_daily_plan WHERE user_id = ? AND user_itinerary_id = ? AND day_number = ?";
         int rowsAffected = jdbcTemplate.update(sql, userId, userItineraryId, dayNumber);
         return rowsAffected > 0;
     }
 
 
     public boolean userItineraryStepExists(int userId, int userItineraryId, int dayNumber ){
-        String sqlCheck = "SELECT COUNT(*) FROM userDailyPlan WHERE userId = ? AND userItineraryId = ? AND dayNumber = ?";
+        String sqlCheck = "SELECT COUNT(*) FROM user_daily_plan WHERE user_id = ? AND user_itinerary_id = ? AND day_number = ?";
         int count = jdbcTemplate.queryForObject(sqlCheck, Integer.class, userId, userItineraryId, dayNumber);
         return count > 0;
     }

@@ -51,7 +51,7 @@ public class UserDao {
     }
 
     public void save(User user) {
-        String sql = "INSERT INTO user (email, password, role, firstName, lastName) VALUES (?, ?, ?, ?, ?)";
+        String sql = "INSERT INTO user (email, password, role, first_name, last_name) VALUES (?, ?, ?, ?, ?)";
         int rowsAffected = jdbcTemplate.update(sql, user.getEmail(), user.getPassword(), user.getRole(), user.getFirstName(), user.getLastName());
         if(rowsAffected <= 0){
             throw new DatabaseException("Could not save user.");
@@ -65,7 +65,7 @@ public class UserDao {
 
         User existingUser = this.findById(id);
 
-        String sql = "UPDATE user SET email = ?, firstName = ?, lastName = ? WHERE id = ?";
+        String sql = "UPDATE user SET email = ?, first_name = ?, last_name = ? WHERE id = ?";
         int rowsAffected = jdbcTemplate.update(
                 sql,
                 user.getEmail() != null ? user.getEmail() : existingUser.getEmail(),

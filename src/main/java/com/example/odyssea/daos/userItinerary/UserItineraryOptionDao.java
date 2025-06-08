@@ -22,22 +22,22 @@ public class UserItineraryOptionDao {
     }
 
     private final RowMapper<UserItineraryOption> userItineraryOptionRowMapper = (rs, _) -> new UserItineraryOption(
-            rs.getInt("userItineraryId"),
-            rs.getInt("optionId")
+            rs.getInt("user_itinerary_id"),
+            rs.getInt("option_id")
     );
 
     public List<UserItineraryOption> findAll(){ // Gets all options of all user itineraries
-        String sql = "SELECT * FROM userItineraryOption";
+        String sql = "SELECT * FROM user_itinerary_option";
         return  jdbcTemplate.query(sql, userItineraryOptionRowMapper);
     }
 
     public List<Option> findOptionsByUserItineraryId(int userItineraryId){ // Gets all options of a user itinerary in particular
-        String sql = "SELECT options.* FROM userItineraryOption INNER JOIN options ON userItineraryOption.optionId = options.id WHERE userItineraryId = ?";
+        String sql = "SELECT options.* FROM user_itinerary_option INNER JOIN options ON user_itinerary_option.option_id = options.id WHERE user_itinerary_id = ?";
         return jdbcTemplate.query(sql, new Object[]{userItineraryId}, new BeanPropertyRowMapper<>(Option.class));
     }
 
     public UserItineraryOption findByIds(int userItineraryId, int optionId){
-        String sql = "SElECT * FROM userItineraryOption WHERE userItineraryId = ? AND optionId = ?";
+        String sql = "SElECT * FROM user_itinerary_option WHERE user_itinerary_id = ? AND option_id = ?";
         return jdbcTemplate.query(sql, userItineraryOptionRowMapper, userItineraryId, optionId)
                 .stream()
                 .findFirst()
@@ -46,7 +46,7 @@ public class UserItineraryOptionDao {
 
     public UserItineraryOption save(int userItineraryId, int optionId) {
         try {
-            String sql = "INSERT INTO userItineraryOption (userItineraryId, optionId) VALUES (?, ?)";
+            String sql = "INSERT INTO user_itinerary_option (user_itinerary_id, option_id) VALUES (?, ?)";
             jdbcTemplate.update(sql, userItineraryId, optionId);
 
             return new UserItineraryOption(userItineraryId, optionId);
@@ -62,7 +62,7 @@ public class UserItineraryOptionDao {
             throw new RuntimeException("The user itinerary option you are looking for does not exist.");
         }
 
-        String sql = "UPDATE userItineraryOption SET userItineraryId = ?, optionId = ? WHERE userItineraryId = ? AND optionId = ?";
+        String sql = "UPDATE user_itinerary_option SET user_itinerary_id = ?, option_id = ? WHERE user_itinerary_id = ? AND option_id = ?";
         int rowsAffected = jdbcTemplate.update(sql, userItineraryOption.getUserItineraryId(), userItineraryOption.getOptionId(), userItineraryId, optionId);
 
         if(rowsAffected <= 0){
@@ -73,7 +73,7 @@ public class UserItineraryOptionDao {
     }
 
     public boolean delete(int userItineraryId, int optionId){
-        String sql = "DELETE FROM userItineraryOption WHERE userItineraryId = ? AND optionId = ?";
+        String sql = "DELETE FROM user_itinerary_option WHERE user_itinerary_id = ? AND option_id = ?";
         int rowsAffected = jdbcTemplate.update(sql, userItineraryId, optionId);
 
         return rowsAffected > 0;
@@ -82,7 +82,7 @@ public class UserItineraryOptionDao {
 
 
     public boolean userItineraryOptionExists(int userItineraryId, int optionId){ // Checks if there are options in a user itinerary
-        String sqlCheck = "SELECT COUNT(*) FROM userItineraryOption WHERE userItineraryId = ? AND optionId = ?";
+        String sqlCheck = "SELECT COUNT(*) FROM user_itinerary_option WHERE user_itinerary_id = ? AND option_id = ?";
         int count = jdbcTemplate.queryForObject(sqlCheck, Integer.class, userItineraryId, optionId);
         return count > 0;
     }
