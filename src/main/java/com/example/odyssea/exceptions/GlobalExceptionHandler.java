@@ -34,8 +34,6 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler({
             ResourceNotFoundException.class,
-            UserNotFoundException.class,
-            UsernameNotFoundException.class,
             ReservationNotFoundException.class,
             CityNotFound.class,
             CountryNotFound.class,
@@ -209,4 +207,13 @@ public class GlobalExceptionHandler {
                 ApiResponse.error("Invalid credentials.", HttpStatus.UNAUTHORIZED)
         );
     }
+
+    @ExceptionHandler({UsernameNotFoundException.class, UserNotFoundException.class})
+    public ResponseEntity<ApiResponse<Void>> handleUsernameNotFoundException(Exception ex) {
+        logger.error("User not found : {}", ex.getMessage(), ex);
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(
+                ApiResponse.error("User not found.", HttpStatus.NOT_FOUND)
+        );
+    }
+
 }

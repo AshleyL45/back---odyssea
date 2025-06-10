@@ -26,6 +26,7 @@ public class HotelAssigner {
     public HotelDto assignHotel(UserItineraryDayDTO day, List<HotelDto> hotelsList){
         StopWatch watch = new StopWatch();
         watch.start("Assigning hotel for a day");
+
         int dayNumber = day.getDayNumber();
         int daysPerHotel = 4;
 

@@ -1,5 +1,6 @@
 package com.example.odyssea.services;
 
+import com.example.odyssea.exceptions.UserNotFoundException;
 import com.example.odyssea.exceptions.ValidationException;
 import com.example.odyssea.security.CustomUserDetails;
 import org.springframework.security.core.Authentication;
@@ -12,7 +13,7 @@ public class CurrentUserService {
     public Integer getCurrentUserId(){
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();  // Contient les informations sur l'utilisateur connecté
         if (!(auth.getPrincipal() instanceof CustomUserDetails)) {
-            throw new ValidationException("Unauthenticated user. Please login or register.");
+            throw new UserNotFoundException("Unauthenticated user. Please login or register.");
         }
         return ((CustomUserDetails) auth.getPrincipal()).getUserId();
     }

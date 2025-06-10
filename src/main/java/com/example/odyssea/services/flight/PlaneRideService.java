@@ -71,10 +71,10 @@ public class PlaneRideService {
         StopWatch sw = new StopWatch();
 
         return Mono.fromCallable(() -> {
-                    flightSemaphore.acquire(); // ⛔ bloque si plus de 2 appels simultanés
+                    flightSemaphore.acquire();
                     return true;
                 })
-                .subscribeOn(Schedulers.boundedElastic()) // pour ne pas bloquer les threads réactifs
+                .subscribeOn(Schedulers.boundedElastic())
                 .flatMap(ignored -> {
                     sw.start("🌐 Appel API Amadeus");
                     logger.info("▶️ Appel à Amadeus lancé...");

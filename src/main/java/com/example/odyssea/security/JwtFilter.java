@@ -1,16 +1,13 @@
 package com.example.odyssea.security;
 
-import com.example.odyssea.exceptions.GlobalExceptionHandler;
 import com.example.odyssea.exceptions.JwtToken.*;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
-import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.security.authentication.BadCredentialsException;
-import org.springframework.security.authentication.InsufficientAuthenticationException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -58,8 +55,12 @@ public class JwtFilter extends OncePerRequestFilter {
             } catch (JwtTokenUnsupportedException | JwtTokenSignatureException ex) {
                 throw new BadCredentialsException(ex.getMessage(), ex);
             } catch (JwtTokenExpiredException ex) {
-                throw new InsufficientAuthenticationException(ex.getMessage(), ex);
+                logger.warn("Token expired: {}", ex.getMessage());
+                SecurityContextHolder.clearContext();
+                response.sendError(HttpServletResponse.SC_UNAUTHORIZED, "Token expired");
+                return;
             }
+
         }
 
         chain.doFilter(request, response);
