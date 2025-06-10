@@ -25,8 +25,8 @@ public class UserDao {
             rs.getString("email"),
             rs.getString("password"),
             rs.getString("role"),
-            rs.getString("firstName"),
-            rs.getString("lastName")
+            rs.getString("first_name"),
+            rs.getString("last_name")
     );
 
     public List<User> findAll(){

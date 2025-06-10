@@ -50,7 +50,7 @@ public class ItineraryStepDao {
     }
 
     public List<DailyPlanDto> findByItineraryId(int itineraryId){
-        String sql = "SELECT city.name AS city_name, country.name AS country_name, hotel.name AS hotel_name, hotel.description AS hotel_description, activity.name AS activity_name, activity.description AS activity_description, daily_itinerary.description_per_day, daily_itinerary.day_number FROM daily_itinerary\n" +
+        String sql = "SELECT city.name AS cityName, country.name AS countryName, hotel.name AS hotelName, hotel.description AS hotelDescription, activity.name AS activityName, activityDescription AS activityDescription, daily_itinerary.description_per_day, daily_itinerary.day_number FROM daily_itinerary\n" +
                 "INNER JOIN city ON daily_itinerary.city_id = city.id\n" +
                 "INNER JOIN country ON daily_itinerary.country_id = country.id\n" +
                 "INNER JOIN hotel ON daily_itinerary.hotel_id = hotel.id\n" +
@@ -70,12 +70,12 @@ public class ItineraryStepDao {
 
     public List<DailyPlanWithCityDto> findByItineraryIdWithCity(int itineraryId) {
         String sql = "SELECT " +
-                "city.name AS city_name, " +
-                "country.name AS country_name, " +
-                "hotel.name AS hotel_name, " +
-                "hotel.description AS hotel_description, " +
-                "activity.name AS activity_name, " +
-                "activity.description AS activity_description, " +
+                "city.name AS cityName, " +
+                "country.name AS countryName, " +
+                "hotel.name AS hotelName, " +
+                "hotel.description AS hotelDescription, " +
+                "activity.name AS activityName, " +
+                "activity.description AS activityDescription, " +
                 "daily_itinerary.description_per_day, " +
                 "daily_itinerary.day_number, " +
                 "city.latitude, " +

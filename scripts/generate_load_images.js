@@ -37,7 +37,7 @@
 
  async function main() {
    const conn = await mysql.createConnection(DB);
-   await conn.query(`TRUNCATE TABLE itineraryImages`);
+   await conn.query(`TRUNCATE TABLE itinerary_images`);
    await conn.query(`TRUNCATE TABLE images`);
    await conn.query(`ALTER TABLE images AUTO_INCREMENT = 1`);
 
@@ -57,7 +57,7 @@
     // 1) INSERT dans images avec le rôle correct
     const [res] = await conn.execute(
       `INSERT INTO images
-         (sizeType, link, altText, activityId, hotelId, itineraryId, articleId, data)
+         (size_type, link, alt_text, activity_id, hotel_id, itinerary_id, article_id, data)
        VALUES (?, '', ?, NULL, NULL, ?, NULL, ?)`,
       [role, `${role} pour itinéraire ${itinId}`, itinId, blob]
     );
@@ -65,7 +65,7 @@
 
     // 2) Lien dans itineraryImages : on met bien `role`, pas le filename
     await conn.execute(
-      `INSERT INTO itineraryImages (itineraryId, imageId, role)
+      `INSERT INTO itinerary_images (itinerary_id, image_id, role)
        VALUES (?, ?, ?)`,
       [itinId, imgId, role]
     );

@@ -31,7 +31,7 @@ public class UserItineraryDraftDao {
     );
 
     public UserItineraryDraft getLastDraftByUserId(Integer userId){
-        String sql = "SELECT * FROM userItineraryDraft WHERE user_id = ? ORDER BY created_at DESC LIMIT 1";
+        String sql = "SELECT * FROM user_itinerary_draft WHERE user_id = ? ORDER BY created_at DESC LIMIT 1";
         return jdbcTemplate.query(sql, userItineraryDraftRowMapper, userId)
                 .stream()
                 .findFirst()
@@ -40,7 +40,7 @@ public class UserItineraryDraftDao {
 
     public Integer getLastDraftIdByUser(int userId) {
         try {
-            String sql = "SELECT id FROM userItineraryDraft WHERE user_id = ? ORDER BY created_at DESC LIMIT 1";
+            String sql = "SELECT id FROM user_itinerary_draft WHERE user_id = ? ORDER BY created_at DESC LIMIT 1";
             return jdbcTemplate.queryForObject(sql, Integer.class, userId);
         } catch (EmptyResultDataAccessException e) {
             throw new DatabaseException("No draft found for user with ID: " + userId);
@@ -50,7 +50,7 @@ public class UserItineraryDraftDao {
     }
 
     public Integer getDurationByUserId(int userId) {
-        String sql = "SELECT duration FROM userItineraryDraft WHERE user_id = ? ORDER BY created_at DESC LIMIT 1";
+        String sql = "SELECT duration FROM user_itinerary_draft WHERE user_id = ? ORDER BY created_at DESC LIMIT 1";
         try {
             return jdbcTemplate.queryForObject(sql, Integer.class, userId);
         } catch (EmptyResultDataAccessException e) {
@@ -60,7 +60,7 @@ public class UserItineraryDraftDao {
 
     public Integer saveFirstStep(int userId, int duration){
         try {
-            String sql = "INSERT INTO userItineraryDraft (user_id, duration) VALUES (?, ?)";
+            String sql = "INSERT INTO user_itinerary_draft (user_id, duration) VALUES (?, ?)";
             jdbcTemplate.update(sql, userId, duration);
 
             String sqlGetId = "SELECT LAST_INSERT_ID()";
@@ -79,7 +79,7 @@ public class UserItineraryDraftDao {
     public LocalDate saveDate(int userId, LocalDate startDate){
         int draftId = getLastDraftIdByUser(userId);
 
-        String sql = "UPDATE userItineraryDraft SET start_date = ? WHERE id = ?";
+        String sql = "UPDATE user_itinerary_draft SET start_date = ? WHERE id = ?";
         int rowsAffected = jdbcTemplate.update(sql, startDate, draftId);
 
         if (rowsAffected == 0) {
@@ -92,7 +92,7 @@ public class UserItineraryDraftDao {
     public String saveDepartureCity(int userId, String departureCity){
         int draftId = getLastDraftIdByUser(userId);
 
-        String sql = "UPDATE userItineraryDraft SET departure_city = ? WHERE id = ?";
+        String sql = "UPDATE user_itinerary_draft SET departure_city = ? WHERE id = ?";
         int rowsAffected = jdbcTemplate.update(sql, departureCity, draftId);
 
         if (rowsAffected == 0) {
@@ -106,7 +106,7 @@ public class UserItineraryDraftDao {
     public void saveHotelStanding(int userId, int hotelStanding){
         int draftId = getLastDraftIdByUser(userId);
 
-        String sql = "UPDATE userItineraryDraft SET hotel_standing = ? WHERE id = ?";
+        String sql = "UPDATE user_itinerary_draft SET hotel_standing = ? WHERE id = ?";
         int rowsAffected = jdbcTemplate.update(sql, hotelStanding, draftId);
 
         if (rowsAffected == 0) {
@@ -119,7 +119,7 @@ public class UserItineraryDraftDao {
     public void saveTravelsNumber(int userId, int numberAdults, int numberKids){
         int draftId = getLastDraftIdByUser(userId);
 
-        String sql = "UPDATE userItineraryDraft SET number_adults = ?, number_kids = ? WHERE id = ?";
+        String sql = "UPDATE user_itinerary_draft SET number_adults = ?, number_kids = ? WHERE id = ?";
         int rowsAffected = jdbcTemplate.update(sql, numberAdults, numberKids, draftId);
 
         if (rowsAffected == 0) {
@@ -132,14 +132,14 @@ public class UserItineraryDraftDao {
         if(!doesExist){
             return false;
         }
-        String sql = "DELETE FROM userItineraryDraft WHERE id = ?";
+        String sql = "DELETE FROM user_itinerary_draft WHERE id = ?";
         int rowsAffected = jdbcTemplate.update(sql, id);
 
         return rowsAffected > 0;
     }
 
     public boolean doesExist(Integer id){
-        String sql = "SELECT COUNT (*) FROM userItineraryDraft WHERE id = ?";
+        String sql = "SELECT COUNT (*) FROM user_itinerary_draft WHERE id = ?";
         int count = jdbcTemplate.queryForObject(sql, Integer.class, id);
         return count > 0;
     }

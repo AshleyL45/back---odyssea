@@ -31,7 +31,7 @@ public class DraftCitiesDao {
         String sql = """
         SELECT dc.city_id
          FROM draft_cities dc
-         JOIN userItineraryDraft uid ON dc.draft_user_itinerary_id = uid.id
+         JOIN user_itinerary_draft uid ON dc.draft_user_itinerary_id = uid.id
          WHERE uid.user_id = ?
     """;
         return jdbcTemplate.queryForList(sql, Integer.class, userId);
