@@ -1,4 +1,4 @@
-package com.example.odyssea.dtos.reservation;
+package com.example.odyssea.dtos.booking;
 
 import com.example.odyssea.entities.userAuth.User;
 import com.example.odyssea.enums.BookingStatus;

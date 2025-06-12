@@ -1,8 +1,8 @@
-package com.example.odyssea.dtos.reservation;
+package com.example.odyssea.dtos.booking;
 
 import com.example.odyssea.entities.itinerary.Itinerary;
+import com.example.odyssea.entities.booking.Booking;
 import com.example.odyssea.entities.mainTables.Option;
-import com.example.odyssea.entities.mainTables.Reservation;
 
 import java.time.LocalDate;
 import java.util.List;
@@ -100,20 +100,20 @@ public class BookingConfirmation {
     }
 
     public static BookingConfirmation fromEntities(
-            Reservation reservation,
+            Booking booking,
             Itinerary itinerary,
             List<Option> options
     ) {
 
         return new BookingConfirmation(
                 itinerary,
-                reservation.getDepartureDate(),
-                reservation.getReturnDate(),
-                reservation.getStatus(),
-                reservation.getNumberOfAdults(),
-                reservation.getNumberOfKids(),
+                booking.getDepartureDate(),
+                booking.getReturnDate(),
+                booking.getStatus(),
+                booking.getNumberOfAdults(),
+                booking.getNumberOfKids(),
                 options,
-                reservation.getPurchaseDate()
+                booking.getPurchaseDate()
         );
     }
 }

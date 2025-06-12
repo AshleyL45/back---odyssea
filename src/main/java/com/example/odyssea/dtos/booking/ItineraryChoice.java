@@ -1,4 +1,4 @@
-package com.example.odyssea.dtos.reservation;
+package com.example.odyssea.dtos.booking;
 
 import jakarta.validation.constraints.Positive;
 

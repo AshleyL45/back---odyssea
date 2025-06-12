@@ -1,18 +1,18 @@
-package com.example.odyssea.entities.mainTables;
+package com.example.odyssea.entities.booking;
 
 import jakarta.validation.constraints.*;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
 
-public class Reservation {
+public class Booking {
 
-    private int reservationId;
+    private int booking;
 
-    @NotNull(message = "User reservationId cannot be null.")
+    @NotNull(message = "User booking cannot be null.")
     private int userId;
 
-    @NotNull(message = "Itinerary reservationId cannot be null.")
+    @NotNull(message = "Itinerary booking cannot be null.")
     private int itineraryId;
 
     @NotBlank(message = "Status cannot be blank.")
@@ -39,12 +39,12 @@ public class Reservation {
     @NotNull(message = "Type cannot be null.")
     private String type;
 
-    public Reservation() {
+    public Booking() {
     }
 
 
-    public Reservation(int reservationId, int userId, int itineraryId, String status, LocalDate departureDate, LocalDate returnDate, BigDecimal totalPrice, LocalDate purchaseDate, int numberOfAdults, int numberOfKids, String type) {
-        this.reservationId = reservationId;
+    public Booking(int booking, int userId, int itineraryId, String status, LocalDate departureDate, LocalDate returnDate, BigDecimal totalPrice, LocalDate purchaseDate, int numberOfAdults, int numberOfKids, String type) {
+        this.booking = booking;
         this.userId = userId;
         this.itineraryId = itineraryId;
         this.status = status;
@@ -113,12 +113,12 @@ public class Reservation {
         this.numberOfKids = numberOfKids;
     }
 
-    public int getReservationId() {
-        return reservationId;
+    public int getBooking() {
+        return booking;
     }
 
-    public void setReservationId(int reservationId) {
-        this.reservationId = reservationId;
+    public void setBooking(int booking) {
+        this.booking = booking;
     }
 
     public String getType() {

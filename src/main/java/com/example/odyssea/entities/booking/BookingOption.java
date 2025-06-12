@@ -1,24 +1,24 @@
-package com.example.odyssea.entities.mainTables;
+package com.example.odyssea.entities.booking;
 
 import jakarta.validation.constraints.NotNull;
 
-public class ReservationOption {
+public class BookingOption {
 
     @NotNull(message = "User ID is required")
-    private int reservationId;
+    private int booking;
     @NotNull(message = "Option ID is required")
     private int optionId;
 
-    public ReservationOption() {
+    public BookingOption() {
     }
 
 
     public int getItineraryId() {
-        return reservationId;
+        return booking;
     }
 
-    public void setItineraryId(int reservationId) {
-        this.reservationId = reservationId;
+    public void setItineraryId(int booking) {
+        this.booking = booking;
     }
 
     public int getOptionId() {

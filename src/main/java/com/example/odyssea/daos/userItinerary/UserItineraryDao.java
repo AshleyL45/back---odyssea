@@ -1,6 +1,5 @@
 package com.example.odyssea.daos.userItinerary;
 
-import com.example.odyssea.entities.mainTables.Reservation;
 import com.example.odyssea.entities.userItinerary.UserItinerary;
 import com.example.odyssea.enums.BookingStatus;
 import com.example.odyssea.exceptions.UserItineraryDatabaseException;

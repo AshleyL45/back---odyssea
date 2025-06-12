@@ -4,25 +4,25 @@ import jakarta.validation.constraints.Min;
 
 public class ItineraryOption {
 
-    @Min(value = 1, message = "Reservation ID must be greater than or equal to 1")
-    private int idReservation;
+    @Min(value = 1, message = "Booking ID must be greater than or equal to 1")
+    private int idBooking;
 
     @Min(value = 1, message = "Option ID must be greater than or equal to 1")
     private int idOption;
 
     public ItineraryOption() {}
 
-    public ItineraryOption(int idReservation, int idOption) {
-        this.idReservation = idReservation;
+    public ItineraryOption(int idBooking, int idOption) {
+        this.idBooking = idBooking;
         this.idOption = idOption;
     }
 
-    public int getIdReservation() {
-        return idReservation;
+    public int getIdBooking() {
+        return idBooking;
     }
 
-    public void setIdReservation(int idReservation) {
-        this.idReservation = idReservation;
+    public void setIdBooking(int idBooking) {
+        this.idBooking = idBooking;
     }
 
     public int getIdOption() {

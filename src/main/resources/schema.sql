@@ -346,12 +346,12 @@ CREATE TABLE IF NOT EXISTS `plane_ride` (
 /*!40101 SET character_set_client = @saved_cs_client */;
 SET FOREIGN_KEY_CHECKS = 1;
 --
--- Table structure for table `reservation`
+-- Table structure for table `booking`
 --
 SET FOREIGN_KEY_CHECKS = 0;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!50503 SET character_set_client = utf8mb4 */;
-CREATE TABLE IF NOT EXISTS `reservation` (
+CREATE TABLE IF NOT EXISTS `booking` (
   `user_id` int NOT NULL,
   `itinerary_id` int NOT NULL,
   `status` varchar(255) NOT NULL,
@@ -366,18 +366,18 @@ CREATE TABLE IF NOT EXISTS `reservation` (
   KEY `userId` (`user_id`),
   KEY `itineraryId` (`itinerary_id`),
   KEY `optionId_constraint` (`option_id`),
-  CONSTRAINT `itinerary_id_reservation` FOREIGN KEY (`itinerary_id`) REFERENCES `itinerary` (`id`) ON DELETE CASCADE,
+  CONSTRAINT `itinerary_id_booking` FOREIGN KEY (`itinerary_id`) REFERENCES `itinerary` (`id`) ON DELETE CASCADE,
   CONSTRAINT `optionId_constraint` FOREIGN KEY (`option_id`) REFERENCES `options` (`id`),
-  CONSTRAINT `user_id_reservation` FOREIGN KEY (`user_id`) REFERENCES `user` (`id`) ON DELETE CASCADE
+  CONSTRAINT `user_id_booking` FOREIGN KEY (`user_id`) REFERENCES `user` (`id`) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 SET FOREIGN_KEY_CHECKS = 1;
 --
--- Table structure for table `reservation_draft`
+-- Table structure for table `booking`
 --
 SET FOREIGN_KEY_CHECKS = 0;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!50503 SET character_set_client = utf8mb4 */;
-CREATE TABLE IF NOT EXISTS `reservation_draft` (
+CREATE TABLE IF NOT EXISTS `booking` (
   `draft_id` int NOT NULL AUTO_INCREMENT,
   `user_id` int DEFAULT NULL,
   `itinerary_id` int DEFAULT NULL,
@@ -389,41 +389,41 @@ CREATE TABLE IF NOT EXISTS `reservation_draft` (
   PRIMARY KEY (`draft_id`),
   KEY `user_id` (`user_id`),
   KEY `itinerary_id` (`itinerary_id`),
-  CONSTRAINT `reservation_draft_ibfk_1` FOREIGN KEY (`user_id`) REFERENCES `user` (`id`),
-  CONSTRAINT `reservation_draft_ibfk_2` FOREIGN KEY (`itinerary_id`) REFERENCES `itinerary` (`id`)
+  CONSTRAINT `booking` FOREIGN KEY (`user_id`) REFERENCES `user` (`id`),
+  CONSTRAINT `booking` FOREIGN KEY (`itinerary_id`) REFERENCES `itinerary` (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 SET FOREIGN_KEY_CHECKS = 1;
 --
--- Table structure for table `reservation_option`
+-- Table structure for table `booking`
 --
 SET FOREIGN_KEY_CHECKS = 0;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!50503 SET character_set_client = utf8mb4 */;
-CREATE TABLE IF NOT EXISTS `reservation_option` (
+CREATE TABLE IF NOT EXISTS `booking` (
   `user_id` int NOT NULL,
   `itinerary_id` int NOT NULL,
   `option_id` int NOT NULL,
   PRIMARY KEY (`user_id`,`itinerary_id`,`option_id`),
   KEY `option_id` (`option_id`),
-  CONSTRAINT `reservation_option_ibfk_1` FOREIGN KEY (`user_id`, `itinerary_id`) REFERENCES `reservation` (`user_id`, `itinerary_id`) ON DELETE CASCADE,
-  CONSTRAINT `reservation_option_ibfk_2` FOREIGN KEY (`option_id`) REFERENCES `options` (`id`) ON DELETE CASCADE
+  CONSTRAINT `booking` FOREIGN KEY (`user_id`, `itinerary_id`) REFERENCES `booking` (`user_id`, `itinerary_id`) ON DELETE CASCADE,
+  CONSTRAINT `booking` FOREIGN KEY (`option_id`) REFERENCES `options` (`id`) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 SET FOREIGN_KEY_CHECKS = 1;
 --
--- Table structure for table `reservation_options_draft`
+-- Table structure for table `booking`
 --
 SET FOREIGN_KEY_CHECKS = 0;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!50503 SET character_set_client = utf8mb4 */;
-CREATE TABLE IF NOT EXISTS `reservation_options_draft` (
-  `reservation_draft_id` int NOT NULL,
+CREATE TABLE IF NOT EXISTS `booking` (
+  `booking` int NOT NULL,
   `option_id` int NOT NULL,
-  PRIMARY KEY (`reservation_draft_id`,`option_id`),
+  PRIMARY KEY (`booking`,`option_id`),
   KEY `option_id` (`option_id`),
-  CONSTRAINT `reservation_options_draft_ibfk_1` FOREIGN KEY (`reservation_draft_id`) REFERENCES `reservation_draft` (`draft_id`),
-  CONSTRAINT `reservation_options_draft_ibfk_2` FOREIGN KEY (`option_id`) REFERENCES `options` (`id`)
+  CONSTRAINT `booking` FOREIGN KEY (`booking`) REFERENCES `booking` (`draft_id`),
+  CONSTRAINT `booking` FOREIGN KEY (`option_id`) REFERENCES `options` (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 SET FOREIGN_KEY_CHECKS = 1;

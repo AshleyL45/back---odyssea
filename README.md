@@ -85,7 +85,7 @@ Utilisation de l'outil Trello pour organiser les tâches : "À faire", "En cours
         │   │               │   ├── HotelController.java
         │   │               │   ├── MySelectionController.java
         │   │               │   ├── OptionController.java
-        │   │               │   ├── ReservationController.java
+        │   │               │   ├── BookingController.java
         │   │               │   └── ThemeController.java
         │   │               └── userItinerary
         │   │               │   ├── InteractiveMapController.java
@@ -110,8 +110,8 @@ Utilisation de l'outil Trello pour organiser les tâches : "À faire", "En cours
         │   │               │   ├── ImageDao.java
         │   │               │   ├── MySelectionDao.java
         │   │               │   ├── OptionDao.java
-        │   │               │   ├── ReservationDao.java
-        │   │               │   ├── ReservationOptionDao.java
+        │   │               │   ├── BookingDao.java
+        │   │               │   ├── BookingOptionDao.java
         │   │               │   └── ThemeDao.java
         │   │               ├── userAuth
         │   │               │   └── UserDao.java
@@ -146,9 +146,9 @@ Utilisation de l'outil Trello pour organiser les tâches : "À faire", "En cours
         │   │               │   ├── ItineraryDetails.java
         │   │               │   ├── ItinerarySummary.java
         │   │               │   └── MySelectionDto.java
-        │   │               ├── reservation
-        │   │               │   ├── ItineraryReservationDTO.java
-        │   │               │   ├── ReservationRecapDTO.java
+        │   │               ├── booking
+        │   │               │   ├── ItineraryBooking.java
+        │   │               │   ├── Booking.java
         │   │               │   └── BookingRequest.java
         │   │               └── userItinerary
         │   │               │   ├── CitySelectionDTO.java
@@ -176,8 +176,8 @@ Utilisation de l'outil Trello pour organiser les tâches : "À faire", "En cours
         │   │               │   ├── Image.java
         │   │               │   ├── Option.java
         │   │               │   ├── PlaneRide.java
-        │   │               │   ├── Reservation.java
-        │   │               │   ├── ReservationOption.java
+        │   │               │   ├── Booking.java
+        │   │               │   ├── BookingOption.java
         │   │               │   └── Theme.java
         │   │               ├── userAuth
         │   │               │   └── User.java
@@ -189,15 +189,15 @@ Utilisation de l'outil Trello pour organiser les tâches : "À faire", "En cours
         │   │               │   └── UserItineraryStep.java
         │   │           ├── exceptions
         │   │               ├── GlobalExceptionHandler.java
-        │   │               ├── ReservationNotFoundException.java
+        │   │               ├── BookingNotFoundException.java
         │   │               ├── ResourceNotFoundException.java
         │   │               ├── UserNotFoundException.java
         │   │               └── UsernameNotFoundException.java
         │   │           ├── mapper
         │   │               ├── DailyPlanDTOMapper.java
         │   │               ├── ItineraryThemesMapper.java
-        │   │               ├── ReservationRecapDTOMapper.java
-        │   │               └── ReservationRowMapper.java
+        │   │               ├── Booking.java
+        │   │               └── Booking.java
         │   │           ├── security
         │   │               ├── CustomUserDetails.java
         │   │               ├── CustomUserDetailsService.java
@@ -224,7 +224,7 @@ Utilisation de l'outil Trello pour organiser les tâches : "À faire", "En cours
         │   │                   ├── CountryService.java
         │   │                   ├── HotelService.java
         │   │                   ├── MySelectionService.java
-        │   │                   ├── ReservationService.java
+        │   │                   ├── BookingService.java
         │   │                   └── ThemeService.java
         │   │               └── userItinerary
         │   │                   ├── InteractiveMapService.java

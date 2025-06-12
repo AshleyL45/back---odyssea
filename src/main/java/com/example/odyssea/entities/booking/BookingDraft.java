@@ -1,9 +1,9 @@
-package com.example.odyssea.entities;
+package com.example.odyssea.entities.booking;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 
-public class ReservationDraft {
+public class BookingDraft {
     private int draftId;
     private Integer userId;
     private Integer itineraryId;
@@ -13,10 +13,10 @@ public class ReservationDraft {
     private LocalDateTime createdAt;
     private String type;
 
-    public ReservationDraft() {
+    public BookingDraft() {
     }
 
-    public ReservationDraft(int draftId, Integer userId, Integer itineraryId, LocalDate departureDate, int numberOfAdults, int numberOfKids, LocalDateTime createdAt, String type) {
+    public BookingDraft(int draftId, Integer userId, Integer itineraryId, LocalDate departureDate, int numberOfAdults, int numberOfKids, LocalDateTime createdAt, String type) {
         this.draftId = draftId;
         this.userId = userId;
         this.itineraryId = itineraryId;
