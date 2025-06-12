@@ -1,9 +1,9 @@
-package com.example.odyssea.services.mainTables;
+package com.example.odyssea.services.booking;
 
-import com.example.odyssea.daos.ReservationDraftDao;
+import com.example.odyssea.daos.booking.BookingDraftDao;
 import com.example.odyssea.daos.mainTables.OptionDao;
-import com.example.odyssea.daos.mainTables.ReservationOptionDraftDao;
-import com.example.odyssea.entities.ReservationDraft;
+import com.example.odyssea.daos.booking.BookingOptionDraftDao;
+import com.example.odyssea.entities.booking.BookingDraft;
 import com.example.odyssea.exceptions.ValidationException;
 import com.example.odyssea.services.CurrentUserService;
 import org.springframework.stereotype.Service;
@@ -12,18 +12,17 @@ import org.springframework.transaction.annotation.Transactional;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
-import java.util.Optional;
 
 @Service
-public class ReservationDraftService {
-    private final ReservationDraftDao reservationDraftDao;
-    private final ReservationOptionDraftDao reservationOptionDraftDao;
+public class BookingDraftService {
+    private final BookingDraftDao bookingDraftDao;
+    private final BookingOptionDraftDao bookingOptionDraftDao;
     private final CurrentUserService currentUserService;
     private final OptionDao optionDao;
 
-    public ReservationDraftService(ReservationDraftDao reservationDraftDao, ReservationOptionDraftDao reservationOptionDraftDao, CurrentUserService currentUserService, OptionDao optionDao) {
-        this.reservationDraftDao = reservationDraftDao;
-        this.reservationOptionDraftDao = reservationOptionDraftDao;
+    public BookingDraftService(BookingDraftDao bookingDraftDao, BookingOptionDraftDao bookingOptionDraftDao, CurrentUserService currentUserService, OptionDao optionDao) {
+        this.bookingDraftDao = bookingDraftDao;
+        this.bookingOptionDraftDao = bookingOptionDraftDao;
         this.currentUserService = currentUserService;
         this.optionDao = optionDao;
     }
@@ -36,16 +35,16 @@ public class ReservationDraftService {
         if (numberAdults == null || numberAdults <= 0) {
             throw new ValidationException("There must be at least one adult");
         }
-        Integer draftId = reservationDraftDao.getLastDraftIdByUser(getUserId());
-        reservationDraftDao.updateNumberOfAdults(draftId, numberAdults);
+        Integer draftId = bookingDraftDao.getLastDraftIdByUser(getUserId());
+        bookingDraftDao.updateNumberOfAdults(draftId, numberAdults);
     }
 
     public void validateNumberOfKids(Integer numberKids) {
         if (numberKids == null || numberKids < 0) {
             throw new ValidationException("Number of kids cannot be negative");
         }
-        Integer draftId = reservationDraftDao.getLastDraftIdByUser(getUserId());
-        reservationDraftDao.updateNumberOfKids(draftId, numberKids);
+        Integer draftId = bookingDraftDao.getLastDraftIdByUser(getUserId());
+        bookingDraftDao.updateNumberOfKids(draftId, numberKids);
     }
 
     public void validateDepartureDate(String date) {
@@ -58,24 +57,24 @@ public class ReservationDraftService {
         if (parsedDate.isBefore(LocalDate.now().plusDays(1))) {
             throw new ValidationException("Departure date must be at least tomorrow");
         }
-        Integer draftId = reservationDraftDao.getLastDraftIdByUser(getUserId());
-        reservationDraftDao.updateDepartureDate(draftId, parsedDate);
+        Integer draftId = bookingDraftDao.getLastDraftIdByUser(getUserId());
+        bookingDraftDao.updateDepartureDate(draftId, parsedDate);
     }
 
     public void validateItineraryId(Integer itineraryId) {
         if (itineraryId == null || itineraryId <= 0) {
             throw new ValidationException("Itinerary ID must be a positive number");
         }
-        Integer draftId = reservationDraftDao.getLastDraftIdByUser(getUserId());
-        reservationDraftDao.updateItineraryId(draftId, itineraryId);
+        Integer draftId = bookingDraftDao.getLastDraftIdByUser(getUserId());
+        bookingDraftDao.updateItineraryId(draftId, itineraryId);
     }
 
     public void validateType(String type) {
         if (type == null || (!type.equals("Standard") && !type.equals("Mystery"))) {
             throw new ValidationException("Type must be either Standard or Mystery");
         }
-        Integer draftId = reservationDraftDao.getLastDraftIdByUser(getUserId());
-        reservationDraftDao.updateType(draftId, type);
+        Integer draftId = bookingDraftDao.getLastDraftIdByUser(getUserId());
+        bookingDraftDao.updateType(draftId, type);
     }
 
     @Transactional
@@ -84,8 +83,8 @@ public class ReservationDraftService {
             return;
         }
 
-        Integer draftId = reservationDraftDao.getLastDraftIdByUser(getUserId());
-        reservationOptionDraftDao.deleteOptionsByDraftId(draftId);
+        Integer draftId = bookingDraftDao.getLastDraftIdByUser(getUserId());
+        bookingOptionDraftDao.deleteOptionsByDraftId(draftId);
 
         for (Integer optionId : optionIds) {
             optionDao.findById(optionId);
@@ -93,7 +92,7 @@ public class ReservationDraftService {
     }
 
     @Transactional(readOnly = true)
-    public ReservationDraft loadDraft() {
-        return reservationDraftDao.getLastDraftByUserId(getUserId());
+    public BookingDraft loadDraft() {
+        return bookingDraftDao.getLastDraftByUserId(getUserId());
     }
 }

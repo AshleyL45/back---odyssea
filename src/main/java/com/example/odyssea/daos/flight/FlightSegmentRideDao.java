@@ -20,36 +20,36 @@ public class FlightSegmentRideDao {
 
     private final RowMapper<FlightSegmentRide> flightSegmentRideRowMapper = (rs, rowNum) -> {
         FlightSegmentRide ride = new FlightSegmentRide();
-        ride.setPlaneRideId(rs.getInt("planeRideId"));
-        ride.setFlightSegmentId(rs.getInt("flightSegmentId"));
+        ride.setPlaneRideId(rs.getInt("plane_ride_id"));
+        ride.setFlightSegmentId(rs.getInt("flight_segment_id"));
         return ride;
     };
 
     public List<FlightSegmentRide> findAll() {
-        String sql = "SELECT * FROM flightSegmentRide";
+        String sql = "SELECT * FROM flight_segment_ride";
         return jdbcTemplate.query(sql, flightSegmentRideRowMapper);
     }
 
     public FlightSegmentRide findByIds(int planeRideId, int flightSegmentId) {
-        String sql = "SELECT * FROM flightSegmentRide WHERE planeRideId = ? AND flightSegmentId = ?";
+        String sql = "SELECT * FROM flight_segment_ride WHERE plane_ride_id = ? AND flight_segment_id = ?";
         return jdbcTemplate.queryForObject(sql, flightSegmentRideRowMapper, planeRideId, flightSegmentId);
     }
 
     public List<FlightSegment> findSegmentsByPlaneId(int planeRideId) {
-        String sql = "SELECT flightSegment.* from flightSegmentRide\n" +
-                "INNER JOIN flightSegment ON flightSegmentRide.flightSegmentId = flightSegment.id\n" +
-                "WHERE flightSegmentRide.planeRideId = 2";
+        String sql = "SELECT flight_segment.* from flight_segment_ride\n" +
+                "INNER JOIN flight_segment ON flight_segment_ride.flight_segment_id = flight_segment.id\n" +
+                "WHERE flight_segment_ride.plane_ride_id = 2";
         return jdbcTemplate.query(sql, new Object[]{planeRideId}, new BeanPropertyRowMapper<>(FlightSegment.class));
     }
 
     public FlightSegmentRide save(FlightSegmentRide ride) {
-        String sql = "INSERT INTO flightSegmentRide (planeRideId, flightSegmentId) VALUES (?, ?)";
+        String sql = "INSERT INTO flight_segment_ride (plane_ride_id, flight_segment_id) VALUES (?, ?)";
         jdbcTemplate.update(sql, ride.getPlaneRideId(), ride.getFlightSegmentId());
         return ride;
     }
 
     public boolean delete(int planeRideId, int flightSegmentId) {
-        String sql = "DELETE FROM flightSegmentRide WHERE planeRideId = ? AND flightSegmentId = ?";
+        String sql = "DELETE FROM flight_segment_ride WHERE plane_ride_id = ? AND flight_segment_id = ?";
         int rowsAffected = jdbcTemplate.update(sql, planeRideId, flightSegmentId);
         return rowsAffected > 0;
     }

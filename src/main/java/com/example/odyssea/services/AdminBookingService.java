@@ -1,17 +1,17 @@
 package com.example.odyssea.services;
 
 import com.example.odyssea.daos.itinerary.ItineraryDao;
-import com.example.odyssea.daos.mainTables.ReservationDao;
-import com.example.odyssea.daos.mainTables.ReservationOptionDao;
+import com.example.odyssea.daos.booking.BookingDao;
+import com.example.odyssea.daos.booking.BookingOptionDao;
 import com.example.odyssea.daos.userAuth.UserDao;
 import com.example.odyssea.daos.userItinerary.UserItineraryDao;
-import com.example.odyssea.dtos.reservation.AdminBookingConfirmation;
-import com.example.odyssea.dtos.reservation.AdminBookingConfirmationDetails;
-import com.example.odyssea.dtos.reservation.AdminUserItineraryDetails;
+import com.example.odyssea.dtos.booking.AdminBookingConfirmation;
+import com.example.odyssea.dtos.booking.AdminBookingConfirmationDetails;
+import com.example.odyssea.dtos.booking.AdminUserItineraryDetails;
 import com.example.odyssea.dtos.userItinerary.UserItineraryDTO;
 import com.example.odyssea.entities.itinerary.Itinerary;
+import com.example.odyssea.entities.booking.Booking;
 import com.example.odyssea.entities.mainTables.Option;
-import com.example.odyssea.entities.mainTables.Reservation;
 import com.example.odyssea.entities.userAuth.User;
 import com.example.odyssea.entities.userItinerary.UserItinerary;
 import com.example.odyssea.enums.BookingStatus;
@@ -28,20 +28,20 @@ import java.util.Set;
 @Service
 public class AdminBookingService {
     private final UserDao userDao;
-    private final ReservationDao reservationDao;
+    private final BookingDao bookingDao;
     private final ItineraryDao itineraryDao;
-    private final ReservationOptionDao reservationOptionDao;
+    private final BookingOptionDao bookingOptionDao;
     private final UserItineraryDao userItineraryDao;
     private final UserItineraryService userItineraryService;
     private static final Set<String> ALLOWED_SORT_FIELDS = Set.of("startDate", "booking_date");
     private static final Set<String> ALLOWED_SORT_BOOKING_FIELDS = Set.of("departureDate", "purchaseDate");
     private static final Set<String> ALLOWED_SORT_DIRECTIONS = Set.of("asc", "desc");
 
-    public AdminBookingService(UserDao userDao, ReservationDao reservationDao, ItineraryDao itineraryDao, ReservationOptionDao reservationOptionDao, UserItineraryDao userItineraryDao, UserItineraryService userItineraryService) {
+    public AdminBookingService(UserDao userDao, BookingDao bookingDao, ItineraryDao itineraryDao, BookingOptionDao bookingOptionDao, UserItineraryDao userItineraryDao, UserItineraryService userItineraryService) {
         this.userDao = userDao;
-        this.reservationDao = reservationDao;
+        this.bookingDao = bookingDao;
         this.itineraryDao = itineraryDao;
-        this.reservationOptionDao = reservationOptionDao;
+        this.bookingOptionDao = bookingOptionDao;
         this.userItineraryDao = userItineraryDao;
         this.userItineraryService = userItineraryService;
     }
@@ -57,8 +57,8 @@ public class AdminBookingService {
 
         validatePersonalizedSorting(sortField, sortDirection);
 
-        List<UserItinerary> reservations = userItineraryDao.getAllUserItinerariesAndFilter(status, search, sortField, sortDirection);
-        List <AdminBookingConfirmation> adminBookingConfirmations = reservations.stream()
+        List<UserItinerary> bookings = userItineraryDao.getAllUserItinerariesAndFilter(status, search, sortField, sortDirection);
+        List <AdminBookingConfirmation> adminBookingConfirmations = bookings.stream()
                 .map(this::fromUserItinerary)
                 .toList();
         return adminBookingConfirmations;
@@ -76,8 +76,8 @@ public class AdminBookingService {
 
         validateStandardSorting(sortField, sortDirection);
 
-        List<Reservation> reservations = reservationDao.getAllBookingsAndFilter(status, search, sortField, sortDirection);
-        List <AdminBookingConfirmation> adminBookingConfirmationDetails = reservations.stream()
+        List<Booking> bookings = bookingDao.getAllBookingsAndFilter(status, search, sortField, sortDirection);
+        List <AdminBookingConfirmation> adminBookingConfirmationDetails = bookings.stream()
                 .map(this::fromBooking)
                 .toList();
         return adminBookingConfirmationDetails;
@@ -86,8 +86,8 @@ public class AdminBookingService {
 
     @PreAuthorize("hasRole('ADMIN')")
     public AdminBookingConfirmationDetails getBookingByIdForAdmin(int bookingId) {
-        Reservation reservation = reservationDao.findByBookingId(bookingId);
-        return convertToAdminBookingConfirmationDetails(reservation);
+        Booking booking = bookingDao.findByBookingId(bookingId);
+        return convertToAdminBookingConfirmationDetails(booking);
     }
 
     @PreAuthorize("hasRole('ADMIN')")
@@ -98,18 +98,18 @@ public class AdminBookingService {
     }
 
     @PreAuthorize("hasRole('ADMIN')")
-    public void updateReservationPrice(int bookingId, BigDecimal newPrice) {
+    public void updateBooking(int bookingId, BigDecimal newPrice) {
         if (newPrice == null || newPrice.compareTo(BigDecimal.ZERO) < 0) {
             throw new ValidationException("Total price must be a positive number.");
         }
 
-        reservationDao.updateReservationPrice(bookingId, newPrice);
+        bookingDao.updateBooking(bookingId, newPrice);
     }
 
 
     @PreAuthorize("hasRole('ADMIN')")
-    public void updateReservationStatus(int bookingId, BookingStatus status) {
-        reservationDao.updateReservationStatus(bookingId, status);
+    public void updateBooking(int bookingId, BookingStatus status) {
+        bookingDao.updateBooking(bookingId, status);
     }
 
     @PreAuthorize("hasRole('ADMIN')")
@@ -132,22 +132,22 @@ public class AdminBookingService {
         return AdminUserItineraryDetails.fromEntities(user, userItineraryDTO);
     }
 
-    private AdminBookingConfirmationDetails convertToAdminBookingConfirmationDetails(Reservation reservation){
-        Reservation reservationFound = reservationDao.findByBookingId(reservation.getReservationId());
-        User user = userDao.findById(reservation.getUserId());
-        Itinerary itinerary = itineraryDao.findById(reservationFound.getItineraryId());
-        List<Option> options = reservationOptionDao.getBookingOptions(reservationFound.getReservationId());
+    private AdminBookingConfirmationDetails convertToAdminBookingConfirmationDetails(Booking booking){
+        Booking bookingFound = bookingDao.findByBookingId(booking.getBooking());
+        User user = userDao.findById(booking.getUserId());
+        Itinerary itinerary = itineraryDao.findById(bookingFound.getItineraryId());
+        List<Option> options = bookingOptionDao.getBookingOptions(bookingFound.getBooking());
 
-        return AdminBookingConfirmationDetails.fromEntities(user, itinerary, reservationFound, options);
+        return AdminBookingConfirmationDetails.fromEntities(user, itinerary, bookingFound, options);
 
     }
 
-    private AdminBookingConfirmation fromBooking(Reservation reservation){
-        Integer id = reservation.getReservationId();
-        BigDecimal price = reservation.getTotalPrice();
-        LocalDate purchaseDate = reservation.getPurchaseDate();
-        BookingStatus status = BookingStatus.valueOf(reservation.getStatus());
-        User user = userDao.findById(reservation.getUserId());
+    private AdminBookingConfirmation fromBooking(Booking booking){
+        Integer id = booking.getBooking();
+        BigDecimal price = booking.getTotalPrice();
+        LocalDate purchaseDate = booking.getPurchaseDate();
+        BookingStatus status = BookingStatus.valueOf(booking.getStatus());
+        User user = userDao.findById(booking.getUserId());
 
         return AdminBookingConfirmation.fromEntities(id, user,price, purchaseDate, status);
 

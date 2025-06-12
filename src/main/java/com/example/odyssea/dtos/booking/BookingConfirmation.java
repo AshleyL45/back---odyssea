@@ -1,8 +1,8 @@
-package com.example.odyssea.dtos.reservation;
+package com.example.odyssea.dtos.booking;
 
 import com.example.odyssea.entities.itinerary.Itinerary;
+import com.example.odyssea.entities.booking.Booking;
 import com.example.odyssea.entities.mainTables.Option;
-import com.example.odyssea.entities.mainTables.Reservation;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
@@ -104,26 +104,6 @@ public class BookingConfirmation {
         this.purchaseDate = purchaseDate;
     }
 
-    public static BookingConfirmation fromEntities(
-            Reservation reservation,
-            Itinerary itinerary,
-            List<Option> options
-    ) {
-
-        return new BookingConfirmation(
-                reservation.getReservationId(),
-                itinerary,
-                reservation.getDepartureDate(),
-                reservation.getReturnDate(),
-                reservation.getStatus(),
-                reservation.getNumberOfAdults(),
-                reservation.getNumberOfKids(),
-                options,
-                reservation.getPurchaseDate(),
-                reservation.getTotalPrice()
-        );
-    }
-
     public BigDecimal getPrice() {
         return price;
     }
@@ -138,5 +118,25 @@ public class BookingConfirmation {
 
     public void setId(int id) {
         this.id = id;
+    }
+
+    public static BookingConfirmation fromEntities(
+            Booking booking,
+            Itinerary itinerary,
+            List<Option> options
+    ) {
+
+        return new BookingConfirmation(
+                booking.getId(),
+                itinerary,
+                booking.getDepartureDate(),
+                booking.getReturnDate(),
+                booking.getStatus(),
+                booking.getNumberOfAdults(),
+                booking.getNumberOfKids(),
+                options,
+                booking.getPurchaseDate(),
+                booking.getTotalPrice()
+        );
     }
 }

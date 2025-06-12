@@ -1,16 +1,14 @@
 package com.example.odyssea.controllers;
 
 import com.example.odyssea.dtos.ApiResponse;
-import com.example.odyssea.dtos.BookingStatusUpdate;
+import com.example.odyssea.dtos.booking.BookingStatusUpdate;
 import com.example.odyssea.dtos.PriceChange;
-import com.example.odyssea.dtos.reservation.AdminBookingConfirmation;
-import com.example.odyssea.dtos.reservation.AdminBookingConfirmationDetails;
-import com.example.odyssea.dtos.reservation.AdminUserItineraryDetails;
-import com.example.odyssea.enums.BookingStatus;
+import com.example.odyssea.dtos.booking.AdminBookingConfirmation;
+import com.example.odyssea.dtos.booking.AdminBookingConfirmationDetails;
+import com.example.odyssea.dtos.booking.AdminUserItineraryDetails;
 import com.example.odyssea.services.AdminBookingService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
-import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
@@ -23,7 +21,7 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/admin")
-@Tag(name = "Admin Management", description = "Admin actions for managing standard reservations and personalized trips.")
+@Tag(name = "Admin Management", description = "Admin actions for managing standard bookings and personalized trips.")
 public class AdminBookingController {
     private final AdminBookingService adminBookingService;
 
@@ -38,7 +36,7 @@ public class AdminBookingController {
     )
     @PreAuthorize("hasRole('ADMIN')")
     @GetMapping("/bookings")
-    public ResponseEntity<ApiResponse<List<AdminBookingConfirmation>>> getAllReservationsWithFiltersAndSorting(
+    public ResponseEntity<ApiResponse<List<AdminBookingConfirmation>>> getAllBookingsWithFiltersAndSorting(
             @RequestParam(required = false) String status,
             @RequestParam(required = false) String search,
             @RequestParam(required = false) String sortField,
@@ -83,7 +81,7 @@ public class AdminBookingController {
     )
     @PreAuthorize("hasRole('ADMIN')")
     @GetMapping("/bookings/{id}")
-    public ResponseEntity<ApiResponse<AdminBookingConfirmationDetails>> getReservationById(@PathVariable int id) {
+    public ResponseEntity<ApiResponse<AdminBookingConfirmationDetails>> getBooking(@PathVariable int id) {
         AdminBookingConfirmationDetails booking = adminBookingService.getBookingByIdForAdmin(id);
         return ResponseEntity.ok(
                 ApiResponse.success("Booking successfully found.", booking, HttpStatus.OK)
@@ -104,17 +102,17 @@ public class AdminBookingController {
     }
 
     @Operation(
-            summary = "Update the total price of a standard reservation",
-            description = "Allows an admin to modify the totalPrice of a reservation"
+            summary = "Update the total price of a standard booking",
+            description = "Allows an admin to modify the totalPrice of a booking"
     )
     @PatchMapping("/bookings/{id}/price")
     public ResponseEntity<ApiResponse<Void>> updateBookingPrice(
-            @Parameter(description = "Booking ID of the reservation to update", required = true)
+            @Parameter(description = "Booking ID of the booking to update", required = true)
             @PathVariable int id,
 
             @RequestBody @Valid PriceChange price
             ) {
-        adminBookingService.updateReservationPrice(id, price.getNewPrice());
+        adminBookingService.updateBooking(id, price.getNewPrice());
         return ResponseEntity.status(HttpStatus.OK).body(
                 ApiResponse.success("Booking price successfully updated.", HttpStatus.OK)
         );
@@ -127,10 +125,10 @@ public class AdminBookingController {
     )
     @PreAuthorize("hasRole('ADMIN')")
     @PatchMapping("/bookings/{id}/status")
-    public ResponseEntity<ApiResponse<Void>> updateBookingStatus( @Parameter(description = "Booking ID of the reservation to update", required = true)
+    public ResponseEntity<ApiResponse<Void>> updateBookingStatus( @Parameter(description = "Booking ID of the booking to update", required = true)
                                                                       @PathVariable int id,
                                                                   @RequestBody @Valid  BookingStatusUpdate status) {
-        adminBookingService.updateReservationStatus(id, status.getNewStatus());
+        adminBookingService.updateBooking(id, status.getNewStatus());
         return ResponseEntity.status(HttpStatus.OK).body(
                 ApiResponse.success("Booking status successfully updated.", HttpStatus.OK)
         );

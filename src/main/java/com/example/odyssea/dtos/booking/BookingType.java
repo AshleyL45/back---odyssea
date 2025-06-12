@@ -1,14 +1,14 @@
-package com.example.odyssea.dtos.reservation;
+package com.example.odyssea.dtos.booking;
 
 import jakarta.validation.constraints.Pattern;
 
-public class ReservationType {
+public class BookingType {
     @Pattern(regexp = "Standard|Mystery", message = "Type must be either 'Standard' or 'Mystery'")
     private String type;
 
-    public ReservationType() {}
+    public BookingType() {}
 
-    public ReservationType(String type) {
+    public BookingType(String type) {
         this.type = type;
     }
 

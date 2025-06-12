@@ -15,7 +15,7 @@
  };
 
  // chemins relatifs
- const baseAssets  = path.resolve(__dirname, '..', '..', 'front---odyssea', 'src', 'assets');
+ const baseAssets  = path.resolve(__dirname, '..', '..', 'front-odyssea', 'src', 'assets');
  const frontAssets = path.join(baseAssets, 'itineraries');
  const mappingFile = path.join(baseAssets, 'image.tsx');
 
@@ -37,11 +37,9 @@
 
  async function main() {
    const conn = await mysql.createConnection(DB);
-   await conn.query('SET FOREIGN_KEY_CHECKS = 0');
-   await conn.query('TRUNCATE TABLE itineraryImages');
-   await conn.query('TRUNCATE TABLE images');
-   await conn.query('ALTER TABLE images AUTO_INCREMENT = 1');
-   await conn.query('SET FOREIGN_KEY_CHECKS = 1');
+   await conn.query(`TRUNCATE TABLE itineraryImages`);
+   await conn.query(`TRUNCATE TABLE images`);
+   await conn.query(`ALTER TABLE images AUTO_INCREMENT = 1`);
 
   for (let { alias, dir, file } of entries) {
     const itinId = parseInt(dir.replace('itinerary',''), 10);

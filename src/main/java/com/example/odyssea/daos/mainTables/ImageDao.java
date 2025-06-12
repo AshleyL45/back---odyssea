@@ -31,8 +31,8 @@ public class ImageDao {
         String sql = """
             SELECT i.data
               FROM images i
-              JOIN itineraryImages ii ON ii.imageId = i.id
-             WHERE ii.itineraryId = ?
+              JOIN itinerary_images ii ON ii.image_id = i.id
+             WHERE ii.itinerary_id = ?
                AND ii.role = ?
             """;
         return jdbc.queryForObject(

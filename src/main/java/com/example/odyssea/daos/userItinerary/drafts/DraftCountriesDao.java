@@ -35,8 +35,8 @@ public class DraftCountriesDao {
         String sql = """
         SELECT draft_countries.country_id
          FROM draft_countries
-         JOIN userItineraryDraft ON draft_countries.draft_user_itinerary_id = userItineraryDraft.id
-         WHERE userItineraryDraft.user_id = ?
+         JOIN user_itinerary_draft ON draft_countries.draft_user_itinerary_id = user_itinerary_draft.id
+         WHERE user_itinerary_draft.user_id = ?
     """;
         return jdbcTemplate.queryForList(sql, Integer.class, userId);
     }

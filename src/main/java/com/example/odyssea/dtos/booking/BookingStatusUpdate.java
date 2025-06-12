@@ -1,4 +1,4 @@
-package com.example.odyssea.dtos;
+package com.example.odyssea.dtos.booking;
 
 import com.example.odyssea.enums.BookingStatus;
 import jakarta.validation.constraints.NotNull;

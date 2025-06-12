@@ -1,8 +1,8 @@
-package com.example.odyssea.dtos.reservation;
+package com.example.odyssea.dtos.booking;
 
 import com.example.odyssea.entities.itinerary.Itinerary;
+import com.example.odyssea.entities.booking.Booking;
 import com.example.odyssea.entities.mainTables.Option;
-import com.example.odyssea.entities.mainTables.Reservation;
 import com.example.odyssea.entities.userAuth.User;
 
 import java.math.BigDecimal;
@@ -13,18 +13,18 @@ public class AdminBookingConfirmationDetails {
     private String userLastName;
     private String itineraryName;
     private BigDecimal itineraryPrice;
-    private Reservation reservation;
+    private Booking booking;
     private List<Option> options;
 
     public AdminBookingConfirmationDetails() {
     }
 
-    public AdminBookingConfirmationDetails(String userFirstName, String userLastName, String itineraryName, BigDecimal itineraryPrice, Reservation reservation, List<Option> options) {
+    public AdminBookingConfirmationDetails(String userFirstName, String userLastName, String itineraryName, BigDecimal itineraryPrice, Booking booking, List<Option> options) {
         this.userFirstName = userFirstName;
         this.userLastName = userLastName;
         this.itineraryName = itineraryName;
         this.itineraryPrice = itineraryPrice;
-        this.reservation = reservation;
+        this.booking = booking;
         this.options = options;
     }
 
@@ -60,12 +60,12 @@ public class AdminBookingConfirmationDetails {
         this.itineraryPrice = itineraryPrice;
     }
 
-    public Reservation getReservation() {
-        return reservation;
+    public Booking getBooking() {
+        return booking;
     }
 
-    public void setReservation(Reservation reservation) {
-        this.reservation = reservation;
+    public void setBooking(Booking booking) {
+        this.booking = booking;
     }
 
     public List<Option> getOptions() {
@@ -76,13 +76,13 @@ public class AdminBookingConfirmationDetails {
         this.options = options;
     }
 
-    public static AdminBookingConfirmationDetails fromEntities(User user, Itinerary itinerary, Reservation reservation, List<Option> options){
+    public static AdminBookingConfirmationDetails fromEntities(User user, Itinerary itinerary, Booking booking, List<Option> options){
         return new AdminBookingConfirmationDetails(
                 user.getFirstName(),
                 user.getLastName(),
                 itinerary.getName(),
                 itinerary.getPrice(),
-                reservation,
+                booking,
                 options
         );
     }

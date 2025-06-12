@@ -33,7 +33,7 @@ public class PlaneRideDao {
     private final RowMapper<PlaneRide> planeRideRowMapper = (rs, rowNum) -> {
         int id = rs.getInt("id");
         boolean oneWay = rs.getBoolean("one_way");
-        BigDecimal totalPrice = rs.getBigDecimal("totalPrice");
+        BigDecimal totalPrice = rs.getBigDecimal("total_price");
         String currency = rs.getString("currency");
         Timestamp ts = rs.getTimestamp("created_at");
         LocalDateTime createdAt = (ts != null) ? ts.toLocalDateTime() : null;
@@ -44,7 +44,7 @@ public class PlaneRideDao {
      * Retourne tous les vols enregistrés.
      */
     public List<PlaneRide> findAll() {
-        String sql = "SELECT * FROM planeRide";
+        String sql = "SELECT * FROM plane_ride";
         return jdbcTemplate.query(sql, planeRideRowMapper);
     }
 
@@ -52,7 +52,7 @@ public class PlaneRideDao {
      * Retourne le vol correspondant à l'id, ou lève une exception si introuvable.
      */
     public PlaneRide findById(int id) {
-        String sql = "SELECT * FROM planeRide WHERE id = ?";
+        String sql = "SELECT * FROM plane_ride WHERE id = ?";
         return jdbcTemplate.query(sql, planeRideRowMapper, id)
                 .stream()
                 .findFirst()
@@ -63,7 +63,7 @@ public class PlaneRideDao {
      * Enregistre un nouveau vol et retourne l'entité avec son id généré.
      */
     public PlaneRide save(PlaneRide planeRide) {
-        String sql = "INSERT INTO planeRide (one_way, totalPrice, currency) VALUES (?, ?, ?)";
+        String sql = "INSERT INTO plane_ride (one_way, total_price, currency) VALUES (?, ?, ?)";
         KeyHolder keyHolder = new GeneratedKeyHolder();
         jdbcTemplate.update(connection -> {
             PreparedStatement ps = connection.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS);
@@ -88,7 +88,7 @@ public class PlaneRideDao {
         if (!flightExists(id)) {
             throw new ResourceNotFoundException("This flight doesn't exist.");
         }
-        String sql = "UPDATE planeRide SET one_way = ?, totalPrice = ?, currency = ? WHERE id = ?";
+        String sql = "UPDATE plane_ride SET one_way = ?, total_price = ?, currency = ? WHERE id = ?";
         int rowsAffected = jdbcTemplate.update(sql,
                 planeRide.isOneWay(),
                 planeRide.getTotalPrice(),
@@ -104,7 +104,7 @@ public class PlaneRideDao {
      * Supprime un vol par son identifiant.
      */
     public boolean delete(int id) {
-        String sql = "DELETE FROM planeRide WHERE id = ?";
+        String sql = "DELETE FROM plane_ride WHERE id = ?";
         int rowsAffected = jdbcTemplate.update(sql, id);
         return rowsAffected > 0;
     }
@@ -113,7 +113,7 @@ public class PlaneRideDao {
      * Vérifie si un vol existe dans la base.
      */
     public boolean flightExists(int id) {
-        String sqlCheck = "SELECT COUNT(*) FROM planeRide WHERE id = ?";
+        String sqlCheck = "SELECT COUNT(*) FROM plane_ride WHERE id = ?";
         int count = jdbcTemplate.queryForObject(sqlCheck, Integer.class, id);
         return count > 0;
     }
@@ -122,7 +122,7 @@ public class PlaneRideDao {
      * Méthode de sauvegarde pour PlaneRideDTO si nécessaire.
      */
     public PlaneRideDTO save(PlaneRideDTO flight) {
-        String sql = "INSERT INTO planeRide (one_way, totalPrice, currency) VALUES (?, ?, ?)";
+        String sql = "INSERT INTO plane_ride (one_way, total_price, currency) VALUES (?, ?, ?)";
         KeyHolder keyHolder = new GeneratedKeyHolder();
         jdbcTemplate.update(connection -> {
             PreparedStatement ps = connection.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS);
@@ -145,19 +145,19 @@ public class PlaneRideDao {
      */
     public FlightItineraryDTO getPlaneRideById(Integer rideId) {
         String sql = "SELECT \n" +
-                "    fs.id AS segmentId,\n" +
-                "    fs.departureAirportIata, fs.departureDateTime,\n" +
-                "    fs.arrivalAirportIata, fs.arrivalDateTime,\n" +
-                "    fs.carrierCode, fs.carrierName,\n" +
-                "    fs.aircraftCode, fs.aircraftName,\n" +
+                "    fs.id AS segment_id,\n" +
+                "    fs.departure_airport_iata, fs.departure_date_time,\n" +
+                "    fs.arrival_airport_iata, fs.arrival_date_time,\n" +
+                "    fs.carrier_code, fs.carrier_name,\n" +
+                "    fs.aircraft_code, fs.aircraft_name,\n" +
                 "    fs.duration,\n" +
-                "    pr.id AS planeRideId\n" +
+                "    pr.id AS plane_ride_id\n" +
                 "FROM \n" +
-                "    flightSegmentRide fsr\n" +
+                "    flight_segment_ride fsr\n" +
                 "INNER JOIN \n" +
-                "    flightSegment fs ON fsr.flightSegmentId = fs.id\n" +
+                "    flight_segment fs ON fsr.flight_segment_id = fs.id\n" +
                 "INNER JOIN \n" +
-                "    planeRide pr ON fsr.planeRideId = pr.id\n" +
+                "    plane_ride pr ON fsr.plane_ride_id = pr.id\n" +
                 "WHERE \n" +
                 "    pr.id = ?;";
 
@@ -173,34 +173,34 @@ public class PlaneRideDao {
 
         for (Map<String, Object> row : rows) {
             AirportDTO departure = new AirportDTO(
-                    (String) row.get("departureAirportIata"),
-                    ((LocalDateTime) row.get("departureDateTime"))
+                    (String) row.get("departure_airport_iata"),
+                    ((LocalDateTime) row.get("departure_date_time"))
             );
 
             AirportDTO arrival = new AirportDTO(
-                    (String) row.get("arrivalAirportIata"),
-                    ((LocalDateTime) row.get("arrivalDateTime"))
+                    (String) row.get("arrival_airport_iata"),
+                    ((LocalDateTime) row.get("arrival_date_time"))
             );
 
             AircraftDTO aircraft = new AircraftDTO(
-                    (String) row.get("aircraftCode")
+                    (String) row.get("aircraft_code")
             );
 
             FlightSegmentDTO segment = new FlightSegmentDTO();
-            segment.setId(String.valueOf(row.get("segmentId")));
+            segment.setId(String.valueOf(row.get("segment_id")));
             segment.setDeparture(departure);
             segment.setArrival(arrival);
-            segment.setCarrierCode((String) row.get("carrierCode"));
-            segment.setCarrierName((String) row.get("carrierName"));
+            segment.setCarrierCode((String) row.get("carrier_code"));
+            segment.setCarrierName((String) row.get("carrier_name"));
             segment.setAircraftCode(aircraft);
-            segment.setAircraftName((String) row.get("aircraftName"));
+            segment.setAircraftName((String) row.get("aircraft_name"));
             segment.setDuration(row.get("duration").toString());
 
             segments.add(segment);
         }
 
         Map<String, Object> firstRow = rows.getFirst();
-        Integer planeRideId = (Integer) firstRow.get("planeRideId");
+        Integer planeRideId = (Integer) firstRow.get("plane_ride_id");
         Duration totalDuration = calculateTotalDuration(segments);
 
         return new FlightItineraryDTO(planeRideId, segments, totalDuration);
@@ -208,7 +208,7 @@ public class PlaneRideDao {
 
 
     public boolean existsById(Integer id) {
-        String sql = "SELECT COUNT(*) FROM planeRide WHERE id = ?";
+        String sql = "SELECT COUNT(*) FROM plane_ride WHERE id = ?";
         Integer count = jdbcTemplate.queryForObject(sql, Integer.class, id);
         return count != null && count > 0;
     }

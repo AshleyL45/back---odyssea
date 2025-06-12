@@ -1,27 +1,24 @@
-package com.example.odyssea.controllers.mainTables;
+package com.example.odyssea.controllers.booking;
 
 import com.example.odyssea.dtos.ApiResponse;
-import com.example.odyssea.dtos.reservation.BookingConfirmation;
-import com.example.odyssea.entities.mainTables.Reservation;
-import com.example.odyssea.services.mainTables.ReservationService;
+import com.example.odyssea.dtos.booking.BookingConfirmation;
+import com.example.odyssea.services.booking.BookingService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
-import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 @RestController
 @RequestMapping("/bookings")
 @Tag(name = "Bookings", description = "Handles all operations related to bookings, including creating, updating, retrieving, and deleting bookings.")
-public class ReservationController {
+public class BookingController {
 
-    private final ReservationService reservationService;
+    private final BookingService bookingService;
 
-    public ReservationController(ReservationService reservationService) {
-        this.reservationService = reservationService;
+    public BookingController(BookingService bookingService) {
+        this.bookingService = bookingService;
     }
 
     @Operation(
@@ -29,8 +26,8 @@ public class ReservationController {
             description = "Returns a list of all bookings made by the currently authenticated user."
     )
     @GetMapping("/")
-    public ResponseEntity<ApiResponse<List<BookingConfirmation>>> getAllUserReservations() {
-        List<BookingConfirmation> bookingConfirmations = reservationService.getAllUserReservations();
+    public ResponseEntity<ApiResponse<List<BookingConfirmation>>> getAllUserBookings() {
+        List<BookingConfirmation> bookingConfirmations = bookingService.getAllUserBookings();
         return ResponseEntity.ok(
                 ApiResponse.success("Bookings successfully found.", bookingConfirmations, HttpStatus.OK)
         );
@@ -41,8 +38,8 @@ public class ReservationController {
             description = "Returns detailed information about a booking, identified by its booking ID."
     )
     @GetMapping("/{id}")
-    public ResponseEntity<ApiResponse<BookingConfirmation>> getReservationById(@PathVariable int id) {
-        BookingConfirmation booking = reservationService.getBookingById(id);
+    public ResponseEntity<ApiResponse<BookingConfirmation>> getBookingById(@PathVariable int id) {
+        BookingConfirmation booking = bookingService.getBookingById(id);
         return ResponseEntity.ok(
                 ApiResponse.success("Booking successfully found.", booking, HttpStatus.OK)
         );
@@ -53,8 +50,8 @@ public class ReservationController {
             description = "Creates a new booking for the authenticated user based on the booking request data."
     )
     @PostMapping
-    public ResponseEntity<ApiResponse<Void>> createReservation() {
-        reservationService.createReservation();
+    public ResponseEntity<ApiResponse<Void>> createBooking() {
+        bookingService.createBooking();
         return ResponseEntity.status(HttpStatus.CREATED).body(
                 ApiResponse.success("Booking successfully created.", HttpStatus.CREATED)
         );

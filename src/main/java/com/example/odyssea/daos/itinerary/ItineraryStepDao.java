@@ -25,24 +25,24 @@ public class ItineraryStepDao {
 
     private final RowMapper<ItineraryStep> itineraryStepRowMapper = (rs, rowNum) -> new ItineraryStep(
             rs.getInt("id"),
-            rs.getInt("itineraryId"),
-            rs.getInt("cityId"),
-            rs.getInt("countryId"),
-            rs.getInt("hotelId"),
+            rs.getInt("itinerary_id"),
+            rs.getInt("city_id"),
+            rs.getInt("country_id"),
+            rs.getInt("hotel_id"),
             rs.getInt("position"),
-            rs.getInt("dayNumber"),
-            rs.getString("descriptionPerDay")
+            rs.getInt("day_number"),
+            rs.getString("description_per_day")
     );
 
 
 
     public List<ItineraryStep> findAll() {
-        String sql = "SELECT * FROM itineraryStep";
+        String sql = "SELECT * FROM itinerary_step";
         return jdbcTemplate.query(sql, itineraryStepRowMapper);
     }
 
     public ItineraryStep findById(int id) {
-        String sql = "SELECT * FROM itineraryStep WHERE id = ?";
+        String sql = "SELECT * FROM itinerary_step WHERE id = ?";
         return jdbcTemplate.query(sql, itineraryStepRowMapper, id)
                 .stream()
                 .findFirst()
@@ -50,17 +50,17 @@ public class ItineraryStepDao {
     }
 
     public List<DailyPlanDto> findByItineraryId(int itineraryId){
-        String sql = "SELECT city.name AS cityName, country.name AS countryName, hotel.name AS hotelName, hotel.description AS hotelDescription, activity.name AS activityName, activity.description AS activityDescription, dailyItinerary.descriptionPerDay, dailyItinerary.dayNumber FROM dailyItinerary\n" +
-                "INNER JOIN city ON dailyItinerary.cityId = city.id\n" +
-                "INNER JOIN country ON dailyItinerary.countryId = country.id\n" +
-                "INNER JOIN hotel ON dailyItinerary.hotelId = hotel.id\n" +
-                "INNER JOIN activity ON dailyItinerary.activityId = activity.id where dailyItinerary.itineraryId = ? ORDER BY dayNumber";
+        String sql = "SELECT city.name AS cityName, country.name AS countryName, hotel.name AS hotelName, hotel.description AS hotelDescription, activity.name AS activityName, activityDescription AS activityDescription, daily_itinerary.description_per_day, daily_itinerary.day_number FROM daily_itinerary\n" +
+                "INNER JOIN city ON daily_itinerary.city_id = city.id\n" +
+                "INNER JOIN country ON daily_itinerary.country_id = country.id\n" +
+                "INNER JOIN hotel ON daily_itinerary.hotel_id = hotel.id\n" +
+                "INNER JOIN activity ON daily_itinerary.activity_id = activity.id where daily_itinerary.itinerary_id = ? ORDER BY day_number";
         return jdbcTemplate.query(sql, new DailyPlanDTOMapper(), itineraryId);
     }
 
 
     public ItineraryStep save(ItineraryStep itineraryStep) {
-        String sql = "INSERT INTO itineraryStep (itineraryId, cityId, countryId, hotelId, position, dayNumber, descriptionPerDay) VALUES (?, ?, ?, ?, ?, ?, ?)";
+        String sql = "INSERT INTO itinerary_step (itinerary_id, city_id, country_id, hotel_id, position, day_number, description_per_day) VALUES (?, ?, ?, ?, ?, ?, ?)";
         jdbcTemplate.update(sql, itineraryStep.getItineraryId(), itineraryStep.getIdCity(), itineraryStep.getIdCountry(), itineraryStep.getIdHotel(), itineraryStep.getPosition(), itineraryStep.getDayNumber(), itineraryStep.getDescriptionPerDay());
 
         return itineraryStep;
@@ -68,7 +68,7 @@ public class ItineraryStepDao {
 
 
 
-    public List<DailyPlanWithCityDto> findByItineraryIdWithCity(int itineraryId) {//TODO Demander à Ashley
+    public List<DailyPlanWithCityDto> findByItineraryIdWithCity(int itineraryId) {
         String sql = "SELECT " +
                 "city.name AS cityName, " +
                 "country.name AS countryName, " +
@@ -76,17 +76,17 @@ public class ItineraryStepDao {
                 "hotel.description AS hotelDescription, " +
                 "activity.name AS activityName, " +
                 "activity.description AS activityDescription, " +
-                "dailyItinerary.descriptionPerDay, " +
-                "dailyItinerary.dayNumber, " +
+                "daily_itinerary.description_per_day, " +
+                "daily_itinerary.day_number, " +
                 "city.latitude, " +
                 "city.longitude " +
-                "FROM dailyItinerary " +
-                "INNER JOIN city ON dailyItinerary.cityId = city.id " +
-                "INNER JOIN country ON dailyItinerary.countryId = country.id " +
-                "INNER JOIN hotel ON dailyItinerary.hotelId = hotel.id " +
-                "INNER JOIN activity ON dailyItinerary.activityId = activity.id " +
-                "WHERE dailyItinerary.itineraryId = ? " +
-                "ORDER BY dayNumber";
+                "FROM daily_itinerary " +
+                "INNER JOIN city ON daily_itinerary.city_id = city.id " +
+                "INNER JOIN country ON daily_itinerary.country_id = country.id " +
+                "INNER JOIN hotel ON daily_itinerary.hotel_id = hotel.id " +
+                "INNER JOIN activity ON daily_itinerary.activity_id = activity.id " +
+                "WHERE daily_itinerary.itinerary_id = ? " +
+                "ORDER BY day_number";
         return jdbcTemplate.query(sql, (ResultSet rs, int rowNum) -> DailyPlanWithCityDto.fromResultSet(rs), itineraryId);
     }
 

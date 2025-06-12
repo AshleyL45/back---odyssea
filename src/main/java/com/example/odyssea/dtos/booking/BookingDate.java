@@ -1,11 +1,11 @@
-package com.example.odyssea.dtos.reservation;
+package com.example.odyssea.dtos.booking;
 
-public class ReservationDate {
+public class BookingDate {
     private String date;
 
-    public ReservationDate() {}
+    public BookingDate() {}
 
-    public ReservationDate(String date) {
+    public BookingDate(String date) {
         this.date = date;
     }
 
