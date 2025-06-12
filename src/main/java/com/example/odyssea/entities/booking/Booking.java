@@ -7,6 +7,7 @@ import java.time.LocalDate;
 
 public class Booking {
 
+    private int id;
     private int booking;
 
     @NotNull(message = "User booking cannot be null.")
@@ -39,13 +40,13 @@ public class Booking {
     @NotNull(message = "Type cannot be null.")
     private String type;
 
-    private int id;
 
     public Booking() {
     }
 
 
-    public Booking(int userId, int itineraryId, String status, LocalDate departureDate, LocalDate returnDate, BigDecimal totalPrice, LocalDate purchaseDate, int numberOfAdults, int numberOfKids, String type, int Id) {
+    public Booking( int id, int userId, int itineraryId, String status, LocalDate departureDate, LocalDate returnDate, BigDecimal totalPrice, LocalDate purchaseDate, int numberOfAdults, int numberOfKids, String type) {
+        this.id = id;
         this.userId = userId;
         this.itineraryId = itineraryId;
         this.status = status;
@@ -56,7 +57,6 @@ public class Booking {
         this.numberOfAdults = numberOfAdults;
         this.numberOfKids = numberOfKids;
         this.type = type;
-        this.id = Id;
     }
 
 

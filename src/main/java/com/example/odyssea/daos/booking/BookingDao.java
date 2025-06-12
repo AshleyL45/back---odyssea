@@ -30,6 +30,7 @@ public class BookingDao {
     }
 
     private final RowMapper<Booking> booking = (rs, _) -> new Booking(
+            rs.getInt("id"),
             rs.getInt("user_id"),
             rs.getInt("itinerary_id"),
             rs.getString("status"),
@@ -39,8 +40,7 @@ public class BookingDao {
             rs.getDate("purchase_date").toLocalDate(),
             rs.getInt("number_of_adults"),
             rs.getInt("number_of_kids"),
-            rs.getString("type"),
-            rs.getInt("id")
+            rs.getString("type")
     );
 
 
@@ -94,7 +94,7 @@ public class BookingDao {
 
 
     public Booking findByBookingId(int bookingId){
-        String sql = "SELECT * FROM booking WHERE booking = ?";
+        String sql = "SELECT * FROM booking WHERE id = ?";
         return jdbcTemplate.query(sql, booking, bookingId)
                 .stream()
                 .findFirst()
@@ -103,7 +103,7 @@ public class BookingDao {
 
     // Récupère une réservation
     public Booking findById(int userId, int bookingId) {
-        String sql = "SELECT * FROM booking WHERE user_id = ? AND booking = ?";
+        String sql = "SELECT * FROM booking WHERE user_id = ? AND id = ?";
         return jdbcTemplate.query(sql, booking, userId, bookingId)
                 .stream()
                 .findFirst()
@@ -119,7 +119,7 @@ public class BookingDao {
 
     // Enregistre une nouvelle réservation dans la base
     public Booking save(Booking booking) {
-        String sql = "INSERT INTO booking (user_id, itinerary_id, status, departure_date, return_date, total_price, purchase_date, number_of_adults, number_of_kids, type) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)";
+        String sql = "INSERT INTO booking (user_id, itinerary_id, status, departure_date, return_date, total_price, purchase_date, number_of_adults, number_of_kids, type) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
 
         jdbcTemplate.update(sql,
                 booking.getUserId(),
@@ -143,7 +143,7 @@ public class BookingDao {
             throw new BookingNotFoundException("Booking " + bookingId + "does not exist");
         }
 
-        String sql = "UPDATE booking SET user_id = ?, itinerary_id = ?, status = ?, departure_date = ?, return_date = ?, total_price = ?, purchase_date = ?, number_of_adults = ?, number_of_kids = ?, type = ? WHERE booking = ?";
+        String sql = "UPDATE booking SET user_id = ?, itinerary_id = ?, status = ?, departure_date = ?, return_date = ?, total_price = ?, purchase_date = ?, number_of_adults = ?, number_of_kids = ?, type = ? WHERE id = ?";
         int rowsAffected = jdbcTemplate.update(sql,
                 booking.getUserId(),
                 booking.getItineraryId(),
@@ -170,7 +170,7 @@ public class BookingDao {
             throw new BookingNotFoundException("Booking with ID " + bookingId + "does not exist");
         }
 
-        String sql = "UPDATE booking SET status = ? WHERE booking = ?";
+        String sql = "UPDATE booking SET status = ? WHERE id = ?";
 
         int rowsAffected = jdbcTemplate.update(sql, status.name(), bookingId);
 
@@ -185,7 +185,7 @@ public class BookingDao {
             throw new BookingNotFoundException("Booking with ID " + bookingId + " does not exist");
         }
 
-        String sql = "UPDATE booking SET total_price = ? WHERE booking = ?";
+        String sql = "UPDATE booking SET total_price = ? WHERE id = ?";
         int rowsAffected = jdbcTemplate.update(sql, newPrice, bookingId);
 
         if (rowsAffected <= 0) {
@@ -196,7 +196,7 @@ public class BookingDao {
 
     // Vérifie si une réservation existe dans la base
     private boolean booking(int bookingId) {
-        String checkSql = "SELECT COUNT(*) FROM booking WHERE booking = ?";
+        String checkSql = "SELECT COUNT(*) FROM booking WHERE id = ?";
         int count = jdbcTemplate.queryForObject(checkSql, Integer.class, bookingId);
         return count > 0;
     }
