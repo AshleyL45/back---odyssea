@@ -29,7 +29,7 @@ public class JwtUtil {
     public JwtToken generateToken(Integer id, String role){
         String token = Jwts.builder()
                 .setSubject(String.valueOf(id))
-                .claim("role",role )
+                .claim("role","ROLE_" + role )
                 .setIssuedAt(new Date())
                 .setExpiration(new Date((new Date()).getTime() + jwtExpirationMs))
                 .signWith(key, SignatureAlgorithm.HS256)
@@ -45,6 +45,16 @@ public class JwtUtil {
                 .getBody()
                 .getSubject();
     }
+
+    public String getRoleFromToken(String token) {
+        return Jwts.parserBuilder()
+                .setSigningKey(key)
+                .build()
+                .parseClaimsJws(token)
+                .getBody()
+                .get("role", String.class);
+    }
+
 
     public void validateJwtToken(String token) {
         try {

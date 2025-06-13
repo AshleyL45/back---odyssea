@@ -64,9 +64,9 @@ public class SecurityConfig {
                                 "/api/**",
                                 "/countries/**",
                                 "/cities/**",
-                                "/options/**", "/v3/api-docs/**", "/swagger-ui/**", "/swagger-ui.html"
+                                "/options/**",
+                                "/v3/api-docs/**", "/swagger-ui/**", "/swagger-ui.html"
                         ).permitAll()
-                        .requestMatchers("/user/**", "/bookings/**", "/mySelection/**").hasRole("USER")
                         .requestMatchers("/userItinerary/**", "/user/**", "/bookings/**", "/mySelection/**").hasRole("USER")
                         .requestMatchers("/admin/**").hasRole("ADMIN")
                         .anyRequest().authenticated()

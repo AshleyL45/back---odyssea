@@ -1,6 +1,9 @@
 package com.example.odyssea.security;
 
+import com.example.odyssea.daos.userAuth.UserDao;
+import com.example.odyssea.entities.userAuth.User;
 import com.example.odyssea.exceptions.JwtToken.*;
+import com.example.odyssea.exceptions.UsernameNotFoundException;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -9,6 +12,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.web.authentication.WebAuthenticationDetailsSource;
@@ -16,6 +21,7 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 import java.io.IOException;
+import java.util.List;
 
 @Component
 public class JwtFilter extends OncePerRequestFilter {
@@ -24,7 +30,7 @@ public class JwtFilter extends OncePerRequestFilter {
     private final CustomUserDetailsService userDetailsService;
     private static final Logger logger = LoggerFactory.getLogger(JwtFilter.class);
 
-    public JwtFilter(JwtUtil jwtUtil, CustomUserDetailsService userDetailsService) {
+    public JwtFilter(JwtUtil jwtUtil, CustomUserDetailsService userDetailsService, UserDao userDao) {
         this.jwtUtil = jwtUtil;
         this.userDetailsService = userDetailsService;
     }
@@ -42,10 +48,15 @@ public class JwtFilter extends OncePerRequestFilter {
 
                 Integer id = Integer.valueOf(jwtUtil.getIdFromToken(jwt));
                 UserDetails userDetails = userDetailsService.loadById(id);
+                String role = jwtUtil.getRoleFromToken(jwt);
+
+                List<GrantedAuthority> authorities = List.of(new SimpleGrantedAuthority("ROLE_" + role));
+                System.out.println("Authorities: " + authorities);
+
 
                 UsernamePasswordAuthenticationToken auth =
                         new UsernamePasswordAuthenticationToken(
-                                userDetails, null, userDetails.getAuthorities()
+                                userDetails, null, authorities
                         );
                 auth.setDetails(new WebAuthenticationDetailsSource()
                         .buildDetails(request));

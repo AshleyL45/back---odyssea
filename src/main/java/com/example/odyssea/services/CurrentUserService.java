@@ -10,12 +10,21 @@ import org.springframework.stereotype.Service;
 @Service
 public class CurrentUserService {
 
-    public Integer getCurrentUserId(){
-        Authentication auth = SecurityContextHolder.getContext().getAuthentication();  // Contient les informations sur l'utilisateur connecté
-        if (!(auth.getPrincipal() instanceof CustomUserDetails)) {
+    public Integer getCurrentUserId() {
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+
+        if (auth == null || !auth.isAuthenticated() || "anonymousUser".equals(auth.getPrincipal())) {
             throw new UserNotFoundException("Unauthenticated user. Please login or register.");
         }
-        return ((CustomUserDetails) auth.getPrincipal()).getUserId();
+
+        System.out.println("Auth principal: " + auth.getPrincipal().getClass().getName());
+
+        if (!(auth.getPrincipal() instanceof CustomUserDetails customUser)) {
+            throw new UserNotFoundException("Unexpected principal type.");
+        }
+
+        return customUser.getUserId();
     }
+
 
 }

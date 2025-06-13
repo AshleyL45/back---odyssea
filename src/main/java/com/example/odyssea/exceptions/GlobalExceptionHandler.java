@@ -198,18 +198,19 @@ public class GlobalExceptionHandler {
     }
 
     @ExceptionHandler(AuthenticationException.class)
-    public ResponseEntity<ApiResponse<Void>> handleGlobal(AuthenticationException ex) {
+    public ResponseEntity<ApiResponse<Void>> handleAuthenticationException(AuthenticationException ex) {
         logger.error("Authentication error : {}", ex.getMessage(), ex);
         return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(
                 ApiResponse.error("Invalid credentials.", HttpStatus.UNAUTHORIZED)
         );
     }
 
+
     @ExceptionHandler({UsernameNotFoundException.class, UserNotFoundException.class})
     public ResponseEntity<ApiResponse<Void>> handleUsernameNotFoundException(Exception ex) {
         logger.error("User not found : {}", ex.getMessage(), ex);
-        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(
-                ApiResponse.error("User not found.", HttpStatus.NOT_FOUND)
+        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(
+                ApiResponse.error("User not found.", HttpStatus.UNAUTHORIZED)
         );
     }
 
