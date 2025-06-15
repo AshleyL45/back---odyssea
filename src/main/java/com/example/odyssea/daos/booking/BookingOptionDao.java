@@ -33,8 +33,17 @@ public class BookingOptionDao {
 
 
     //Supprimer une option d'une réservation
-    public void deleteOptionFromBooking(int userId, int itineraryId, int optionId) {
-        String sql = "DELETE FROM booking WHERE user_id = ? AND itinerary_id = ? AND option_id = ?";
+    /** Supprime toutes les options pour un couple (user, itinerary) donné */
+    public void deleteOptionsForBooking(int userId, int itineraryId) {
+        String sql = "DELETE FROM booking_option WHERE user_id = ? AND itinerary_id = ?";
+        jdbcTemplate.update(sql, userId, itineraryId);
+    }
+
+    /** Insère une option pour un couple (user, itinerary) donné */
+    public void insertBookingOption(int userId, int itineraryId, int optionId) {
+        String sql = "INSERT INTO booking_option (user_id, itinerary_id, option_id) VALUES (?, ?, ?)";
         jdbcTemplate.update(sql, userId, itineraryId, optionId);
     }
+
+
 }

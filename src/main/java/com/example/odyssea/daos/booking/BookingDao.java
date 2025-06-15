@@ -8,9 +8,14 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
+import org.springframework.jdbc.support.GeneratedKeyHolder;
+import org.springframework.jdbc.support.KeyHolder;
 import org.springframework.stereotype.Repository;
 
 import java.math.BigDecimal;
+import java.sql.Date;
+import java.sql.PreparedStatement;
+import java.sql.Statement;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -119,23 +124,43 @@ public class BookingDao {
 
     // Enregistre une nouvelle réservation dans la base
     public Booking save(Booking booking) {
-        String sql = "INSERT INTO booking (user_id, itinerary_id, status, departure_date, return_date, total_price, purchase_date, number_of_adults, number_of_kids, type) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+        String sql = """
+        INSERT INTO booking
+          (user_id,
+           itinerary_id,
+           status,
+           departure_date,
+           return_date,
+           total_price,
+           purchase_date,
+           number_of_adults,
+           number_of_kids,
+           `type`)
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+        """;
 
-        jdbcTemplate.update(sql,
+        // Test basique : on fait juste l'update
+        int rows = jdbcTemplate.update(sql,
                 booking.getUserId(),
                 booking.getItineraryId(),
                 booking.getStatus(),
-                booking.getDepartureDate(),
-                booking.getReturnDate(),
+                Date.valueOf(booking.getDepartureDate()),
+                Date.valueOf(booking.getReturnDate()),
                 booking.getTotalPrice(),
-                booking.getPurchaseDate(),
+                Date.valueOf(booking.getPurchaseDate()),
                 booking.getNumberOfAdults(),
                 booking.getNumberOfKids(),
                 booking.getType()
         );
 
+        if (rows != 1) {
+            throw new DatabaseException("Expected 1 row inserted, got " + rows);
+        }
+        // On arrête là : pas de récupération de clé
         return booking;
     }
+
+
 
     // Met à jour une réservation existante identifiée par son ID
     public Booking update(int bookingId, Booking booking) {

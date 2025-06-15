@@ -24,28 +24,41 @@ public class BookingDraftDao {
         this.jdbcTemplate = jdbcTemplate;
     }
 
-    private final RowMapper<BookingDraft> bookingRowMapper = (rs, rowNum) -> new BookingDraft(
-            rs.getInt("draft_id"),
-            rs.getObject("user_id", Integer.class),
-            rs.getObject("itinerary_id", Integer.class),
-            rs.getDate("departure_date") != null ? rs.getDate("departure_date").toLocalDate() : null,
-            rs.getObject("number_of_adults", Integer.class),
-            rs.getObject("number_of_kids", Integer.class),
-            rs.getTimestamp("created_at").toLocalDateTime(),
-            rs.getString("type")
-    );
+    private final RowMapper<BookingDraft> bookingRowMapper = (rs, rowNum) -> {
+        BookingDraft d = new BookingDraft();
+        d.setDraftId(rs.getInt("draft_id"));  // identifiant métier
+        d.setUserId(rs.getObject("user_id", Integer.class));
+        d.setItineraryId(rs.getObject("itinerary_id", Integer.class));
+        d.setDepartureDate(rs.getDate("departure_date") != null
+                ? rs.getDate("departure_date").toLocalDate()
+                : null);
+        d.setReturnDate(rs.getDate("return_date") != null
+                ? rs.getDate("return_date").toLocalDate()
+                : null);
+        d.setNumberOfAdults(rs.getInt("number_of_adults"));
+        d.setNumberOfKids(rs.getInt("number_of_kids"));
+        d.setCreatedAt(rs.getTimestamp("created_at").toLocalDateTime());
+        d.setType(rs.getString("type"));
+        return d;
+    };
 
     public Integer getLastDraftIdByUser(int userId) {
-        String sql = "SELECT draft_id FROM booking_draft WHERE user_id = ? ORDER BY created_at DESC LIMIT 1";
+        String sql = """
+        SELECT draft_id
+          FROM booking_draft
+         WHERE user_id = ?
+      ORDER BY created_at DESC
+         LIMIT 1
+    """;
         try {
             return jdbcTemplate.queryForObject(sql, Integer.class, userId);
         } catch (EmptyResultDataAccessException e) {
-            // No draft exists, create a new one
             return createInitialDraft(userId);
         } catch (Exception e) {
             throw new DatabaseException("Error retrieving draft: " + e.getMessage());
         }
     }
+
 
     private Integer createInitialDraft(int userId) {
         String insertSql = "INSERT INTO booking_draft (user_id, created_at) VALUES (?, NOW())";
@@ -63,13 +76,16 @@ public class BookingDraftDao {
     }
 
     public BookingDraft getLastDraftByUserId(int userId) {
-        int draftId = getLastDraftIdByUser(userId);
-        String sql = "SELECT * FROM booking_draft WHERE draft_id = ?";
-        return jdbcTemplate.query(sql, bookingRowMapper, draftId)
-                .stream()
-                .findFirst()
-                .orElseThrow(() -> new DatabaseException("No draft found for user with ID: " + userId));
+        String sql = """
+    SELECT *
+      FROM booking_draft
+     WHERE user_id = ?
+  ORDER BY created_at DESC
+     LIMIT 1
+  """;
+        return jdbcTemplate.queryForObject(sql, bookingRowMapper, userId);
     }
+
 
     public void updateItineraryId(int draftId, int itineraryId) {
         String sql = "UPDATE booking_draft SET itinerary_id = ? WHERE draft_id = ?";
@@ -123,4 +139,16 @@ public class BookingDraftDao {
             jdbcTemplate.update(sql, draftId, optId);
         }
     }
+
+    public void deleteDraftByDraftId(int draftId) {
+        String sql = "DELETE FROM booking_draft WHERE draft_id = ?";
+        jdbcTemplate.update(sql, draftId);
     }
+
+
+    public void deleteDraftById(int id) {
+        String sql = "DELETE FROM booking_draft WHERE id = ?";
+        jdbcTemplate.update(sql, id);
+    }
+
+}

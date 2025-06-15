@@ -18,7 +18,6 @@ import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
-import java.util.stream.Collectors;
 
 @Service
 public class BookingDraftService {
@@ -133,13 +132,14 @@ public class BookingDraftService {
         Integer userId = getUserId();
         BookingDraft draft = bookingDraftDao.getLastDraftByUserId(userId);
 
-        // Calcul de la date de retour si non stockée
+
+        // 1) Calcul de la date de retour si non stockée
         LocalDate departure = draft.getDepartureDate();
         LocalDate returnDate = (draft.getReturnDate() != null)
                 ? draft.getReturnDate()
                 : departure.plusDays(12);
 
-        // Construction de l'entité finale
+        // 2) Construction de l'entité Booking
         Booking booking = new Booking();
         booking.setUserId(userId);
         booking.setItineraryId(draft.getItineraryId());
@@ -147,24 +147,147 @@ public class BookingDraftService {
         booking.setReturnDate(returnDate);
         booking.setNumberOfAdults(draft.getNumberOfAdults());
         booking.setNumberOfKids(draft.getNumberOfKids());
-        booking.setStatus(draft.getType().equals("Mystery")
-                ? BookingStatus.PENDING.name()
-                : BookingStatus.CONFIRMED.name());
+        booking.setStatus(
+                draft.getType().equals("Mystery")
+                        ? BookingStatus.PENDING.name()
+                        : BookingStatus.CONFIRMED.name()
+        );
         booking.setPurchaseDate(LocalDate.now());
         booking.setTotalPrice(BigDecimal.ZERO);
         booking.setType(draft.getType());
 
-        // Enregistrement dans booking
-        Booking saved = bookingDao.save(booking);
+        // 3) Persistance de la réservation dans la table booking
+        bookingDao.save(booking);
 
-        // Transfert des options du draft
+        // 4) Récupération des options sélectionnées dans le draft
         List<Option> options = bookingOptionDraftDao.getOptionsByDraftId(draft.getDraftId());
-        List<Integer> optionIds = options.stream()
-                .map(Option::getId)
-                .collect(Collectors.toList());
-        for (Integer optionId : optionIds) {
-            // insertBooking ajoute une entrée dans booking_option
-            bookingOptionDao.insertBooking(userId, draft.getItineraryId(), optionId);
+
+        // 5) Suppression des anciennes options pour ce user+itinerary
+        bookingOptionDao.deleteOptionsForBooking(userId, draft.getItineraryId());
+
+        // 6) Insertion des options actuelles
+        for (Option opt : options) {
+            bookingOptionDao.insertBookingOption(userId, draft.getItineraryId(), opt.getId());
+        }
+
+        bookingOptionDraftDao.deleteOptionsByDraftId(draft.getDraftId());
+
+        // 2️⃣ Puis seulement on supprime le draft
+        bookingDraftDao.deleteDraftByDraftId(draft.getDraftId());
+
+    }
+
+    @Service
+    public static class BookingStep1Service {
+        private final BookingDraftDao bookingDraftDao;
+        private final CurrentUserService currentUserService;
+
+        public BookingStep1Service(BookingDraftDao bookingDraftDao,
+                                   CurrentUserService currentUserService) {
+            this.bookingDraftDao = bookingDraftDao;
+            this.currentUserService = currentUserService;
+        }
+
+        private int getUserId() {
+            return currentUserService.getCurrentUserId();
+        }
+
+        /**
+         * Étape 1 : validation itinéraire, type et date de départ
+         */
+        public void execute(int itineraryId, String type, String date) {
+            if (itineraryId <= 0) {
+                throw new ValidationException("Itinerary ID must be a positive number");
+            }
+            if (!"Standard".equals(type) && !"Mystery".equals(type)) {
+                throw new ValidationException("Type must be either Standard or Mystery");
+            }
+            if (date == null || date.isBlank()) {
+                throw new ValidationException("Departure date is required");
+            }
+            LocalDate departure = LocalDate.parse(date,
+                    DateTimeFormatter.ofPattern("dd/MM/yyyy"));
+            if (departure.isBefore(LocalDate.now().plusDays(1))) {
+                throw new ValidationException("Departure date must be at least tomorrow");
+            }
+
+            int draftId = bookingDraftDao.getLastDraftIdByUser(getUserId());
+            bookingDraftDao.updateItineraryId(draftId, itineraryId);
+            bookingDraftDao.updateType(draftId, type);
+            bookingDraftDao.updateDepartureDate(draftId, departure);
+        }
+    }
+
+    @Service
+    public static class BookingStep2Service {
+        private final BookingDraftDao bookingDraftDao;
+        private final CurrentUserService currentUserService;
+
+        public BookingStep2Service(BookingDraftDao bookingDraftDao,
+                                   CurrentUserService currentUserService) {
+            this.bookingDraftDao = bookingDraftDao;
+            this.currentUserService = currentUserService;
+        }
+
+        private int getUserId() {
+            return currentUserService.getCurrentUserId();
+        }
+
+        /**
+         * Étape 2 : validation nombre d’adultes et d’enfants
+         */
+        public void execute(int numberAdults, int numberKids) {
+            if (numberAdults <= 0) {
+                throw new ValidationException("There must be at least one adult");
+            }
+            if (numberKids < 0) {
+                throw new ValidationException("Number of kids cannot be negative");
+            }
+            int draftId = bookingDraftDao.getLastDraftIdByUser(getUserId());
+            bookingDraftDao.updateNumberOfAdults(draftId, numberAdults);
+            bookingDraftDao.updateNumberOfKids(draftId, numberKids);
+        }
+    }
+
+    @Service
+    public static class BookingStep3Service {
+        private final BookingDraftDao bookingDraftDao;
+        private final BookingOptionDraftDao bookingOptionDraftDao;
+        private final OptionDao optionDao;
+        private final CurrentUserService currentUserService;
+
+        public BookingStep3Service(BookingDraftDao bookingDraftDao,
+                                   BookingOptionDraftDao bookingOptionDraftDao,
+                                   OptionDao optionDao,
+                                   CurrentUserService currentUserService) {
+            this.bookingDraftDao = bookingDraftDao;
+            this.bookingOptionDraftDao = bookingOptionDraftDao;
+            this.optionDao = optionDao;
+            this.currentUserService = currentUserService;
+        }
+
+        private int getUserId() {
+            return currentUserService.getCurrentUserId();
+        }
+
+        /**
+         * Étape 3 : enregistre la liste d’options choisies
+         */
+        @Transactional
+        public void execute(List<Integer> optionIds) {
+            int draftId = bookingDraftDao.getLastDraftIdByUser(getUserId());
+            // purge anciennes
+            bookingOptionDraftDao.deleteOptionsByDraftId(draftId);
+            if (optionIds == null || optionIds.isEmpty()) {
+                return;
+            }
+            // validation existence
+            for (Integer optId : optionIds) {
+                if (optionDao.findById(optId) == null) {
+                    throw new ValidationException("Option not found: " + optId);
+                }
+            }
+            bookingOptionDraftDao.saveOptions(draftId, optionIds);
         }
     }
 }
