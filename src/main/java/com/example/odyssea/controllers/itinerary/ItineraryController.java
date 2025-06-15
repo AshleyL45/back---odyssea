@@ -12,7 +12,9 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.Collections;
 import java.util.List;
+import java.util.Optional;
 
 @RestController
 @RequestMapping("/api/itineraries")
@@ -54,5 +56,23 @@ public class ItineraryController {
         return ResponseEntity.ok(ApiResponse.success("Itineraries retrieved by search query", results, HttpStatus.OK));
     }
 
+    @Operation(
+            summary = "Get valid itineraries",
+            description = "Retrieve itineraries excluding the given countries"
+    )
+    @GetMapping("/valid")
+    public ResponseEntity<ApiResponse<List<Itinerary>>> getValidItineraries(
+            @RequestParam(required = false) String excludedCountries
+    ) {
+        List<String> excluded = Optional.ofNullable(excludedCountries)
+                .map(s -> List.of(s.split(",")))
+                .orElse(Collections.emptyList());
 
+        List<Itinerary> results = itineraryService.findValidItineraries(excluded);
+        return ResponseEntity.ok(ApiResponse.success(
+                "Valid itineraries retrieved successfully",
+                results,
+                HttpStatus.OK
+        ));
+    }
 }

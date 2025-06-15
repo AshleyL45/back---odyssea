@@ -60,4 +60,8 @@ public class ItineraryService {
         return itineraryStepDao.findByItineraryIdWithCity(itineraryId);
     }
 
+    public List<Itinerary> findValidItineraries(List<String> excludedCountries) {
+        return itineraryDao.findValidItineraries(excludedCountries);
+    }
+
 }

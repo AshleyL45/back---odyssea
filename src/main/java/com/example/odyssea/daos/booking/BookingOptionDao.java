@@ -26,11 +26,11 @@ public class BookingOptionDao {
         return jdbcTemplate.query(sql, new Object[]{bookingId}, new BeanPropertyRowMapper<>(Option.class));
     }
 
-    // Ajouter une option d'une réservation
     public void insertBooking(int userId, int itineraryId, int optionId) {
-        String sql = "INSERT INTO booking (user_id, itinerary_id, option_id) VALUES (?, ?, ?)";
+        String sql = "INSERT INTO booking_option (user_id, itinerary_id, option_id) VALUES (?, ?, ?)";
         jdbcTemplate.update(sql, userId, itineraryId, optionId);
     }
+
 
     //Supprimer une option d'une réservation
     public void deleteOptionFromBooking(int userId, int itineraryId, int optionId) {
