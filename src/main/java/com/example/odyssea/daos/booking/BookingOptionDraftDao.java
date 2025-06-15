@@ -47,7 +47,7 @@ public class BookingOptionDraftDao {
                 jdbcTemplate.update(sql, draftId, optionId);
             }
         } catch (Exception e) {
-            throw new DatabaseException("Erreur lors de l'enregistrement des options du draft : " + e.getMessage());
+            throw new DatabaseException("Error saving draft options: " + e.getMessage());
         }
     }
 

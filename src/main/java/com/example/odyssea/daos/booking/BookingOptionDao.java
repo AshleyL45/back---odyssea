@@ -33,7 +33,6 @@ public class BookingOptionDao {
 
 
     //Supprimer une option d'une réservation
-    /** Supprime toutes les options pour un couple (user, itinerary) donné */
     public void deleteOptionsForBooking(int userId, int itineraryId) {
         String sql = "DELETE FROM booking_option WHERE user_id = ? AND itinerary_id = ?";
         jdbcTemplate.update(sql, userId, itineraryId);

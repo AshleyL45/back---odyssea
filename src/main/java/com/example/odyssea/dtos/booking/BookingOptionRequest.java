@@ -1,4 +1,3 @@
-// src/main/java/com/example/odyssea/dtos/booking/BookingOptionRequest.java
 package com.example.odyssea.dtos.booking;
 
 public class BookingOptionRequest {

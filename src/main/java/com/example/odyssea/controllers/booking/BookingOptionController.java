@@ -23,7 +23,7 @@ public class BookingOptionController {
 
     @Operation(
             summary = "Add an option to a booking",
-            description = "Associe une option donnée à l'itinéraire en cours de réservation pour l'utilisateur courant"
+            description = "Associates a given option with the route currently booked for the current user"
     )
     @PostMapping
     public ResponseEntity<ApiResponse<Void>> addOptionToBooking(
@@ -35,6 +35,6 @@ public class BookingOptionController {
         );
         return ResponseEntity
                 .status(HttpStatus.CREATED)
-                .body(ApiResponse.success("Option ajoutée à la réservation", HttpStatus.CREATED));
+                .body(ApiResponse.success("Option added to reservation", HttpStatus.CREATED));
     }
 }

@@ -8,7 +8,7 @@ public class BookingDraft {
     private Integer userId;
     private Integer itineraryId;
     private LocalDate departureDate;
-    private LocalDate returnDate;     // ← assurez-vous qu’elle existe comme champ
+    private LocalDate returnDate;
     private int numberOfAdults;
     private int numberOfKids;
     private LocalDateTime createdAt;

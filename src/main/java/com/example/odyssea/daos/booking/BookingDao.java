@@ -156,7 +156,7 @@ public class BookingDao {
         if (rows != 1) {
             throw new DatabaseException("Expected 1 row inserted, got " + rows);
         }
-        // On arrête là : pas de récupération de clé
+
         return booking;
     }
 

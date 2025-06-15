@@ -43,13 +43,7 @@ public class BookingDraftDao {
     };
 
     public Integer getLastDraftIdByUser(int userId) {
-        String sql = """
-        SELECT draft_id
-          FROM booking_draft
-         WHERE user_id = ?
-      ORDER BY created_at DESC
-         LIMIT 1
-    """;
+        String sql = " SELECT draft_id FROM booking_draft WHERE user_id = ? ORDER BY created_at DESC LIMIT 1";
         try {
             return jdbcTemplate.queryForObject(sql, Integer.class, userId);
         } catch (EmptyResultDataAccessException e) {
@@ -76,13 +70,7 @@ public class BookingDraftDao {
     }
 
     public BookingDraft getLastDraftByUserId(int userId) {
-        String sql = """
-    SELECT *
-      FROM booking_draft
-     WHERE user_id = ?
-  ORDER BY created_at DESC
-     LIMIT 1
-  """;
+        String sql = " SELECT * FROM booking_draft WHERE user_id = ? ORDER BY created_at DESC LIMIT 1 ";
         return jdbcTemplate.queryForObject(sql, bookingRowMapper, userId);
     }
 
@@ -130,25 +118,33 @@ public class BookingDraftDao {
 
     public void deleteOptionsByDraftId(int draftId) {
         String sql = "DELETE FROM booking_options_draft WHERE booking_draft_id = ?";
-        jdbcTemplate.update(sql, draftId);
+        try {
+            int rows = jdbcTemplate.update(sql, draftId);
+            if (rows == 0) throw new DatabaseException("No options to delete for draft ID: " + draftId);
+        } catch (Exception e) {
+            throw new DatabaseException("Error deleting draft options for ID: " + draftId);
+        }
     }
 
     public void saveOptions(int draftId, List<Integer> optionIds) {
         String sql = "INSERT INTO booking_options_draft (booking_draft_id, option_id) VALUES (?, ?)";
-        for (Integer optId : optionIds) {
-            jdbcTemplate.update(sql, draftId, optId);
+        try {
+            for (Integer optId : optionIds) {
+                jdbcTemplate.update(sql, draftId, optId);
+            }
+        } catch (Exception e) {
+            throw new DatabaseException("Error saving draft options for ID: " + draftId);
         }
     }
 
     public void deleteDraftByDraftId(int draftId) {
         String sql = "DELETE FROM booking_draft WHERE draft_id = ?";
-        jdbcTemplate.update(sql, draftId);
-    }
-
-
-    public void deleteDraftById(int id) {
-        String sql = "DELETE FROM booking_draft WHERE id = ?";
-        jdbcTemplate.update(sql, id);
+        try {
+            int rows = jdbcTemplate.update(sql, draftId);
+            if (rows == 0) throw new DatabaseException("No draft found to delete with ID: " + draftId);
+        } catch (Exception e) {
+            throw new DatabaseException("Error deleting draft ID: " + draftId);
+        }
     }
 
 }
