@@ -29,7 +29,7 @@ public class JwtUtil {
     public JwtToken generateToken(Integer id, String role){
         String token = Jwts.builder()
                 .setSubject(String.valueOf(id))
-                .claim("role","ROLE_" + role )
+                .claim("role", role )
                 .setIssuedAt(new Date())
                 .setExpiration(new Date((new Date()).getTime() + jwtExpirationMs))
                 .signWith(key, SignatureAlgorithm.HS256)

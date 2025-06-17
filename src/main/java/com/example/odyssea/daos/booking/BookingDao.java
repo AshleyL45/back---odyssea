@@ -29,7 +29,7 @@ public class BookingDao {
         this.namedParameterJdbcTemplate = namedParameterJdbcTemplate;
     }
 
-    private final RowMapper<Booking> booking = (rs, _) -> new Booking(
+    private final RowMapper<Booking> bookingRowMapper = (rs, _) -> new Booking(
             rs.getInt("id"),
             rs.getInt("user_id"),
             rs.getInt("itinerary_id"),
@@ -47,7 +47,7 @@ public class BookingDao {
     // Récupère la liste de toutes les réservations
     public List<Booking> findAll() {
         String sql = "SELECT * FROM booking";
-        return jdbcTemplate.query(sql, booking);
+        return jdbcTemplate.query(sql, bookingRowMapper);
     }
 
     public List<Booking> getAllBookingsAndFilter(
@@ -88,14 +88,14 @@ public class BookingDao {
             }
         }
 
-        return namedParameterJdbcTemplate.query(sql.toString(), new MapSqlParameterSource(params), booking);
+        return namedParameterJdbcTemplate.query(sql.toString(), new MapSqlParameterSource(params),  bookingRowMapper);
     }
 
 
 
     public Booking findByBookingId(int bookingId){
         String sql = "SELECT * FROM booking WHERE id = ?";
-        return jdbcTemplate.query(sql, booking, bookingId)
+        return jdbcTemplate.query(sql,  bookingRowMapper, bookingId)
                 .stream()
                 .findFirst()
                 .orElseThrow(() -> new BookingNotFoundException("Booking " + bookingId + "does not exist"));
@@ -104,7 +104,7 @@ public class BookingDao {
     // Récupère une réservation
     public Booking findById(int userId, int bookingId) {
         String sql = "SELECT * FROM booking WHERE user_id = ? AND id = ?";
-        return jdbcTemplate.query(sql, booking, userId, bookingId)
+        return jdbcTemplate.query(sql,  bookingRowMapper, userId, bookingId)
                 .stream()
                 .findFirst()
                 .orElseThrow(() -> new BookingNotFoundException("Booking " + bookingId + " of user with ID" + userId + " does not exist"));
@@ -112,8 +112,8 @@ public class BookingDao {
 
     //Récupère tous les itinéraires reservés d'un utilisateur
     public List<Booking> findAllUserBookings(int userId) {
-        String sql = "SELECT * FROM booking WHERE booking.user_id = ?";
-        return jdbcTemplate.query(sql, booking, userId);
+        String sql = "SELECT * FROM booking WHERE user_id = ?";
+        return jdbcTemplate.query(sql,  bookingRowMapper, userId);
     }
 
 

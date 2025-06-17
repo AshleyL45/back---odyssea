@@ -8,6 +8,9 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.ReactiveSecurityContextHolder;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 import reactor.core.publisher.Mono;
 
@@ -54,21 +57,20 @@ public class UserItineraryController {
         return ResponseEntity.ok(response);
     }
 
-    @Operation(
+   @Operation(
             summary = "Generate a personalized itinerary",
             description = "Automatically generates a new personalized itinerary based on user preferences."
     )
-    @GetMapping("/generate")
-    public Mono<ResponseEntity<ApiResponse<UserItineraryDTO>>> generateItinerary() {
-        return userItineraryService.generateItineraryAsync()
-                .map(itinerary -> {
-                    ApiResponse<UserItineraryDTO> response = ApiResponse.success(
-                            "Personalized itinerary generated successfully.",
-                            itinerary,
-                            HttpStatus.CREATED
-                    );
-                    return new ResponseEntity<>(response, HttpStatus.CREATED);
-                });
+   @GetMapping("/generate")
+    public ResponseEntity<ApiResponse<UserItineraryDTO>> generateItinerary() {
+       UserItineraryDTO itinerary = userItineraryService.generateItineraryAsync().block();
+
+       ApiResponse<UserItineraryDTO> response = ApiResponse.success(
+               "Personalized itinerary generated successfully.",
+               itinerary,
+               HttpStatus.CREATED
+       );
+       return new ResponseEntity<>(response, HttpStatus.CREATED);
     }
 
 

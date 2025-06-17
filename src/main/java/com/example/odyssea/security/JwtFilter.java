@@ -30,7 +30,7 @@ public class JwtFilter extends OncePerRequestFilter {
     private final CustomUserDetailsService userDetailsService;
     private static final Logger logger = LoggerFactory.getLogger(JwtFilter.class);
 
-    public JwtFilter(JwtUtil jwtUtil, CustomUserDetailsService userDetailsService, UserDao userDao) {
+    public JwtFilter(JwtUtil jwtUtil, CustomUserDetailsService userDetailsService) {
         this.jwtUtil = jwtUtil;
         this.userDetailsService = userDetailsService;
     }
@@ -51,8 +51,6 @@ public class JwtFilter extends OncePerRequestFilter {
                 String role = jwtUtil.getRoleFromToken(jwt);
 
                 List<GrantedAuthority> authorities = List.of(new SimpleGrantedAuthority("ROLE_" + role));
-                System.out.println("Authorities: " + authorities);
-
 
                 UsernamePasswordAuthenticationToken auth =
                         new UsernamePasswordAuthenticationToken(
@@ -73,7 +71,6 @@ public class JwtFilter extends OncePerRequestFilter {
             }
 
         }
-
         chain.doFilter(request, response);
     }
 

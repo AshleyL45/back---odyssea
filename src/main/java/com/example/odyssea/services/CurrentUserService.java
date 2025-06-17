@@ -17,8 +17,6 @@ public class CurrentUserService {
             throw new UserNotFoundException("Unauthenticated user. Please login or register.");
         }
 
-        System.out.println("Auth principal: " + auth.getPrincipal().getClass().getName());
-
         if (!(auth.getPrincipal() instanceof CustomUserDetails customUser)) {
             throw new UserNotFoundException("Unexpected principal type.");
         }

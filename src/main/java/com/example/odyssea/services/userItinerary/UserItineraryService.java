@@ -14,6 +14,8 @@ import com.example.odyssea.enums.BookingStatus;
 import com.example.odyssea.exceptions.ValidationException;
 import com.example.odyssea.services.CurrentUserService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StopWatch;
@@ -107,6 +109,8 @@ public class UserItineraryService {
 
 
     public List<UserItineraryDTO> getAllUserItineraries() {
+        StopWatch watch = new StopWatch();
+        watch.start("Getting all user itineraries");
         Integer userId = currentUserService.getCurrentUserId();
         List<UserItinerary> foundItineraries = userItineraryDao.findAllUserItineraries(userId);
         List<UserItineraryDTO> userItineraries = new ArrayList<>();
@@ -116,6 +120,8 @@ public class UserItineraryService {
             userItineraries.add(toUserItineraryDTO(itinerary));
         }
 
+        watch.stop();
+        System.out.println(watch.prettyPrint());
         return userItineraries;
     }
 

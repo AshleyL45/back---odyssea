@@ -133,17 +133,17 @@ public class AdminBookingService {
     }
 
     private AdminBookingConfirmationDetails convertToAdminBookingConfirmationDetails(Booking booking){
-        Booking bookingFound = bookingDao.findByBookingId(booking.getBooking());
+        Booking bookingFound = bookingDao.findByBookingId(booking.getId());
         User user = userDao.findById(booking.getUserId());
         Itinerary itinerary = itineraryDao.findById(bookingFound.getItineraryId());
-        List<Option> options = bookingOptionDao.getBookingOptions(bookingFound.getBooking());
+        List<Option> options = bookingOptionDao.getBookingOptions(bookingFound.getId());
 
         return AdminBookingConfirmationDetails.fromEntities(user, itinerary, bookingFound, options);
 
     }
 
     private AdminBookingConfirmation fromBooking(Booking booking){
-        Integer id = booking.getBooking();
+        Integer id = booking.getId();
         BigDecimal price = booking.getTotalPrice();
         LocalDate purchaseDate = booking.getPurchaseDate();
         BookingStatus status = BookingStatus.valueOf(booking.getStatus());

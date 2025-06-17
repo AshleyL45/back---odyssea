@@ -8,7 +8,6 @@ import java.time.LocalDate;
 public class Booking {
 
     private int id;
-    private int booking;
 
     @NotNull(message = "User booking cannot be null.")
     private int userId;
@@ -115,13 +114,6 @@ public class Booking {
         this.numberOfKids = numberOfKids;
     }
 
-    public int getBooking() {
-        return booking;
-    }
-
-    public void setBooking(int booking) {
-        this.booking = booking;
-    }
 
     public String getType() {
         return type;
