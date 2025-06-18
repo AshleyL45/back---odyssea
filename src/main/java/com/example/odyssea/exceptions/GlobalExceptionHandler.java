@@ -32,11 +32,8 @@ public class GlobalExceptionHandler {
     @ExceptionHandler({
             ResourceNotFoundException.class,
             BookingNotFoundException.class,
-            CityNotFound.class,
             CountryNotFound.class,
-            ActivityNotFound.class,
             OptionNotFound.class,
-            HotelNotFound.class,
             SelectionNotFoundException.class
     })
     public ResponseEntity<ApiResponse<Void>> handleNotFound(RuntimeException ex) {
@@ -93,6 +90,41 @@ public class GlobalExceptionHandler {
                 ApiResponse.error("Flight segment not found.", HttpStatus.INTERNAL_SERVER_ERROR)
         );
     }
+
+    @ExceptionHandler(CityNotFound.class)
+    public ResponseEntity<ApiResponse<Void>> handleCityNotFound(CityNotFound ex) {
+        logger.error("City not found: {}", ex.getMessage());
+        return ResponseEntity
+                .status(HttpStatus.NOT_FOUND)
+                .body(ApiResponse.error(ex.getMessage(), HttpStatus.NOT_FOUND));
+    }
+
+    @ExceptionHandler(ExternalServiceException.class)
+    public ResponseEntity<ApiResponse<Void>> handleExternalService(ExternalServiceException ex) {
+        logger.error("External service error: {}", ex.getMessage());
+        return ResponseEntity
+                .status(HttpStatus.SERVICE_UNAVAILABLE)
+                .body(ApiResponse.error(
+                        "Service temporairement indisponible, réessayez plus tard.",
+                        HttpStatus.SERVICE_UNAVAILABLE));
+    }
+
+    @ExceptionHandler(ActivityNotFound.class)
+    public ResponseEntity<ApiResponse<Void>> handleActivityNotFound(ActivityNotFound ex) {
+        logger.error("Activity not found: {}", ex.getMessage());
+        return ResponseEntity
+                .status(HttpStatus.NOT_FOUND)
+                .body(ApiResponse.error(ex.getMessage(), HttpStatus.NOT_FOUND));
+    }
+
+    @ExceptionHandler(HotelNotFound.class)
+    public ResponseEntity<ApiResponse<Void>> handleHotelNotFound(HotelNotFound ex) {
+        logger.error("Hotel not found: {}", ex.getMessage());
+        return ResponseEntity
+                .status(HttpStatus.NOT_FOUND)
+                .body(ApiResponse.error(ex.getMessage(), HttpStatus.NOT_FOUND));
+    }
+
 
     @ExceptionHandler(ImageNotFoundException.class)
     public ResponseEntity<ApiResponse<Void>> handleImageNotFound(ImageNotFoundException ex) {

@@ -5,6 +5,7 @@ import com.example.odyssea.entities.mainTables.Hotel;
 import com.example.odyssea.entities.userItinerary.UserItineraryStep;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.BeanPropertyRowMapper;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
@@ -16,6 +17,8 @@ import java.util.List;
 public class UserItineraryStepDao {
     private static final Logger log = LoggerFactory.getLogger(UserItineraryStepDao.class);
     private final JdbcTemplate jdbcTemplate;
+
+    private final RowMapper<Hotel> hotelRowMapper = new BeanPropertyRowMapper<>(Hotel.class);
 
     public UserItineraryStepDao(JdbcTemplate jdbcTemplate) {
         this.jdbcTemplate = jdbcTemplate;
@@ -44,7 +47,7 @@ public class UserItineraryStepDao {
     }
 
     public UserItineraryStep findById(int userId, int userItineraryId, int dayNumber){
-        String sql = "SELECT * FROM user_daily_plan  WHERE user_id = ? AND user_itinerary_id = ? AND day_number = ?";
+        String sql = "SELECT h.* FROM user_daily_plan p JOIN hotel h ON p.hotel_id = h.id WHERE p.user_itinerary_id = ? AND p.day_number = ?";
         return jdbcTemplate.query(sql, userItineraryStepRowMapper, userId, userItineraryId, dayNumber)
                 .stream()
                 .findFirst()
@@ -67,11 +70,18 @@ public class UserItineraryStepDao {
         return userItineraryStep;
     }
 
-    public Hotel getHotelInADay(int userItineraryId, int dayNumber){
-        String sql = "SELECT hotel.* FROM user_daily_plan \n" +
-                "INNER JOIN hotel ON user_daily_plan.hotel_id = hotel.id\n" +
-                "WHERE user_itinerary_id = ? AND day_number = ?";
-        return jdbcTemplate.queryForObject(sql, new Object[]{userItineraryId, dayNumber}, new BeanPropertyRowMapper<>(Hotel.class));
+    public Hotel getHotelInADay(int userItineraryId, int dayNumber) {
+        String sql = """
+            SELECT h.* FROM user_daily_plan p JOIN hotel h ON p.hotel_id = h.id WHERE p.user_itinerary_id = ? AND p.day_number       = ?
+        """;
+
+        try {
+            // 2) passez bien userItineraryId et dayNumber en arguments
+            return jdbcTemplate.queryForObject(sql, hotelRowMapper, userItineraryId, dayNumber);
+        } catch (EmptyResultDataAccessException e) {
+            // Aucun hôtel pour cette étape
+            return null;
+        }
     }
 
     public Activity getActivityInADay(int userItineraryId, int dayNumber){
