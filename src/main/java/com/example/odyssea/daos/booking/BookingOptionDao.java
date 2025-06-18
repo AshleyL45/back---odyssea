@@ -15,34 +15,37 @@ public class BookingOptionDao {
         this.jdbcTemplate = jdbcTemplate;
     }
 
-
+    /**
+     * Récupère la liste des options associées à une réservation donnée.
+     */
     public List<Option> getBookingOptions(int bookingId) {
-        String sql = "SELECT o.* " +
-                "FROM options o " +
-                "INNER JOIN `booking` ro ON o.id = ro.option_id " +
-                "INNER JOIN booking r ON r.booking = ro.booking " +
-                "WHERE r.booking = ?";
-
-        return jdbcTemplate.query(sql, new Object[]{bookingId}, new BeanPropertyRowMapper<>(Option.class));
+        String sql = """
+            SELECT o.*
+              FROM options o
+              JOIN booking_option bo
+                ON bo.option_id = o.id
+             WHERE bo.booking_id = ?
+            """;
+        return jdbcTemplate.query(
+                sql,
+                new Object[]{bookingId},
+                new BeanPropertyRowMapper<>(Option.class)
+        );
     }
 
-    public void insertBooking(int userId, int itineraryId, int optionId) {
-        String sql = "INSERT INTO booking_option (user_id, itinerary_id, option_id) VALUES (?, ?, ?)";
-        jdbcTemplate.update(sql, userId, itineraryId, optionId);
+    /**
+     * Insère une option pour une réservation donnée.
+     */
+    public void insertBookingOption(int bookingId, int optionId) {
+        String sql = "INSERT INTO booking_option (booking_id, option_id) VALUES (?, ?)";
+        jdbcTemplate.update(sql, bookingId, optionId);
     }
 
-
-    //Supprimer une option d'une réservation
-    public void deleteOptionsForBooking(int userId, int itineraryId) {
-        String sql = "DELETE FROM booking_option WHERE user_id = ? AND itinerary_id = ?";
-        jdbcTemplate.update(sql, userId, itineraryId);
+    /**
+     * Supprime toutes les options associées à une réservation donnée.
+     */
+    public void deleteOptionsForBooking(int bookingId) {
+        String sql = "DELETE FROM booking_option WHERE booking_id = ?";
+        jdbcTemplate.update(sql, bookingId);
     }
-
-    /** Insère une option pour un couple (user, itinerary) donné */
-    public void insertBookingOption(int userId, int itineraryId, int optionId) {
-        String sql = "INSERT INTO booking_option (user_id, itinerary_id, option_id) VALUES (?, ?, ?)";
-        jdbcTemplate.update(sql, userId, itineraryId, optionId);
-    }
-
-
 }

@@ -71,24 +71,19 @@ public class BookingDraftFinalizerService {
         booking.setType(draft.getType());
 
         // sauvegarde
-        bookingDao.save(booking);
+        // on a déjà récupéré l'id auto‐généré
+        Booking saved = bookingDao.save(booking);
+        int bookingId = saved.getId();
 
-        // options du draft
+// on récupère les options du draft
         List<Option> options = bookingOptionDraftDao.getOptionsByDraftId(draftId);
-        bookingOptionDao.deleteOptionsForBooking(
-                userId,
-                draft.getItineraryId()
-        );
-        for (Option opt : options) {
-            bookingOptionDao.insertBookingOption(
-                    userId,
-                    draft.getItineraryId(),
-                    opt.getId()
-            );
-        }
 
-        // nettoyage des drafts
-        bookingOptionDraftDao.deleteOptionsByDraftId(draftId);
-        bookingDraftDao.deleteDraftByDraftId(draftId);
+// on supprime toutes les anciennes options liées à ce booking
+        bookingOptionDao.deleteOptionsForBooking(bookingId);
+
+// on ré‐insère chaque option en ne passant que bookingId + optionId
+        for (Option opt : options) {
+            bookingOptionDao.insertBookingOption(bookingId, opt.getId());
+        }
     }
 }

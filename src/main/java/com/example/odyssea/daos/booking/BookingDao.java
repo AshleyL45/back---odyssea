@@ -97,8 +97,7 @@ public class BookingDao {
     }
 
 
-
-    public Booking findByBookingId(int bookingId){
+    public Booking findByBookingId(int bookingId) {
         String sql = "SELECT * FROM booking WHERE id = ?";
         return jdbcTemplate.query(sql, booking, bookingId)
                 .stream()
@@ -125,40 +124,40 @@ public class BookingDao {
     // Enregistre une nouvelle réservation dans la base
     public Booking save(Booking booking) {
         String sql = """
-        INSERT INTO booking
-          (user_id,
-           itinerary_id,
-           status,
-           departure_date,
-           return_date,
-           total_price,
-           purchase_date,
-           number_of_adults,
-           number_of_kids,
-           `type`)
-        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-        """;
+                INSERT INTO booking
+                  (user_id, itinerary_id, status, departure_date, return_date,
+                   total_price, purchase_date, number_of_adults, number_of_kids, `type`)
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)""";
 
-        // Test basique : on fait juste l'update
-        int rows = jdbcTemplate.update(sql,
-                booking.getUserId(),
-                booking.getItineraryId(),
-                booking.getStatus(),
-                Date.valueOf(booking.getDepartureDate()),
-                Date.valueOf(booking.getReturnDate()),
-                booking.getTotalPrice(),
-                Date.valueOf(booking.getPurchaseDate()),
-                booking.getNumberOfAdults(),
-                booking.getNumberOfKids(),
-                booking.getType()
-        );
+        KeyHolder keyHolder = new GeneratedKeyHolder();
+        int rows = jdbcTemplate.update(conn -> {
+            PreparedStatement ps = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS);
+            ps.setInt(1, booking.getUserId());
+            ps.setInt(2, booking.getItineraryId());
+            ps.setString(3, booking.getStatus());
+            ps.setDate(4, Date.valueOf(booking.getDepartureDate()));
+            ps.setDate(5, Date.valueOf(booking.getReturnDate()));
+            ps.setBigDecimal(6, booking.getTotalPrice());
+            ps.setDate(7, Date.valueOf(booking.getPurchaseDate()));
+            ps.setInt(8, booking.getNumberOfAdults());
+            ps.setInt(9, booking.getNumberOfKids());
+            ps.setString(10, booking.getType());
+            return ps;
+        }, keyHolder);
 
         if (rows != 1) {
             throw new DatabaseException("Expected 1 row inserted, got " + rows);
         }
 
+        Number generatedId = keyHolder.getKey();
+        if (generatedId == null) {
+            throw new DatabaseException("Impossible de récupérer l'ID généré");
+        }
+        booking.setId(generatedId.intValue());
         return booking;
     }
+
+
 
 
 

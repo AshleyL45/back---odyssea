@@ -24,6 +24,7 @@ public class HotelDto {
     }
 
     public static HotelDto fromEntity(Hotel hotel) {
+        if (hotel == null) return null;
         return new HotelDto(
                 hotel.getId(),
                 hotel.getCityId(),

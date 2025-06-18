@@ -70,19 +70,20 @@ public class UserItineraryStepDao {
         return userItineraryStep;
     }
 
-    public Hotel getHotelInADay(int userItineraryId, int dayNumber) {
+    public Hotel getHotelInADay(int userItineraryId, int dayNumber){
         String sql = """
-            SELECT h.* FROM user_daily_plan p JOIN hotel h ON p.hotel_id = h.id WHERE p.user_itinerary_id = ? AND p.day_number       = ?
-        """;
-
+        SELECT h.* 
+          FROM user_daily_plan udp
+          JOIN hotel h ON udp.hotel_id = h.id
+         WHERE udp.user_itinerary_id = ? 
+           AND udp.day_number = ?""";
         try {
-            // 2) passez bien userItineraryId et dayNumber en arguments
             return jdbcTemplate.queryForObject(sql, hotelRowMapper, userItineraryId, dayNumber);
-        } catch (EmptyResultDataAccessException e) {
-            // Aucun hôtel pour cette étape
+        } catch(EmptyResultDataAccessException e) {
             return null;
         }
     }
+
 
     public Activity getActivityInADay(int userItineraryId, int dayNumber){
         String sql = "SELECT activity.* FROM user_daily_plan \n" +
