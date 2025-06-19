@@ -1,6 +1,7 @@
 package com.example.odyssea.daos.mainTables;
 
 import com.example.odyssea.entities.mainTables.Hotel;
+import com.example.odyssea.exceptions.HotelAlreadyExistsException;
 import com.example.odyssea.exceptions.HotelNotFound;
 import com.example.odyssea.exceptions.ResourceNotFoundException;
 import org.springframework.jdbc.core.JdbcTemplate;
@@ -37,7 +38,24 @@ public class HotelDao {
         if (!cityExists(hotel.getCityId())) {
             throw new ResourceNotFoundException("City with id " + hotel.getCityId() + " not found.");
         }
-        String sql = "INSERT INTO hotel (city_id, name, star_rating, description, price) VALUES (?, ?, ?, ?, ?)";
+        // Vérification de doublon
+        String checkSql = "SELECT COUNT(*) FROM hotel WHERE name = ? AND city_id = ?";
+        Integer count = jdbcTemplate.queryForObject(
+                checkSql,
+                Integer.class,
+                hotel.getName(),
+                hotel.getCityId()
+        );
+        if (count != null && count > 0) {
+            throw new HotelAlreadyExistsException(
+                    "Hotel \"" + hotel.getName() +
+                            "\" already exists for cityId=" + hotel.getCityId()
+            );
+        }
+
+        String sql = "INSERT INTO hotel "
+                + "(city_id, name, star_rating, description, price) "
+                + "VALUES (?, ?, ?, ?, ?)";
         jdbcTemplate.update(sql,
                 hotel.getCityId(),
                 hotel.getName(),
@@ -46,6 +64,7 @@ public class HotelDao {
                 hotel.getPrice()
         );
     }
+
 
     public void update(Hotel hotel) {
         if (!cityExists(hotel.getCityId())) {
