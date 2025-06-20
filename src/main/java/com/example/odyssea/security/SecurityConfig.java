@@ -56,7 +56,7 @@ public class SecurityConfig {
                 // règles d’autorisation
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers(
-                                "/auth/**",
+                                "/auth/**","/userItinerary/**",
                                 "/hotels/**",
                                 "/flights/**",
                                 "/activities/**",
@@ -67,7 +67,8 @@ public class SecurityConfig {
                                 "/options/**",
                                 "/v3/api-docs/**", "/swagger-ui/**", "/swagger-ui.html"
                         ).permitAll()
-                        .requestMatchers("/userItinerary/**", "/user/**", "/bookings/**", "/mySelection/**", "/users/**").hasRole("USER")
+                        .requestMatchers("/user/**", "/bookings/**", "/mySelection/**").hasRole("USER")
+                        .requestMatchers("/userItinerary/**", "/user/**", "/bookings/**", "/mySelection/**").hasRole("USER")
                         .requestMatchers("/admin/**").hasRole("ADMIN")
                         .anyRequest().authenticated()
                 )

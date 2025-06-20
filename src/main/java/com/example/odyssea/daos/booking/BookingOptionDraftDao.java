@@ -20,29 +20,43 @@ public class BookingOptionDraftDao {
     }
 
     private final RowMapper<BookingOptionDraft> optionRowMapper = (rs, rowNum) -> new BookingOptionDraft(
-            rs.getInt("booking"),
+            rs.getInt("booking_draft_id"),
             rs.getInt("option_id")
     );
 
+    /**
+     * Récupère la liste des options associées à un draft.
+     */
     public List<Option> getOptionsByDraftId(int draftId) {
-        String sql = "SELECT options.* FROM booking INNER JOIN options ON booking.option_id = options.id WHERE booking = ?";
-        return jdbcTemplate.query(sql, new Object[]{draftId}, new BeanPropertyRowMapper<>(Option.class));
+        String sql = """
+            SELECT o.* 
+              FROM booking_options_draft bod
+              JOIN options o ON bod.option_id = o.id
+             WHERE bod.booking_draft_id = ?
+        """;
+        return jdbcTemplate.query(sql, new BeanPropertyRowMapper<>(Option.class), draftId);
     }
 
+    /**
+     * Enregistre la liste d'options pour un draft.
+     */
     public void saveOptions(int draftId, List<Integer> optionIds) {
+        String sql = "INSERT INTO booking_options_draft (booking_draft_id, option_id) VALUES (?, ?)";
         try {
-            String sql = "INSERT INTO booking (booking, option_id) VALUES (?, ?)";
-
             for (Integer optionId : optionIds) {
                 jdbcTemplate.update(sql, draftId, optionId);
             }
         } catch (Exception e) {
-            throw new DatabaseException("An error occurred while saving draft options: " + e.getMessage());
+            throw new DatabaseException("Error saving draft options: " + e.getMessage());
         }
     }
 
+    /**
+     * Supprime toutes les options liées à un draft (silent delete).
+     */
     public void deleteOptionsByDraftId(int draftId) {
-        String sql = "DELETE FROM booking WHERE booking = ?";
+        String sql = "DELETE FROM booking_options_draft WHERE booking_draft_id = ?";
         jdbcTemplate.update(sql, draftId);
+        // on ne lève pas d'exception si 0 lignes supprimées
     }
 }

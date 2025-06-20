@@ -130,31 +130,28 @@ public class HotelService {
     public Mono<HotelDto> fetchAndSaveHotelWithStarFromAmadeusByCity(String iataCityCode,
                                                                      int cityId,
                                                                      int requestedStar) {
-
+        // 1. Validation du standing
         if (requestedStar != 4 && requestedStar != 5) {
             return Mono.error(new ValidationException("Only 4 or 5 stars are supported."));
         }
-
+        // 2. Vérification du code IATA
         String actualIata = cityDao.getIataCodeById(cityId);
         if (!iataCityCode.equalsIgnoreCase(actualIata)) {
             return Mono.error(new HotelNotFound(
                     "Mismatched IATA code " + iataCityCode + " for cityId " + cityId));
         }
-
-        try {
-            List<Hotel> existing = hotelDao.findByCityIdAndStarRating(cityId, requestedStar);
-            if (!existing.isEmpty()) {
-                return Mono.just(HotelDto.fromEntity(existing.get(0)));
-            }
-        } catch (HotelNotFound e) {
-            // ignore
+        // 3. Recherche en base sans try/catch inutile
+        List<Hotel> existing = hotelDao.findByCityIdAndStarRating(cityId, requestedStar);
+        if (!existing.isEmpty()) {
+            // Si un hôtel existe déjà, on le retourne directement
+            return Mono.just(HotelDto.fromEntity(existing.get(0)));
         }
 
         StopWatch sw = new StopWatch();
-
+    // 4. Sinon, on poursuit avec l'appel Amadeus
         return tokenService.getValidToken()
                 .flatMap(token -> {
-                    sw.start("🌐 Appel Amadeus hôtels");
+                    sw.start("Call Amadeus hotels");
 
                     return webClient.get()
                             .uri(uriBuilder -> uriBuilder
@@ -171,7 +168,7 @@ public class HotelService {
                 })
                 .flatMap(json -> {
                     StopWatch swHotel = new StopWatch();
-                    swHotel.start("🏨 Mapping + sauvegarde hôtels");
+                    swHotel.start("Mapping + save hotels");
 
                     JsonNode data = json.path("data").path(0);
                     if (data.isMissingNode()) {

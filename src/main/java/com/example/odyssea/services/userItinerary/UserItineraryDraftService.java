@@ -147,13 +147,13 @@ public class UserItineraryDraftService {
 
         TripDuration tripDuration = TripDuration.fromDays(duration);
         int expectedActivities = tripDuration.getExpectedActivities();
-        if(activitiesIds == null || activitiesIds.size() != expectedActivities){
+        if (activitiesIds == null || activitiesIds.size() != expectedActivities) {
             throw new ValidationException("You must select exactly " + expectedActivities + " activities for your trip duration.");
         }
 
         for (Integer id : activitiesIds) {
-            Activity activity = activityDao.findById(id)
-                    .orElseThrow(() -> new ActivityNotFound("Activity with id " + id + " not found."));
+            // findById() lève déjà ActivityNotFound si besoin
+            Activity activity = activityDao.findById(id);
             if (!cityIds.contains(activity.getCityId())) {
                 throw new ValidationException("Activity " + activity.getName() + " does not belong to selected cities.");
             }
@@ -161,6 +161,7 @@ public class UserItineraryDraftService {
 
         draftActivitiesDao.saveActivities(userId, activitiesIds);
     }
+
 
     public void validateHotelStanding(Integer hotelStanding){
         Integer userId = getUserId();

@@ -8,6 +8,7 @@ public class BookingDraft {
     private Integer userId;
     private Integer itineraryId;
     private LocalDate departureDate;
+    private LocalDate returnDate;
     private int numberOfAdults;
     private int numberOfKids;
     private LocalDateTime createdAt;
@@ -90,6 +91,14 @@ public class BookingDraft {
 
     public void setType(String type) {
         this.type = type;
+    }
+
+    public LocalDate getReturnDate() {
+        return this.returnDate;
+    }
+
+    public void setReturnDate(LocalDate returnDate) {
+        this.returnDate = returnDate;
     }
 }
 
