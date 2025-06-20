@@ -22,7 +22,6 @@ public class ActivityDao {
         this.jdbcTemplate = jdbcTemplate;
     }
 
-    // Sauvegarde une nouvelle activité, mais vérifie d'abord l'absence de doublon
     public Activity save(Activity activity) {
         String checkSql = "SELECT COUNT(*) FROM activity WHERE city_id = ? AND name = ?";
         Integer count = jdbcTemplate.queryForObject(
@@ -60,7 +59,17 @@ public class ActivityDao {
         return activity;
     }
 
-    // Met à jour une activité existante, ou lève ActivityNotFound si l'ID est introuvable
+    public boolean activityExists(int cityId, String name) {
+        String sql = "SELECT COUNT(*) FROM activity WHERE city_id = ? AND name = ?";
+        Integer count = jdbcTemplate.queryForObject(
+                sql,
+                Integer.class,
+                cityId,
+                name
+        );
+        return count != null && count > 0;
+    }
+
     public Activity update(Activity activity) {
         String sql = "UPDATE activity SET "
                 + "city_id = ?, name = ?, type = ?, physical_effort = ?, "
@@ -85,7 +94,6 @@ public class ActivityDao {
         return activity;
     }
 
-    // Supprime une activité ou lève ActivityNotFound si l'ID est introuvable
     public void deleteById(int id) {
         String sql = "DELETE FROM activity WHERE id = ?";
         int rowsAffected = jdbcTemplate.update(sql, id);
@@ -94,7 +102,11 @@ public class ActivityDao {
         }
     }
 
-    // Recherche une activité par ID, ou lève ActivityNotFound
+    public List<Activity> findAll() {
+        String sql = "SELECT * FROM activity";
+        return jdbcTemplate.query(sql, new ActivityRowMapper());
+    }
+
     public Activity findById(int id) {
         String sql = "SELECT * FROM activity WHERE id = ?";
         List<Activity> list = jdbcTemplate.query(sql, new ActivityRowMapper(), id);
@@ -104,7 +116,6 @@ public class ActivityDao {
         return list.get(0);
     }
 
-    // Pour importer ou lister, on veut ici un simple retour de liste vide ou non
     public List<Activity> findTop5ByCityId(int cityId) {
         String sql = "SELECT * FROM activity WHERE city_id = ? LIMIT 5";
         return jdbcTemplate.query(sql, new ActivityRowMapper(), cityId);

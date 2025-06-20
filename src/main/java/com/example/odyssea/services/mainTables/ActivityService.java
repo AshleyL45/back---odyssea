@@ -41,7 +41,7 @@ public class ActivityService {
                            WebClient webClient) {
         this.activityDao = activityDao;
         this.cityDao     = cityDao;
-        this.webClient   = webClient;                     // ← initialisation manquante
+        this.webClient   = webClient;
     }
 
     public List<Activity> getAllActivities() {
@@ -49,8 +49,9 @@ public class ActivityService {
     }
 
     public Activity getActivity(int id) {
-        return activityDao.findById(id).orElseThrow(() -> new ActivityNotFound("Activity not found with id: " + id));
+        return activityDao.findById(id);
     }
+
 
     public void createActivity(ActivityDto activityDto, int cityId) {
         checkCityExists(cityId);
@@ -120,8 +121,6 @@ public class ActivityService {
     }
 
     private String buildPlacesUrl(int cityId, int radius) {
-        // on sait que checkCityExists a déjà vérifié que la ville existe,
-        // mais on peut double-vérifier ici :
         City city = cityDao.findById(cityId);
         if (city == null) {
             throw new CityNotFound("City not found: " + cityId);
