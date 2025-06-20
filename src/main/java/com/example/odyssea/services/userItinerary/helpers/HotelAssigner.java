@@ -5,6 +5,7 @@ import com.example.odyssea.dtos.userItinerary.UserItineraryDayDTO;
 import com.example.odyssea.entities.mainTables.City;
 import com.example.odyssea.entities.mainTables.Hotel;
 import com.example.odyssea.exceptions.DatabaseException;
+import com.example.odyssea.exceptions.HotelNotFound;
 import com.example.odyssea.services.mainTables.HotelService;
 import org.springframework.stereotype.Component;
 import org.springframework.util.StopWatch;
@@ -32,12 +33,14 @@ public class HotelAssigner {
 
         int index = (dayNumber - 1) / daysPerHotel;
         if(hotelsList.isEmpty()){
-            throw new DatabaseException("An error occurred while fetching hotels.");
+            throw new HotelNotFound("The list of hotels is empty.");
         }
+
+        System.out.println("Hotel length : " + hotelsList.size());
+
         if (index >= hotelsList.size()) {
             index = hotelsList.size() - 1;
         }
-        System.out.println("Hotel Index : " + index);
 
         watch.stop();
         System.out.println(watch.prettyPrint());

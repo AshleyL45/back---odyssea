@@ -46,7 +46,7 @@ public class AuthController {
             description = "Authenticates a user using email and password, returns a JWT."
     )
     @PostMapping("/login")
-    public ResponseEntity<ApiResponse<JwtToken>> authenticateUser(@RequestBody User user) {
+    public ResponseEntity<ApiResponse<JwtToken>> authenticateUser(@RequestBody User user) {//TODO Faire un DTO
         JwtToken token = authService.login(user);
         return ResponseEntity.ok(
                 ApiResponse.success("User successfully logged in.",token, HttpStatus.OK)
@@ -63,46 +63,6 @@ public class AuthController {
         UserName userName = userService.getUserName();
         return ResponseEntity.ok(
                 ApiResponse.success("User name successfully retrieved.", userName, HttpStatus.OK)
-        );
-    }
-
-
-    @Operation(
-            summary = "Update account information",
-            description = "Updates the user's account information (e.g., name, email)."
-    )
-    @PutMapping("/")
-    public ResponseEntity<ApiResponse<Void>> changeUserInformation(@RequestBody User user){
-        userService.changeUserInformation(user);
-        return ResponseEntity.ok(
-                ApiResponse.success("Account successfully updated.", HttpStatus.OK)
-        );
-    }
-
-    @Operation(
-            summary = "Change user password",
-            description = "Updates the user's password. The request must contain the new password."
-    )
-    @PatchMapping("/password")
-    public ResponseEntity<ApiResponse<Void>> changeUserPassword(@RequestBody Map<String, String> passwordRequest){
-        String newPassword = passwordRequest.get("password");
-        userService.changePassword(newPassword);
-
-        return ResponseEntity.ok(
-                ApiResponse.success("Password successfully updated.", HttpStatus.OK)
-        );
-    }
-
-    @Operation(
-            summary = "Delete user account",
-            description = "Deletes the authenticated user's account."
-    )
-
-    @DeleteMapping("/")
-    public ResponseEntity<ApiResponse<Void>> deleteUser(){
-        userService.deleteAccount();
-        return ResponseEntity.ok(
-                ApiResponse.success("Account successfully deleted.", HttpStatus.OK)
         );
     }
 }

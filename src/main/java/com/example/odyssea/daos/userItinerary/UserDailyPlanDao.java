@@ -13,11 +13,11 @@ import org.springframework.stereotype.Repository;
 import java.util.List;
 
 @Repository
-public class UserItineraryStepDao {
-    private static final Logger log = LoggerFactory.getLogger(UserItineraryStepDao.class);
+public class UserDailyPlanDao {
+    private static final Logger log = LoggerFactory.getLogger(UserDailyPlanDao.class);
     private final JdbcTemplate jdbcTemplate;
 
-    public UserItineraryStepDao(JdbcTemplate jdbcTemplate) {
+    public UserDailyPlanDao(JdbcTemplate jdbcTemplate) {
         this.jdbcTemplate = jdbcTemplate;
     }
 
@@ -51,14 +51,11 @@ public class UserItineraryStepDao {
                 .orElseThrow(() -> new RuntimeException("The daily plan of the (user) itinerary " + userItineraryId + " day " + dayNumber + " you are looking for does not exist."));
     }
 
-    /*public LocalDate convertDayNumberToDate(int dayNumber, LocalDate startDate){
-       return startDate.plusDays(dayNumber - 1);
+    public List<UserItineraryStep> findByUserId(int userId){
+        String sql = "SELECT * FROM user_daily_plan WHERE user_id = ?";
+        return jdbcTemplate.query(sql, userItineraryStepRowMapper, userId);
     }
 
-    public LocalDate getStartDateForItinerary(int itineraryId) {
-        String sql = "SELECT startDate FROM userDailyPlan WHERE id = ?";
-        return jdbcTemplate.queryForObject(sql, LocalDate.class, itineraryId);
-    }*/
 
     public UserItineraryStep save (UserItineraryStep userItineraryStep){
         String sql = "INSERT INTO user_daily_plan (user_id, user_itinerary_id, hotel_id, city_id, day_number, off_day, activity_id, plane_ride_id) VALUES (?, ?, ?, ?, ?, ?, ?, ?)";

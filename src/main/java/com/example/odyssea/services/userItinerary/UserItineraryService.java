@@ -1,9 +1,8 @@
 package com.example.odyssea.services.userItinerary;
 
-import com.example.odyssea.daos.mainTables.CityDao;
 import com.example.odyssea.daos.userItinerary.UserItineraryDao;
 import com.example.odyssea.daos.userItinerary.UserItineraryOptionDao;
-import com.example.odyssea.daos.userItinerary.UserItineraryStepDao;
+import com.example.odyssea.daos.userItinerary.UserDailyPlanDao;
 import com.example.odyssea.dtos.mainTables.HotelDto;
 import com.example.odyssea.dtos.userItinerary.*;
 import com.example.odyssea.entities.mainTables.*;
@@ -14,8 +13,6 @@ import com.example.odyssea.enums.BookingStatus;
 import com.example.odyssea.exceptions.ValidationException;
 import com.example.odyssea.services.CurrentUserService;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StopWatch;
@@ -30,7 +27,7 @@ import java.util.stream.Stream;
 @Service
 public class UserItineraryService {
     private UserItineraryDao userItineraryDao;
-    private UserItineraryStepDao userItineraryStepDao;
+    private UserDailyPlanDao userItineraryStepDao;
     private UserDailyPlanService userDailyPlanService;
     private UserItineraryDraftService userItineraryDraftService;
     private UserItineraryOptionDao userItineraryOptionDao;
@@ -42,7 +39,7 @@ public class UserItineraryService {
     }
 
     @Autowired
-    public UserItineraryService(UserItineraryDao userItineraryDao, UserItineraryStepDao userItineraryStepDao, UserDailyPlanService userDailyPlanService, UserItineraryDraftService userItineraryDraftService, UserItineraryOptionDao userItineraryOptionDao, CurrentUserService currentUserService) {
+    public UserItineraryService(UserItineraryDao userItineraryDao, UserDailyPlanDao userItineraryStepDao, UserDailyPlanService userDailyPlanService, UserItineraryDraftService userItineraryDraftService, UserItineraryOptionDao userItineraryOptionDao, CurrentUserService currentUserService) {
         this.userItineraryDao = userItineraryDao;
         this.userItineraryStepDao = userItineraryStepDao;
         this.userDailyPlanService = userDailyPlanService;

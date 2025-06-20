@@ -115,7 +115,6 @@ public class UserItineraryDraftService {
             countryDao.findById(id);
         }
 
-
         draftCountriesDao.saveCountries(userId, countriesIds);
     }
 

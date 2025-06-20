@@ -44,6 +44,13 @@ public class UserItineraryOptionDao {
                 .orElseThrow(() -> new RuntimeException("The option ID : " + optionId + "doesn't exist for user itinerary ID : + " + userItineraryId));
     }
 
+    public List<Option> findAllOptionsByUserId(int userId){
+        String sql = "SELECT user_itinerary_option.* FROM user_itinerary_option\n" +
+                "INNER JOIN user_itinerary ON user_itinerary_option.user_itinerary_id = user_itinerary.id\n" +
+                "WHERE user_itinerary.user_id = ?";
+        return jdbcTemplate.query(sql, new Object[]{userId}, new BeanPropertyRowMapper<>(Option.class));
+    }
+
     public UserItineraryOption save(int userItineraryId, int optionId) {
         try {
             String sql = "INSERT INTO user_itinerary_option (user_itinerary_id, option_id) VALUES (?, ?)";

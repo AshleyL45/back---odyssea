@@ -3,8 +3,8 @@ package com.example.odyssea.services.userItinerary;
 import com.example.odyssea.daos.mainTables.CityDao;
 import com.example.odyssea.daos.mainTables.CountryDao;
 import com.example.odyssea.daos.flight.PlaneRideDao;
+import com.example.odyssea.daos.userItinerary.UserDailyPlanDao;
 import com.example.odyssea.daos.userItinerary.UserItineraryDao;
-import com.example.odyssea.daos.userItinerary.UserItineraryStepDao;
 import com.example.odyssea.dtos.flight.FlightItineraryDTO;
 import com.example.odyssea.dtos.mainTables.HotelDto;
 import com.example.odyssea.dtos.userItinerary.DraftData;
@@ -28,7 +28,7 @@ import java.util.stream.IntStream;
 
 @Service
 public class UserDailyPlanService {
-    private final UserItineraryStepDao userItineraryStepDao;
+    private final UserDailyPlanDao userItineraryStepDao;
     private final CityDao cityDao;
     private final CountryDao countryDao;
     private final DayAssigner dayAssigner;
@@ -40,8 +40,8 @@ public class UserDailyPlanService {
     private final PlaneRideDao planeRideDao;
 
 
-    public UserDailyPlanService(UserItineraryStepDao userItineraryStepDao, CityDao cityDao, CountryDao countryDao, DayAssigner dayAssigner, LocationAssigner locationAssigner, HotelAssigner hotelAssigner, ActivityAssigner activityAssigner, FlightAssigner flightAssigner, UserItineraryDao userItineraryDao, PlaneRideDao planeRideDao) {
-        this.userItineraryStepDao = userItineraryStepDao;
+    public UserDailyPlanService(UserDailyPlanDao userDailyPlanDao, CityDao cityDao, CountryDao countryDao, DayAssigner dayAssigner, LocationAssigner locationAssigner, HotelAssigner hotelAssigner, ActivityAssigner activityAssigner, FlightAssigner flightAssigner, UserItineraryDao userItineraryDao, PlaneRideDao planeRideDao) {
+        this.userItineraryStepDao = userDailyPlanDao;
         this.cityDao = cityDao;
         this.countryDao = countryDao;
         this.dayAssigner = dayAssigner;

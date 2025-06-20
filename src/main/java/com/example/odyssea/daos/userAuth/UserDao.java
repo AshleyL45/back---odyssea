@@ -58,7 +58,7 @@ public class UserDao {
         }
     }
 
-    public void update(int id, User user) {
+    public void update(int id, String email, String firstname, String lastname) {
         if (!userExistsById(id)) {
             throw new UserNotFoundException("User with id : " + id + " doesn't exist.");
         }
@@ -68,14 +68,14 @@ public class UserDao {
         String sql = "UPDATE user SET email = ?, first_name = ?, last_name = ? WHERE id = ?";
         int rowsAffected = jdbcTemplate.update(
                 sql,
-                user.getEmail() != null ? user.getEmail() : existingUser.getEmail(),
-                user.getFirstName() != null ? user.getFirstName() : existingUser.getFirstName(),
-                user.getLastName() != null ? user.getLastName() : existingUser.getLastName(),
+                email != null ? email : existingUser.getEmail(),
+                firstname != null ? firstname : existingUser.getFirstName(),
+                lastname != null ? lastname : existingUser.getLastName(),
                 id
         );
 
         if (rowsAffected <= 0) {
-            throw new DatabaseException("Failed to update user.");
+            throw new DatabaseException("Failed to update user with id : " + id);
         }
     }
 

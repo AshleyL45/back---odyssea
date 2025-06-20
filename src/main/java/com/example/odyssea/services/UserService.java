@@ -1,6 +1,7 @@
 package com.example.odyssea.services;
 
 import com.example.odyssea.daos.userAuth.UserDao;
+import com.example.odyssea.dtos.UpdateUser;
 import com.example.odyssea.dtos.UserName;
 import com.example.odyssea.entities.userAuth.User;
 import com.example.odyssea.exceptions.InvalidPasswordException;
@@ -37,9 +38,9 @@ public class UserService {
         userDao.save(newUser);
     }
 
-    public void changeUserInformation(User user){
+    public void changeUserInformation(UpdateUser updateUserRequest){
         Integer userId = getUserId();
-        userDao.update(userId, user);
+        userDao.update(userId, updateUserRequest.email(), updateUserRequest.firstName(), updateUserRequest.lastName());
     }
 
     public UserName getUserName(){

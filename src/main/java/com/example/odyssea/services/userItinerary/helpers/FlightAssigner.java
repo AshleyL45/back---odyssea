@@ -11,8 +11,10 @@ import com.example.odyssea.entities.mainTables.City;
 import com.example.odyssea.services.flight.PlaneRideService;
 import org.springframework.stereotype.Component;
 import org.springframework.util.StopWatch;
+import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
+import java.time.Duration;
 import java.time.LocalDate;
 import java.util.List;
 
@@ -75,7 +77,7 @@ public class FlightAssigner {
     }
 
 
-    private int getOffDayIndex(int currentDayNumber) {
+    public int getOffDayIndex(int currentDayNumber) {
         int count = 0;
         for (int i = 1; i <= currentDayNumber; i++) {
             if ((i - 1) % 4 == 0) {

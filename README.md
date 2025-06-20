@@ -121,7 +121,7 @@ Utilisation de l'outil Trello pour organiser les tâches : "À faire", "En cours
         │   │               │   ├── UserItineraryDao.java
         │   │               │   ├── UserItineraryFlightDao.java
         │   │               │   ├── UserItineraryOptionDao.java
-        │   │               │   └── UserItineraryStepDao.java
+        │   │               │   └── UserDailyPlanDao.java
         │   │           ├── dtos
         │   │               ├── amadeus
         │   │               │   └── TokenAmadeus.java

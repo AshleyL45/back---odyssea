@@ -53,8 +53,8 @@ public class AdminBookingController {
 
 
     @Operation(
-            summary = "Fetch all bookings of all users with filters",
-            description = "Returns a list of all bookings. Can filter by status, dates, user search. Requires admin role."
+            summary = "Fetch all personalized trips of all users with filters",
+            description = "Returns a list of all personalized trips. Can filter by status, dates, user search. Requires admin role."
     )
     @PreAuthorize("hasRole('ADMIN')")
     @GetMapping("/userItineraries")

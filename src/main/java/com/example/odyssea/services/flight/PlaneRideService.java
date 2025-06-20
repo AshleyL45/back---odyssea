@@ -49,18 +49,18 @@ public class PlaneRideService {
                                                      LocalDate departureDate, LocalDate arrivalDate,
                                                      int totalPeople) {
         StopWatch sw = new StopWatch();
-        sw.start("🔁 getFlights");
+        sw.start("getFlights");
 
         return tokenService.getValidToken()
                 .flatMap(token -> fetchFlightOffers(departureIata, arrivalIata, departureDate, arrivalDate, totalPeople, token))
                 .flatMap(this::processFlightData)
                 .doOnSuccess(res -> {
                     sw.stop();
-                    logger.info("✅ getFlights terminé - Durée totale : {}s", sw.getTotalTimeSeconds());
+                    logger.info("getFlights terminé - Durée totale : {}s", sw.getTotalTimeSeconds());
                     System.out.println(sw.prettyPrint());
                 })
                 .onErrorResume(e -> {
-                    logger.error("❌ Erreur lors de getFlights : {}", e.getMessage());
+                    logger.error("Erreur lors de getFlights : {}", e.getMessage());
                     return Mono.just(Collections.emptyList());
                 });
     }
@@ -77,7 +77,7 @@ public class PlaneRideService {
                 .subscribeOn(Schedulers.boundedElastic())
                 .flatMap(ignored -> {
                     sw.start("🌐 Appel API Amadeus");
-                    logger.info("▶️ Appel à Amadeus lancé...");
+                    logger.info("Appel à Amadeus lancé...");
 
                     return webClient.get()
                             .uri(uriBuilder -> uriBuilder
@@ -94,7 +94,7 @@ public class PlaneRideService {
                             .bodyToMono(FlightDataDTO.class)
                             .doOnSuccess(response -> {
                                 sw.stop();
-                                logger.info("✅ Réponse Amadeus reçue - {}s", sw.getTotalTimeSeconds());
+                                logger.info("Réponse Amadeus reçue - {}s", sw.getTotalTimeSeconds());
                                 System.out.println(sw.prettyPrint());
                             })
                             .doFinally(signal -> {
@@ -106,11 +106,11 @@ public class PlaneRideService {
 
     private Mono<List<FlightItineraryDTO>> processFlightData(FlightDataDTO flightDataDTO) {
         StopWatch sw = new StopWatch();
-        sw.start("🧠 processFlightData");
+        sw.start("processFlightData");
 
         if (flightDataDTO == null || flightDataDTO.getData() == null || flightDataDTO.getData().isEmpty()) {
             sw.stop();
-            logger.warn("⚠️ Données Amadeus vides");
+            logger.warn("Données Amadeus vides");
             System.out.println(sw.prettyPrint());
             return Mono.just(Collections.emptyList());
         }
@@ -118,7 +118,7 @@ public class PlaneRideService {
         FlightOffersDTO offer = flightDataDTO.getData().get(0);
         if (offer.getItineraries() == null || offer.getItineraries().isEmpty()) {
             sw.stop();
-            logger.warn("⚠️ Pas d’itinéraires trouvés");
+            logger.warn("Pas d’itinéraires trouvés");
             System.out.println(sw.prettyPrint());
             return Mono.just(Collections.emptyList());
         }
@@ -128,14 +128,14 @@ public class PlaneRideService {
 
         // Chrono des segments
         StopWatch swSeg = new StopWatch();
-        swSeg.start("✈️ processSegments");
+        swSeg.start("processSegments");
         List<Integer> savedSegmentIds = processSegments(itinerary, dict);
         swSeg.stop();
         System.out.println(swSeg.prettyPrint());
 
         // Chrono sauvegarde plane ride
         StopWatch swSave = new StopWatch();
-        swSave.start("💾 savePlaneRide");
+        swSave.start("savePlaneRide");
         BigDecimal totalPrice = getTotalPrice(offer);
         PlaneRide savedPlaneRide = createAndSavePlaneRide(offer, totalPrice);
         swSave.stop();
@@ -143,7 +143,7 @@ public class PlaneRideService {
 
         // Chrono lien segments ↔ plane ride
         StopWatch swLink = new StopWatch();
-        swLink.start("🔗 linkSegmentsToPlaneRide");
+        swLink.start("linkSegmentsToPlaneRide");
         linkSegmentsToPlaneRide(savedSegmentIds, savedPlaneRide);
         swLink.stop();
         System.out.println(swLink.prettyPrint());
