@@ -39,7 +39,6 @@ public class AuthService {
 
             // Récupération des détails de l'utilisateur
             CustomUserDetails userDetails = (CustomUserDetails) authentication.getPrincipal();
-
            return jwtUtils.generateToken(userDetails.getUserId(), userDetails.getRole());
 
         } catch (BadCredentialsException e) {
