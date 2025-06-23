@@ -6,6 +6,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.context.support.DefaultMessageSourceResolvable;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.security.authentication.InsufficientAuthenticationException;
@@ -128,24 +129,19 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(ImageNotFoundException.class)
     public ResponseEntity<ApiResponse<Void>> handleImageNotFound(ImageNotFoundException ex) {
-        /*HttpHeaders headers = new HttpHeaders();
-        headers.setContentType(MediaType.APPLICATION_JSON);*/
-
-        logger.error("Image not found: {}", ex.getMessage());
-        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(
-                ApiResponse.error("Image not found", HttpStatus.NOT_FOUND)
-        );
+        return ResponseEntity
+                .status(HttpStatus.NOT_FOUND)
+                .contentType(MediaType.APPLICATION_JSON)
+                .body(ApiResponse.error(ex.getMessage(), HttpStatus.NOT_FOUND));
     }
 
     @ExceptionHandler(ImageProcessingException.class)
-    public ResponseEntity<ApiResponse<Void>> handleImageProcessing(ImageProcessingException ex) {
-        /*HttpHeaders headers = new HttpHeaders();
-        headers.setContentType(MediaType.APPLICATION_JSON);*/
-
-        logger.error("Image processing error : {}", ex.getMessage());
-        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(
-                ApiResponse.error("An error occurred while processing the image.", HttpStatus.INTERNAL_SERVER_ERROR)
-        );
+    public ResponseEntity<ApiResponse<Void>> handleProcessingError(ImageProcessingException ex) {
+        return ResponseEntity
+                .status(HttpStatus.INTERNAL_SERVER_ERROR)
+                .contentType(MediaType.APPLICATION_JSON)
+                .body(ApiResponse.error("Error processing image: " + ex.getMessage(),
+                        HttpStatus.INTERNAL_SERVER_ERROR));
     }
 
 

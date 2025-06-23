@@ -16,7 +16,6 @@ public class ImageDao {
         this.jdbc = jdbc;
     }
 
-    // mapping des colonnes (id, link, alt_text, etc.)
     RowMapper<Image> rowMapper = (rs, rowNum) -> new Image(
             rs.getInt("id"),
             rs.getInt("itinerary_id"),
@@ -25,9 +24,6 @@ public class ImageDao {
             rs.getString("alt_text")
     );
 
-    /**
-     * Récupère l’image (avec son lien) pour un itinéraire et un rôle.
-     */
     public Image findByItineraryAndRole(int itineraryId, String role) {
         String sql = """
             SELECT i.*
@@ -44,9 +40,6 @@ public class ImageDao {
         }
     }
 
-    /**
-     * Récupère la liste des rôles disponibles pour cet itinéraire.
-     */
     public List<String> findRolesByItinerary(int itineraryId) {
         String sql = """
             SELECT role

@@ -29,7 +29,7 @@ public class ItineraryImageService {
         List<String> roles = itineraryImageDao.findRolesByItinerary(itineraryId);
         if (roles == null || roles.isEmpty()) {
             throw new ImageNotFoundException(
-                    String.format("Aucune image enregistrée pour l'itinéraire %d", itineraryId)
+                    String.format("No images saved for route %d", itineraryId)
             );
         }
         return roles;
@@ -39,14 +39,14 @@ public class ItineraryImageService {
         List<String> roles = listRoles(itineraryId);
         if (!roles.contains(role)) {
             throw new ImageNotFoundException(
-                    String.format("Le rôle '%s' n'existe pas pour l'itinéraire %d", role, itineraryId)
+                    String.format("The ‘%s’ role does not exist for the route does not exist for route %d", role, itineraryId)
             );
         }
 
         Image img = imageDao.findByItineraryAndRole(itineraryId, role);
         if (img == null) {
             throw new ImageNotFoundException(
-                    String.format("Aucune image trouvée pour l'itinéraire %d et le rôle '%s'", itineraryId, role)
+                    String.format("No images found for route %d and role '%s'", itineraryId, role)
             );
         }
 
@@ -78,7 +78,7 @@ public class ItineraryImageService {
             }
         } catch (IOException ex) {
             throw new ImageProcessingException(
-                    String.format("Erreur lecture du fichier '%s'", resourcePath), ex
+                    String.format("Error reading file '%s'", resourcePath), ex
             );
         }
     }
