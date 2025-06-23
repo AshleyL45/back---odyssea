@@ -1,11 +1,11 @@
 -- 1. D'abord les tables sans dépendances
-CREATE TABLE `theme` (
+CREATE TABLE IF NOT EXISTS `theme` (
   `id` int NOT NULL AUTO_INCREMENT,
   `name` text NOT NULL,
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB AUTO_INCREMENT=11 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
-CREATE TABLE `country` (
+CREATE TABLE IF NOT EXISTS `country` (
   `id` int NOT NULL AUTO_INCREMENT,
   `name` varchar(255) NOT NULL,
   `continent` varchar(255) NOT NULL,
@@ -13,7 +13,7 @@ CREATE TABLE `country` (
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB AUTO_INCREMENT=65 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
-CREATE TABLE `options` (
+CREATE TABLE IF NOT EXISTS `options` (
   `id` int NOT NULL AUTO_INCREMENT,
   `name` varchar(255) NOT NULL,
   `price` decimal(7,2) NOT NULL,
@@ -22,7 +22,7 @@ CREATE TABLE `options` (
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB AUTO_INCREMENT=12 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
-CREATE TABLE `user` (
+CREATE TABLE IF NOT EXISTS `user` (
   `id` int NOT NULL AUTO_INCREMENT,
   `email` varchar(255) NOT NULL,
   `password` varchar(255) NOT NULL,
@@ -33,7 +33,7 @@ CREATE TABLE `user` (
   UNIQUE KEY `email_UNIQUE` (`email`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
-CREATE TABLE `flight_segment` (
+CREATE TABLE IF NOT EXISTS `flight_segment` (
   `id` int NOT NULL AUTO_INCREMENT,
   `departure_airport_iata` varchar(255) DEFAULT NULL,
   `arrival_airport_iata` varchar(255) DEFAULT NULL,
@@ -47,7 +47,7 @@ CREATE TABLE `flight_segment` (
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
-CREATE TABLE `plane_ride` (
+CREATE TABLE IF NOT EXISTS `plane_ride` (
   `id` int NOT NULL AUTO_INCREMENT,
   `one_way` tinyint(1) DEFAULT NULL,
   `total_price` decimal(7,2) DEFAULT NULL,
@@ -57,7 +57,7 @@ CREATE TABLE `plane_ride` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
 -- 2. Tables dépendant des tables ci-dessus
-CREATE TABLE `city` (
+CREATE TABLE IF NOT EXISTS `city` (
   `id` int NOT NULL AUTO_INCREMENT,
   `country_id` int NOT NULL,
   `name` varchar(255) NOT NULL,
@@ -70,7 +70,7 @@ CREATE TABLE `city` (
   CONSTRAINT `city_ibfk_1` FOREIGN KEY (`country_id`) REFERENCES `country` (`id`)
 ) ENGINE=InnoDB AUTO_INCREMENT=307 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
-CREATE TABLE `itinerary` (
+CREATE TABLE IF NOT EXISTS `itinerary` (
   `id` int NOT NULL AUTO_INCREMENT,
   `name` text NOT NULL,
   `description` text NOT NULL,
@@ -84,7 +84,7 @@ CREATE TABLE `itinerary` (
   CONSTRAINT `themeId_constraint` FOREIGN KEY (`theme_id`) REFERENCES `theme` (`id`)
 ) ENGINE=InnoDB AUTO_INCREMENT=11 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
-CREATE TABLE `user_itinerary` (
+CREATE TABLE IF NOT EXISTS `user_itinerary` (
   `id` int NOT NULL AUTO_INCREMENT,
   `user_id` int NOT NULL,
   `start_date` date NOT NULL,
@@ -102,7 +102,7 @@ CREATE TABLE `user_itinerary` (
   CONSTRAINT `user_id_userItinerary` FOREIGN KEY (`user_id`) REFERENCES `user` (`id`) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
-CREATE TABLE `user_itinerary_draft` (
+CREATE TABLE IF NOT EXISTS `user_itinerary_draft` (
   `id` int NOT NULL AUTO_INCREMENT,
   `user_id` int DEFAULT NULL,
   `duration` int DEFAULT NULL,
@@ -118,7 +118,7 @@ CREATE TABLE `user_itinerary_draft` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
 -- 3. Tables dépendant des tables précédentes
-CREATE TABLE `hotel` (
+CREATE TABLE IF NOT EXISTS `hotel` (
   `id` int NOT NULL AUTO_INCREMENT,
   `city_id` int NOT NULL,
   `name` text NOT NULL,
@@ -130,7 +130,7 @@ CREATE TABLE `hotel` (
   CONSTRAINT `hotel_ibfk_1` FOREIGN KEY (`city_id`) REFERENCES `city` (`id`)
 ) ENGINE=InnoDB AUTO_INCREMENT=74 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
-CREATE TABLE `activity` (
+CREATE TABLE IF NOT EXISTS `activity` (
   `id` int NOT NULL AUTO_INCREMENT,
   `city_id` int NOT NULL,
   `name` text NOT NULL,
@@ -144,7 +144,7 @@ CREATE TABLE `activity` (
   CONSTRAINT `activity_ibfk_1` FOREIGN KEY (`city_id`) REFERENCES `city` (`id`)
 ) ENGINE=InnoDB AUTO_INCREMENT=173 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
-CREATE TABLE `images` (
+CREATE TABLE IF NOT EXISTS `images` (
   `id` int NOT NULL AUTO_INCREMENT,
   `size_type` varchar(255) NOT NULL DEFAULT 'gallery',
   `link` text NOT NULL,
@@ -153,7 +153,7 @@ CREATE TABLE `images` (
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB AUTO_INCREMENT=171 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
-CREATE TABLE `flight_segment_ride` (
+CREATE TABLE IF NOT EXISTS `flight_segment_ride` (
   `plane_ride_id` int NOT NULL,
   `flight_segment_id` int NOT NULL,
   PRIMARY KEY (`plane_ride_id`,`flight_segment_id`),
@@ -162,14 +162,14 @@ CREATE TABLE `flight_segment_ride` (
   CONSTRAINT `flight_segment_ride_ibfk_2` FOREIGN KEY (`flight_segment_id`) REFERENCES `flight_segment` (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
-CREATE TABLE `itinerary_images` (
+CREATE TABLE IF NOT EXISTS `itinerary_images` (
   `itinerary_id` int NOT NULL,
   `image_id` int NOT NULL,
   `role` varchar(50) NOT NULL,
   PRIMARY KEY (`itinerary_id`,`image_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
-CREATE TABLE `daily_itinerary` (
+CREATE TABLE IF NOT EXISTS `daily_itinerary` (
   `id` int NOT NULL AUTO_INCREMENT,
   `itinerary_id` int NOT NULL,
   `city_id` int NOT NULL,
@@ -191,7 +191,7 @@ CREATE TABLE `daily_itinerary` (
   CONSTRAINT `daily_itinerary_ibfk_4` FOREIGN KEY (`hotel_id`) REFERENCES `hotel` (`id`)
 ) ENGINE=InnoDB AUTO_INCREMENT=157 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
-CREATE TABLE `booking` (
+CREATE TABLE IF NOT EXISTS `booking` (
   `id` int NOT NULL AUTO_INCREMENT,
   `user_id` int NOT NULL,
   `itinerary_id` int NOT NULL,
@@ -210,7 +210,7 @@ CREATE TABLE `booking` (
   CONSTRAINT `user_id_reservation` FOREIGN KEY (`user_id`) REFERENCES `user` (`id`) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
-CREATE TABLE `booking_draft` (
+CREATE TABLE IF NOT EXISTS `booking_draft` (
   `draft_id` int NOT NULL AUTO_INCREMENT,
   `user_id` int DEFAULT NULL,
   `itinerary_id` int DEFAULT NULL,
@@ -227,7 +227,7 @@ CREATE TABLE `booking_draft` (
   CONSTRAINT `booking_draft_ibfk_2` FOREIGN KEY (`itinerary_id`) REFERENCES `itinerary` (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
-CREATE TABLE `my_selection` (
+CREATE TABLE IF NOT EXISTS `my_selection` (
   `user_id` int NOT NULL,
   `itinerary_id` int NOT NULL,
   PRIMARY KEY (`user_id`,`itinerary_id`),
@@ -236,7 +236,7 @@ CREATE TABLE `my_selection` (
   CONSTRAINT `user_id_selection` FOREIGN KEY (`user_id`) REFERENCES `user` (`id`) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
-CREATE TABLE `user_daily_plan` (
+CREATE TABLE IF NOT EXISTS `user_daily_plan` (
   `id` int NOT NULL AUTO_INCREMENT,
   `user_id` int NOT NULL,
   `user_itinerary_id` int NOT NULL,
@@ -261,7 +261,7 @@ CREATE TABLE `user_daily_plan` (
   CONSTRAINT `user_daily_plan_ibfk_4` FOREIGN KEY (`city_id`) REFERENCES `city` (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
-CREATE TABLE `user_itinerary_option` (
+CREATE TABLE IF NOT EXISTS `user_itinerary_option` (
   `user_itinerary_id` int NOT NULL,
   `option_id` int NOT NULL,
   PRIMARY KEY (`user_itinerary_id`,`option_id`),
@@ -270,7 +270,7 @@ CREATE TABLE `user_itinerary_option` (
   CONSTRAINT `user_itinerary_option_ibfk_2` FOREIGN KEY (`option_id`) REFERENCES `options` (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
-CREATE TABLE `booking_option` (
+CREATE TABLE IF NOT EXISTS `booking_option` (
   `booking_id` int NOT NULL,
   `option_id` int NOT NULL,
   PRIMARY KEY (`booking_id`,`option_id`),
@@ -279,7 +279,7 @@ CREATE TABLE `booking_option` (
   CONSTRAINT `fk_booking_option_booking` FOREIGN KEY (`booking_id`) REFERENCES `booking` (`id`) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
-CREATE TABLE `booking_options_draft` (
+CREATE TABLE IF NOT EXISTS `booking_options_draft` (
   `booking_draft_id` int NOT NULL,
   `option_id` int NOT NULL,
   `type` enum('Standard','Mystery') DEFAULT NULL,
@@ -289,7 +289,7 @@ CREATE TABLE `booking_options_draft` (
   CONSTRAINT `booking_options_draft_ibfk_2` FOREIGN KEY (`option_id`) REFERENCES `options` (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
-CREATE TABLE `draft_activities` (
+CREATE TABLE IF NOT EXISTS `draft_activities` (
   `draft_user_itinerary_id` int NOT NULL,
   `activity_id` int NOT NULL,
   `position` int DEFAULT NULL,
@@ -299,7 +299,7 @@ CREATE TABLE `draft_activities` (
   CONSTRAINT `fk_draft_activities_2` FOREIGN KEY (`activity_id`) REFERENCES `activity` (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
-CREATE TABLE `draft_cities` (
+CREATE TABLE IF NOT EXISTS `draft_cities` (
   `draft_user_itinerary_id` int NOT NULL,
   `city_id` int NOT NULL,
   `position` int DEFAULT NULL,
@@ -309,7 +309,7 @@ CREATE TABLE `draft_cities` (
   CONSTRAINT `fk_draft_cities_2` FOREIGN KEY (`city_id`) REFERENCES `city` (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
-CREATE TABLE `draft_countries` (
+CREATE TABLE IF NOT EXISTS `draft_countries` (
   `draft_user_itinerary_id` int NOT NULL,
   `country_id` int NOT NULL,
   `position` int DEFAULT NULL,
@@ -319,7 +319,7 @@ CREATE TABLE `draft_countries` (
   CONSTRAINT `fk_draft_countries_2` FOREIGN KEY (`country_id`) REFERENCES `country` (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
-CREATE TABLE `draft_options` (
+CREATE TABLE IF NOT EXISTS `draft_options` (
   `draft_user_itinerary_id` int NOT NULL,
   `option_id` int NOT NULL,
   PRIMARY KEY (`draft_user_itinerary_id`,`option_id`),
