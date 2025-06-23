@@ -104,7 +104,7 @@ public class UserItineraryDao {
     }
 
     public List<UserItinerary> findAllUserItineraries(int userId){
-        String sql = "SELECT * FROM user_itinerary WHERE user_id = ?";
+        String sql = "SELECT * FROM user_itinerary WHERE user_id = ? ORDER BY booking_date DESC";
         return jdbcTemplate.query(sql, userItineraryRowMapper, userId);
     }
 

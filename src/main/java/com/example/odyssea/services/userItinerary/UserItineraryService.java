@@ -27,7 +27,7 @@ import java.util.stream.Stream;
 @Service
 public class UserItineraryService {
     private UserItineraryDao userItineraryDao;
-    private UserDailyPlanDao userItineraryStepDao;
+    private UserDailyPlanDao userDailyPlanDao;
     private UserDailyPlanService userDailyPlanService;
     private UserItineraryDraftService userItineraryDraftService;
     private UserItineraryOptionDao userItineraryOptionDao;
@@ -39,9 +39,9 @@ public class UserItineraryService {
     }
 
     @Autowired
-    public UserItineraryService(UserItineraryDao userItineraryDao, UserDailyPlanDao userItineraryStepDao, UserDailyPlanService userDailyPlanService, UserItineraryDraftService userItineraryDraftService, UserItineraryOptionDao userItineraryOptionDao, CurrentUserService currentUserService) {
+    public UserItineraryService(UserItineraryDao userItineraryDao, UserDailyPlanDao userDailyPlanDao, UserDailyPlanService userDailyPlanService, UserItineraryDraftService userItineraryDraftService, UserItineraryOptionDao userItineraryOptionDao, CurrentUserService currentUserService) {
         this.userItineraryDao = userItineraryDao;
-        this.userItineraryStepDao = userItineraryStepDao;
+        this.userDailyPlanDao = userDailyPlanDao;
         this.userDailyPlanService = userDailyPlanService;
         this.userItineraryDraftService = userItineraryDraftService;
         this.userItineraryOptionDao = userItineraryOptionDao;
@@ -110,6 +110,11 @@ public class UserItineraryService {
         watch.start("Getting all user itineraries");
         Integer userId = currentUserService.getCurrentUserId();
         List<UserItinerary> foundItineraries = userItineraryDao.findAllUserItineraries(userId);
+
+        List<Integer> itineraryIds = foundItineraries.stream()
+                .map(UserItinerary::getId)
+                .toList();
+
         List<UserItineraryDTO> userItineraries = new ArrayList<>();
 
 
@@ -228,7 +233,7 @@ public class UserItineraryService {
         LocalDate startDate = userItinerary.getStartDate();
         LocalDate endDate = userItinerary.getEndDate();
 
-        List<UserItineraryStep> daysEntities = userItineraryStepDao.findDailyPlansOfAnItinerary(userItinerary.getId());
+        List<UserItineraryStep> daysEntities = userDailyPlanDao.findDailyPlansOfAnItinerary(userItinerary.getId());
 
         List<UserItineraryDayDTO> days = new ArrayList<>();
         for(UserItineraryStep day : daysEntities){

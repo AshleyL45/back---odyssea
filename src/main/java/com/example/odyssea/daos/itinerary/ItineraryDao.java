@@ -46,7 +46,7 @@ public class ItineraryDao {
                 "FROM \n" +
                 "    daily_itinerary\n" +
                 "INNER JOIN \n" +
-                "    country ON country.id = dailyItinerary.country_id\n" +
+                "    country ON country.id = daily_itinerary.country_id\n" +
                 "INNER JOIN \n" +
                 "    itinerary ON daily_itinerary.itinerary_id = itinerary.id\n" +
                 "INNER JOIN \n" +

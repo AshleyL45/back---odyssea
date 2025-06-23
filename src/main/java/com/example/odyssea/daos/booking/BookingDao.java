@@ -116,7 +116,7 @@ public class BookingDao {
 
     //Récupère tous les itinéraires reservés d'un utilisateur
     public List<Booking> findAllUserBookings(int userId) {
-        String sql = "SELECT * FROM booking WHERE user_id = ?";
+        String sql = "SELECT * FROM booking WHERE user_id = ? ORDER BY purchase_date DESC";
         return jdbcTemplate.query(sql,  bookingRowMapper, userId);
     }
 

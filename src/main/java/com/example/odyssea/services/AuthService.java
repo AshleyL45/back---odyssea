@@ -4,6 +4,7 @@ import com.example.odyssea.daos.userAuth.UserDao;
 import com.example.odyssea.dtos.UserName;
 import com.example.odyssea.entities.userAuth.User;
 import com.example.odyssea.exceptions.UserNotFoundException;
+import com.example.odyssea.security.CustomUserDetails;
 import com.example.odyssea.security.JwtToken;
 import com.example.odyssea.security.JwtUtil;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -37,10 +38,9 @@ public class AuthService {
             );
 
             // Récupération des détails de l'utilisateur
-            UserDetails userDetails = (UserDetails) authentication.getPrincipal();
-            User userWithId = userDao.findByEmail(user.getEmail());
+            CustomUserDetails userDetails = (CustomUserDetails) authentication.getPrincipal();
 
-           return jwtUtils.generateToken(userWithId.getId(), userWithId.getRole());
+           return jwtUtils.generateToken(userDetails.getUserId(), userDetails.getRole());
 
         } catch (BadCredentialsException e) {
             throw new UserNotFoundException("Invalid username or password : " + e);

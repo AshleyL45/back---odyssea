@@ -36,4 +36,14 @@ public class BookingOptionDao {
         String sql = "DELETE FROM booking_option WHERE user_id = ? AND itinerary_id = ? AND option_id = ?";
         jdbcTemplate.update(sql, userId, itineraryId, optionId);
     }
+
+    public void insertBookingOption(int bookingId, int optionId) {
+        String sql = "INSERT INTO booking_option (booking_id, option_id) VALUES (?, ?)";
+        jdbcTemplate.update(sql, bookingId, optionId);
+    }
+
+    /** Supprime toutes les options associées à une réservation donnée.*/
+    public void deleteOptionsForBooking(int bookingId) {
+        String sql = "DELETE FROM booking_option WHERE booking_id = ?";
+        jdbcTemplate.update(sql, bookingId);}
 }

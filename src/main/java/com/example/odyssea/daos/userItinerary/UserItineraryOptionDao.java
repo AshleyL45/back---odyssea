@@ -1,5 +1,6 @@
 package com.example.odyssea.daos.userItinerary;
 
+import com.example.odyssea.dtos.userItinerary.OptionWithItineraryId;
 import com.example.odyssea.entities.mainTables.Option;
 import com.example.odyssea.entities.userItinerary.UserItinerary;
 import com.example.odyssea.entities.userItinerary.UserItineraryOption;
@@ -8,17 +9,22 @@ import com.example.odyssea.exceptions.UserItineraryDatabaseException;
 import org.springframework.jdbc.core.BeanPropertyRowMapper;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
+import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.stereotype.Repository;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 @Repository
 public class UserItineraryOptionDao {
     private final JdbcTemplate jdbcTemplate;
+    private final NamedParameterJdbcTemplate namedParameterJdbcTemplate;
 
 
-    public UserItineraryOptionDao(JdbcTemplate jdbcTemplate) {
+    public UserItineraryOptionDao(JdbcTemplate jdbcTemplate, NamedParameterJdbcTemplate namedParameterJdbcTemplate) {
         this.jdbcTemplate = jdbcTemplate;
+        this.namedParameterJdbcTemplate = namedParameterJdbcTemplate;
     }
 
     private final RowMapper<UserItineraryOption> userItineraryOptionRowMapper = (rs, _) -> new UserItineraryOption(
@@ -44,11 +50,11 @@ public class UserItineraryOptionDao {
                 .orElseThrow(() -> new RuntimeException("The option ID : " + optionId + "doesn't exist for user itinerary ID : + " + userItineraryId));
     }
 
-    public List<Option> findAllOptionsByUserId(int userId){
-        String sql = "SELECT user_itinerary_option.* FROM user_itinerary_option\n" +
-                "INNER JOIN user_itinerary ON user_itinerary_option.user_itinerary_id = user_itinerary.id\n" +
-                "WHERE user_itinerary.user_id = ?";
-        return jdbcTemplate.query(sql, new Object[]{userId}, new BeanPropertyRowMapper<>(Option.class));
+    public List<OptionWithItineraryId> findAllOptionsByUserId(List<Integer> ids){
+        String sql = "SELECT uio.user_itinerary_id, o.* FROM options o JOIN user_itinerary_option uio ON o.id = uio.option_id WHERE uio.user_itinerary_id IN (:ids)";
+        Map<String, Object> params = new HashMap<>();
+        params.put("ids", ids);
+        return namedParameterJdbcTemplate.query(sql, params, OptionWithItineraryId.rowMapper());
     }
 
     public UserItineraryOption save(int userItineraryId, int optionId) {
