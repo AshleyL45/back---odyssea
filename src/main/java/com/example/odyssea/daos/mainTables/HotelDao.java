@@ -28,11 +28,6 @@ public class HotelDao {
         return count != null && count > 0;
     }
 
-    public boolean existsById(int id) {
-        String sql = "SELECT COUNT(*) FROM hotel WHERE id = ?";
-        Integer count = jdbcTemplate.queryForObject(sql, Integer.class, id);
-        return count != null && count > 0;
-    }
 
     public void save(Hotel hotel) {
         if (!cityExists(hotel.getCityId())) {
@@ -86,14 +81,6 @@ public class HotelDao {
         }
     }
 
-    public void deleteById(int id) {
-        String sql = "DELETE FROM hotel WHERE id = ?";
-        int rowsAffected = jdbcTemplate.update(sql, id);
-        if (rowsAffected == 0) {
-            throw new HotelNotFound("Hotel with id " + id + " not found for deletion.");
-        }
-    }
-
     public Optional<Hotel> findById(int id) {
         String sql = "SELECT * FROM hotel WHERE id = ?";
         List<Hotel> hotels = jdbcTemplate.query(sql, new HotelRowMapper(), id);
@@ -110,21 +97,6 @@ public class HotelDao {
             throw new HotelNotFound("No hotels found.");
         }
         return hotels;
-    }
-
-    public List<Hotel> findByCityId(int cityId) {
-        String sql = "SELECT * FROM hotel WHERE city_id = ?";
-        List<Hotel> hotels = jdbcTemplate.query(sql, new HotelRowMapper(), cityId);
-        if (hotels.isEmpty()) {
-            throw new HotelNotFound("No hotels found for city id " + cityId);
-        }
-        return hotels;
-    }
-
-    public boolean existsByNameAndCityId(String name, int cityId) {
-        String sql = "SELECT COUNT(*) FROM hotel WHERE name = ? AND city_id = ?";
-        Integer count = jdbcTemplate.queryForObject(sql, Integer.class, name, cityId);
-        return count != null && count > 0;
     }
 
     public List<Hotel> findByCityIdAndStarRating(int cityId, int starRating) {

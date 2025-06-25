@@ -50,10 +50,6 @@ public class HotelService {
         return hotelDao.findAll();
     }
 
-    public Mono<Hotel> getHotel(int id) {
-        return Mono.fromCallable(() -> hotelDao.findById(id))
-                .flatMap(opt -> opt.map(Mono::just).orElseGet(Mono::empty));
-    }
 
     public void createHotel(HotelDto hotelDto) {
         Hotel hotel = hotelDto.toEntity();
@@ -61,28 +57,6 @@ public class HotelService {
             throw new ResourceNotFoundException("City not found with id : " + hotel.getCityId());
         }
         hotelDao.save(hotel);
-    }
-
-    public boolean updateHotel(int id, HotelDto hotelDto) {
-        if (!hotelDao.existsById(id)) {
-            throw new ResourceNotFoundException("Hotel not found with id : " + id);
-        }
-        Hotel hotel = hotelDto.toEntity();
-        hotel.setId(id);
-        hotelDao.update(hotel);
-        return true;
-    }
-
-    public boolean deleteHotel(int id) {
-        if (!hotelDao.existsById(id)) {
-            throw new ResourceNotFoundException("Hotel not found with id : " + id);
-        }
-        hotelDao.deleteById(id);
-        return true;
-    }
-
-    public List<Hotel> getHotelsByCityAndStarRating(int cityId, int starRating) {
-        return hotelDao.findByCityIdAndStarRating(cityId, starRating);
     }
 
     private HotelDto mapJsonNodeToHotelDto(JsonNode node, int cityId) {
