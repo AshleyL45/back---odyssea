@@ -1,5 +1,6 @@
 package com.example.odyssea.services.userItinerary.helpers;
 
+import com.example.odyssea.daos.mainTables.CityDao;
 import com.example.odyssea.dtos.mainTables.HotelDto;
 import com.example.odyssea.dtos.userItinerary.UserItineraryDayDTO;
 import com.example.odyssea.entities.mainTables.City;
@@ -14,28 +15,28 @@ import java.util.List;
 
 @Component
 public class HotelAssigner {
-    private  HotelService hotelService;
+    private final HotelService hotelService;
+    private final CityDao cityDao;
 
-    public HotelAssigner(HotelService hotelService) {
+    public HotelAssigner(HotelService hotelService, CityDao cityDao) {
         this.hotelService = hotelService;
+        this.cityDao = cityDao;
     }
 
     public HotelDto assignHotel(UserItineraryDayDTO day, List<HotelDto> hotelsList){
-        int dayNumber = day.getDayNumber();
-        int daysPerHotel = 4;
-
-        int index = (dayNumber - 1) / daysPerHotel;
-        if(hotelsList.isEmpty()){
+        if(hotelsList == null || hotelsList.isEmpty()){
             throw new HotelNotFound("The list of hotels is empty.");
         }
 
-        System.out.println("Hotel length : " + hotelsList.size());
+        String cityOfTheDay = day.getCityName();
+        int cityOfTheDayId = cityDao.findCityByName(cityOfTheDay).getId();
 
-        if (index >= hotelsList.size()) {
-            index = hotelsList.size() - 1;
-        }
+        HotelDto dayHotel = hotelsList.stream()
+                .filter(hotelDto -> hotelDto.getCityId() == cityOfTheDayId)
+                .findFirst()
+                .orElseThrow(() -> new HotelNotFound("No hotel found for city : " + day.getCityName()));
 
-        return hotelsList.get(index);
+        return dayHotel;
     }
 
     public Mono<List<HotelDto>> getHotels(int startRating, List<City> cities) {
