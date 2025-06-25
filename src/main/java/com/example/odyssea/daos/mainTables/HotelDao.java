@@ -38,18 +38,19 @@ public class HotelDao {
         if (!cityExists(hotel.getCityId())) {
             throw new ResourceNotFoundException("City with id " + hotel.getCityId() + " not found.");
         }
-        // Vérification de doublon
-        String checkSql = "SELECT COUNT(*) FROM hotel WHERE name = ? AND city_id = ?";
+        String checkSql = "SELECT COUNT(*) FROM hotel WHERE name = ? AND city_id = ? AND star_rating = ?";
         Integer count = jdbcTemplate.queryForObject(
                 checkSql,
                 Integer.class,
                 hotel.getName(),
-                hotel.getCityId()
+                hotel.getCityId(),
+                hotel.getStarRating()
         );
         if (count != null && count > 0) {
             throw new HotelAlreadyExistsException(
                     "Hotel \"" + hotel.getName() +
-                            "\" already exists for cityId=" + hotel.getCityId()
+                            "\" already exists for cityId=" + hotel.getCityId() +
+                            " with starRating=" + hotel.getStarRating()
             );
         }
 
@@ -64,6 +65,7 @@ public class HotelDao {
                 hotel.getPrice()
         );
     }
+
 
 
     public void update(Hotel hotel) {

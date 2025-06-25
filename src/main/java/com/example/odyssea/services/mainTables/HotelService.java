@@ -4,6 +4,7 @@ import com.example.odyssea.daos.mainTables.CityDao;
 import com.example.odyssea.daos.mainTables.HotelDao;
 import com.example.odyssea.dtos.mainTables.HotelDto;
 import com.example.odyssea.entities.mainTables.Hotel;
+import com.example.odyssea.exceptions.HotelAlreadyExistsException;
 import com.example.odyssea.exceptions.HotelNotFound;
 import com.example.odyssea.exceptions.ResourceNotFoundException;
 import com.example.odyssea.exceptions.ValidationException;
@@ -127,67 +128,68 @@ public class HotelService {
     /**
      * En un appel, récupère ou crée et renvoie l’hôtel pour une ville et un standing donnés.
      */
-    public Mono<HotelDto> fetchAndSaveHotelWithStarFromAmadeusByCity(String iataCityCode,
-                                                                     int cityId,
-                                                                     int requestedStar) {
-        // 1. Validation du standing
+    public Mono<HotelDto> fetchAndSaveHotelWithStarFromAmadeusByCity(
+            String iataCityCode,
+            int cityId,
+            int requestedStar
+    ) {
         if (requestedStar != 4 && requestedStar != 5) {
             return Mono.error(new ValidationException("Only 4 or 5 stars are supported."));
         }
-        // 2. Vérification du code IATA
         String actualIata = cityDao.getIataCodeById(cityId);
         if (!iataCityCode.equalsIgnoreCase(actualIata)) {
             return Mono.error(new HotelNotFound(
                     "Mismatched IATA code " + iataCityCode + " for cityId " + cityId));
         }
-        // 3. Recherche en base sans try/catch inutile
-        List<Hotel> existing = hotelDao.findByCityIdAndStarRating(cityId, requestedStar);
-        if (!existing.isEmpty()) {
-            // Si un hôtel existe déjà, on le retourne directement
-            return Mono.just(HotelDto.fromEntity(existing.get(0)));
+
+        List<Hotel> found;
+        try {
+            found = hotelDao.findByCityIdAndStarRating(cityId, requestedStar);
+        } catch (HotelNotFound e) {
+            // Aucun en base => on continue
+            found = Collections.emptyList();
+        }
+        if (!found.isEmpty()) {
+            return Mono.just(HotelDto.fromEntity(found.get(0)));
         }
 
-        StopWatch sw = new StopWatch();
-    // 4. Sinon, on poursuit avec l'appel Amadeus
         return tokenService.getValidToken()
-                .flatMap(token -> {
-                    sw.start("Call Amadeus hotels");
-
-                    return webClient.get()
-                            .uri(uriBuilder -> uriBuilder
-                                    .path("/v1/reference-data/locations/hotels/by-city")
-                                    .queryParam("cityCode", iataCityCode)
-                                    .build())
-                            .header("Authorization", "Bearer " + token)
-                            .retrieve()
-                            .bodyToMono(JsonNode.class)
-                            .doOnSuccess(resp -> {
-                                sw.stop();
-                                System.out.println(sw.prettyPrint());
-                            });
-                })
+                .flatMap(token ->
+                        webClient.get()
+                                .uri(uriBuilder -> uriBuilder
+                                        .path("/v1/reference-data/locations/hotels/by-city")
+                                        .queryParam("cityCode", iataCityCode)
+                                        .build()
+                                )
+                                .header("Authorization", "Bearer " + token)
+                                .retrieve()
+                                .bodyToMono(JsonNode.class)
+                )
                 .flatMap(json -> {
-                    StopWatch swHotel = new StopWatch();
-                    swHotel.start("Mapping + save hotels");
-
-                    JsonNode data = json.path("data").path(0);
-                    if (data.isMissingNode()) {
-                        return Mono.error(new HotelNotFound("No hotel found for city: " + iataCityCode));
+                    JsonNode node = json.path("data").path(0);
+                    if (node.isMissingNode()) {
+                        return Mono.error(new HotelNotFound(
+                                "No hotel found for city: " + iataCityCode));
                     }
 
-                    HotelDto dto4 = mapJsonNodeToHotelDto(data, cityId);
+                    HotelDto dto4 = mapJsonNodeToHotelDto(node, cityId);
                     dto4.setStarRating(4);
-                    createHotel(dto4);
+                    safeSave(dto4);
 
-                    HotelDto dto5 = mapJsonNodeToHotelDto(data, cityId);
+                    HotelDto dto5 = mapJsonNodeToHotelDto(node, cityId);
                     dto5.setStarRating(5);
-                    createHotel(dto5);
+                    safeSave(dto5);
 
-                    swHotel.stop();
-                    System.out.println(swHotel.prettyPrint());
-
-                    return Mono.just(requestedStar == 5 ? dto5 : dto4);
+                    return Mono.just(requestedStar == 4 ? dto4 : dto5);
                 });
     }
+
+    private void safeSave(HotelDto dto) {
+        try {
+            createHotel(dto);
+        } catch (HotelAlreadyExistsException e) {
+        }
+    }
+
 
 }
