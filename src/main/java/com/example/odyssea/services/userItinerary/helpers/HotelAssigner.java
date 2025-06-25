@@ -3,17 +3,13 @@ package com.example.odyssea.services.userItinerary.helpers;
 import com.example.odyssea.dtos.mainTables.HotelDto;
 import com.example.odyssea.dtos.userItinerary.UserItineraryDayDTO;
 import com.example.odyssea.entities.mainTables.City;
-import com.example.odyssea.entities.mainTables.Hotel;
-import com.example.odyssea.exceptions.DatabaseException;
 import com.example.odyssea.exceptions.HotelNotFound;
 import com.example.odyssea.services.mainTables.HotelService;
 import org.springframework.stereotype.Component;
-import org.springframework.util.StopWatch;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 import java.time.Duration;
-import java.util.ArrayList;
 import java.util.List;
 
 @Component
@@ -25,9 +21,6 @@ public class HotelAssigner {
     }
 
     public HotelDto assignHotel(UserItineraryDayDTO day, List<HotelDto> hotelsList){
-        StopWatch watch = new StopWatch();
-        watch.start("Assigning hotel for a day");
-
         int dayNumber = day.getDayNumber();
         int daysPerHotel = 4;
 
@@ -42,8 +35,6 @@ public class HotelAssigner {
             index = hotelsList.size() - 1;
         }
 
-        watch.stop();
-        System.out.println(watch.prettyPrint());
         return hotelsList.get(index);
     }
 
