@@ -1,8 +1,7 @@
-package com.example.odyssea;
+package com.example.odyssea.controllers;
 
 import com.example.odyssea.dtos.ApiResponse;
 import com.example.odyssea.dtos.UpdateUser;
-import com.example.odyssea.entities.userAuth.User;
 import com.example.odyssea.services.UserService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;

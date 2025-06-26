@@ -111,10 +111,6 @@ public class UserItineraryService {
         Integer userId = currentUserService.getCurrentUserId();
         List<UserItinerary> foundItineraries = userItineraryDao.findAllUserItineraries(userId);
 
-        List<Integer> itineraryIds = foundItineraries.stream()
-                .map(UserItinerary::getId)
-                .toList();
-
         List<UserItineraryDTO> userItineraries = new ArrayList<>();
 
 
@@ -138,20 +134,18 @@ public class UserItineraryService {
 
     @Transactional
     private UserItinerary saveUserItinerary(UserItineraryDTO userItineraryDTO) {
-        StopWatch watch = new StopWatch();
-        watch.start("Saving user itinerary in the database");
         UserItinerary userItinerary = toUserItineraryEntity(userItineraryDTO);
         UserItinerary savedItinerary = userItineraryDao.save(userItinerary);
 
-        if (userItineraryDTO.getOptions() != null && !userItineraryDTO.getOptions().isEmpty()) {
+        if (userItineraryDTO.getOptions() != null && !userItineraryDTO.getOptions().isEmpty()) { // TODO enregistrer les options en fonction de draftData
+            System.out.println("Options size is : " + userItineraryDTO.getOptions().size());
             for (Option option : userItineraryDTO.getOptions()) {
                 userItineraryOptionDao.save(savedItinerary.getId(), option.getId());
             }
         }
 
         userDailyPlanService.saveUserDailyPlans(savedItinerary, userItineraryDTO.getItineraryDays());
-        watch.stop();
-        System.out.println(watch.prettyPrint());
+
         return savedItinerary;
     }
 

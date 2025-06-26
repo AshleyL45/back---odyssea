@@ -55,15 +55,11 @@ public class UserDailyPlanService {
 
     @Transactional
     public void saveUserDailyPlans(UserItinerary userItinerary, List<UserItineraryDayDTO> days) {
-        StopWatch watch = new StopWatch();
-        watch.start("Saving each day of the itinerary in the database");
         UserItinerary savedItinerary = userItineraryDao.findById(userItinerary.getId());
 
         days.stream()
                 .map(dayDTO -> buildUserItineraryStep(savedItinerary, dayDTO))
                 .forEach(userItineraryStepDao::save);
-        watch.stop();
-        System.out.println(watch.prettyPrint());
     }
 
     private UserItineraryStep buildUserItineraryStep(UserItinerary itinerary, UserItineraryDayDTO dayDTO) {
@@ -170,8 +166,6 @@ public class UserDailyPlanService {
     }
 
     private Mono<UserItineraryDayDTO> createItineraryDay(DraftData draftData, int dayNumber, AtomicInteger index) {
-        StopWatch watch = new StopWatch();
-        watch.start("Building an itinerary day");
 
         List<Country> countries = draftData.getCountries();
         List<City> cities = draftData.getCities();
@@ -230,14 +224,11 @@ public class UserDailyPlanService {
             int totalPeople,
             AtomicInteger index
     ) {
-        StopWatch watch = new StopWatch();
-        watch.start("Assigning Data per day");
 
         day.setCountryName(locationAssigner.assignCountry(day, countries));
         day.setCityName(locationAssigner.assignCity(day, cities, draftData.getDraft().getDuration()));
         day.setActivity(activityAssigner.assignActivity(day, activities, index));
         day.setHotel(hotelAssigner.assignHotel(day, hotels));
-        watch.stop();
 
         return flightAssigner.assignFlight(day, visitedCities, totalPeople)
                 .map(flight -> {

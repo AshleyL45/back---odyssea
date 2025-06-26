@@ -35,7 +35,8 @@ public class GlobalExceptionHandler {
             BookingNotFoundException.class,
             CountryNotFound.class,
             OptionNotFound.class,
-            SelectionNotFoundException.class
+            SelectionNotFoundException.class,
+            FlightNotFoundException.class
     })
     public ResponseEntity<ApiResponse<Void>> handleNotFound(RuntimeException ex) {
         logger.error("Not found: {}", ex.getMessage());
@@ -193,13 +194,6 @@ public class GlobalExceptionHandler {
         );
     }
 
-    @ExceptionHandler(Exception.class)
-    public ResponseEntity<ApiResponse<Void>> handleGlobal(Exception ex) {
-        logger.error("Unhandled exception: {}", ex.getMessage(), ex);
-        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(
-                ApiResponse.error("An unexpected error occurred.", HttpStatus.INTERNAL_SERVER_ERROR)
-        );
-    }
 
     @ExceptionHandler(MethodArgumentNotValidException.class)
     public ResponseEntity<ApiResponse<Void>> handleValidationException(MethodArgumentNotValidException ex) {
@@ -239,6 +233,14 @@ public class GlobalExceptionHandler {
         logger.error("User not found : {}", ex.getMessage(), ex);
         return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(
                 ApiResponse.error("User not found.", HttpStatus.UNAUTHORIZED)
+        );
+    }
+
+    @ExceptionHandler(Exception.class)
+    public ResponseEntity<ApiResponse<Void>> handleGlobal(Exception ex) {
+        logger.error("Unhandled exception: {}", ex.getMessage(), ex);
+        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(
+                ApiResponse.error("An unexpected error occurred.", HttpStatus.INTERNAL_SERVER_ERROR)
         );
     }
 

@@ -16,7 +16,7 @@ import com.example.odyssea.exceptions.ValidationException;
 import com.example.odyssea.services.CurrentUserService;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.util.StopWatch;
+
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
@@ -82,15 +82,11 @@ public class BookingService {
 
 
     public List<BookingConfirmation> getAllUserBookings() {
-        StopWatch watch = new StopWatch();
-        watch.start("Getting all user bookings");
 
         Integer userId = getUserId();
 
         List<BookingConfirmation> bookings =  getBookingsAndMap(bookingDao.findAllUserBookings(userId));
 
-        watch.stop();
-        System.out.println(watch.prettyPrint());
         return  bookings;
     }
 

@@ -30,7 +30,6 @@ public class APIAuthService {
                 .bodyValue("grant_type=client_credentials&client_id=" + clientId + "&client_secret=" + clientSecret)
                 .retrieve()
                 .bodyToMono(TokenAmadeus.class)
-                .doOnNext(token -> System.out.println("Token reçu: " + token.getToken()))
                 .doOnError(error -> System.err.println("Erreur lors de la demande de token: " + error.getMessage()));
     }
 }

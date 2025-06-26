@@ -9,17 +9,15 @@ import com.example.odyssea.services.amadeus.TokenService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
-import org.springframework.util.StopWatch;
 import org.springframework.web.reactive.function.client.WebClient;
 import reactor.core.publisher.Mono;
-import reactor.core.scheduler.Schedulers;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import java.util.concurrent.Semaphore;
+
 
 @Service
 public class PlaneRideService {
@@ -30,7 +28,6 @@ public class PlaneRideService {
     private final TokenService tokenService;
     private final WebClient webClient;
     private final FlightSegmentService flightSegmentService;
-    private final Semaphore flightSemaphore = new Semaphore(10);
 
 
     public PlaneRideService(PlaneRideDao planeRideDao,
@@ -48,17 +45,10 @@ public class PlaneRideService {
     public Mono<List<FlightItineraryDTO>> getFlights(String departureIata, String arrivalIata,
                                                      LocalDate departureDate, LocalDate arrivalDate,
                                                      int totalPeople) {
-        StopWatch sw = new StopWatch();
-        sw.start("getFlights");
 
         return tokenService.getValidToken()
                 .flatMap(token -> fetchFlightOffers(departureIata, arrivalIata, departureDate, arrivalDate, totalPeople, token))
                 .flatMap(this::processFlightData)
-                .doOnSuccess(res -> {
-                    sw.stop();
-                    logger.info("getFlights terminé - Durée totale : {}s", sw.getTotalTimeSeconds());
-                    System.out.println(sw.prettyPrint());
-                })
                 .onErrorResume(e -> {
                     logger.error("Erreur lors de getFlights : {}", e.getMessage());
                     return Mono.just(Collections.emptyList());
@@ -68,95 +58,51 @@ public class PlaneRideService {
     private Mono<FlightDataDTO> fetchFlightOffers(String departureIata, String arrivalIata,
                                                   LocalDate departureDate, LocalDate arrivalDate,
                                                   int totalPeople, String token) {
-        StopWatch sw = new StopWatch();
-
-        return Mono.fromCallable(() -> {
-                    flightSemaphore.acquire();
-                    return true;
-                })
-                .subscribeOn(Schedulers.boundedElastic())
-                .flatMap(ignored -> {
-                    sw.start("🌐 Appel API Amadeus");
-                    logger.info("Appel à Amadeus lancé...");
-
-                    return webClient.get()
-                            .uri(uriBuilder -> uriBuilder
-                                    .path("v2/shopping/flight-offers")
-                                    .queryParam("originLocationCode", departureIata)
-                                    .queryParam("destinationLocationCode", arrivalIata)
-                                    .queryParam("departureDate", departureDate.toString())
-                                    .queryParam("returnDate", arrivalDate.toString())
-                                    .queryParam("adults", totalPeople)
-                                    .queryParam("max", 2)
-                                    .build())
-                            .header("Authorization", "Bearer " + token)
-                            .retrieve()
-                            .bodyToMono(FlightDataDTO.class)
-                            .doOnSuccess(response -> {
-                                sw.stop();
-                                logger.info("Réponse Amadeus reçue - {}s", sw.getTotalTimeSeconds());
-                                System.out.println(sw.prettyPrint());
-                            })
-                            .doFinally(signal -> {
-                                flightSemaphore.release(); // libère la place pour d'autres appels
-                            });
-                });
+        return webClient.get()
+                .uri(uriBuilder -> uriBuilder
+                        .path("v2/shopping/flight-offers")
+                        .queryParam("originLocationCode", departureIata)
+                        .queryParam("destinationLocationCode", arrivalIata)
+                        .queryParam("departureDate", departureDate.toString())
+                        .queryParam("returnDate", arrivalDate.toString())
+                        .queryParam("adults", totalPeople)
+                        .queryParam("max", 2)
+                        .build())
+                .header("Authorization", "Bearer " + token)
+                .retrieve()
+                .bodyToMono(FlightDataDTO.class);
     }
 
 
     private Mono<List<FlightItineraryDTO>> processFlightData(FlightDataDTO flightDataDTO) {
-        StopWatch sw = new StopWatch();
-        sw.start("processFlightData");
 
         if (flightDataDTO == null || flightDataDTO.getData() == null || flightDataDTO.getData().isEmpty()) {
-            sw.stop();
             logger.warn("Données Amadeus vides");
-            System.out.println(sw.prettyPrint());
+
             return Mono.just(Collections.emptyList());
         }
 
         FlightOffersDTO offer = flightDataDTO.getData().get(0);
         if (offer.getItineraries() == null || offer.getItineraries().isEmpty()) {
-            sw.stop();
             logger.warn("Pas d’itinéraires trouvés");
-            System.out.println(sw.prettyPrint());
             return Mono.just(Collections.emptyList());
         }
 
         FlightItineraryDTO itinerary = offer.getItineraries().get(0);
         DictionnaryDTO dict = flightDataDTO.getDictionnary();
 
-        // Chrono des segments
-        StopWatch swSeg = new StopWatch();
-        swSeg.start("processSegments");
-        List<Integer> savedSegmentIds = processSegments(itinerary, dict);
-        swSeg.stop();
-        System.out.println(swSeg.prettyPrint());
 
-        // Chrono sauvegarde plane ride
-        StopWatch swSave = new StopWatch();
-        swSave.start("savePlaneRide");
+        List<Integer> savedSegmentIds = processSegments(itinerary, dict);
+
+
         BigDecimal totalPrice = getTotalPrice(offer);
         PlaneRide savedPlaneRide = createAndSavePlaneRide(offer, totalPrice);
-        swSave.stop();
-        System.out.println(swSave.prettyPrint());
 
-        // Chrono lien segments ↔ plane ride
-        StopWatch swLink = new StopWatch();
-        swLink.start("linkSegmentsToPlaneRide");
         linkSegmentsToPlaneRide(savedSegmentIds, savedPlaneRide);
-        swLink.stop();
-        System.out.println(swLink.prettyPrint());
 
-        // Chrono construction DTO final
-        StopWatch swBuild = new StopWatch();
-        swBuild.start("📦 buildDTO");
+
         FlightItineraryDTO responseDto = buildResponseDto(itinerary, totalPrice, offer, savedPlaneRide);
-        swBuild.stop();
-        System.out.println(swBuild.prettyPrint());
 
-        sw.stop();
-        System.out.println(sw.prettyPrint());
         return Mono.just(Collections.singletonList(responseDto));
     }
 

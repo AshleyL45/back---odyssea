@@ -27,7 +27,6 @@ public class TokenService {
         // Si le token est expiré ou absent, en demande un nouveau
         return apiAuthService.loginToAmadeus()
                 .doOnNext(newToken -> {
-                    System.out.println("Nouveau token généré: " + newToken.getToken());
                     cachedToken.set(newToken); // Met à jour le cache
                 })
                 .map(TokenAmadeus::getToken);
