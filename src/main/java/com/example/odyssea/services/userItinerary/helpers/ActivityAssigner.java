@@ -14,7 +14,9 @@ import org.springframework.stereotype.Component;
 import org.springframework.util.StopWatch;
 
 import java.util.List;
+import java.util.Random;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.stream.Collectors;
 
 @Component
 public class ActivityAssigner {
@@ -25,29 +27,27 @@ public class ActivityAssigner {
         this.cityDao = cityDao;
     }
 
-    public Activity assignActivity(UserItineraryDayDTO day, List<Activity> activityList, AtomicInteger activityIndex) {
-
+    public Activity assignActivity(UserItineraryDayDTO day, List<Activity> activityList) {
         if (day.isDayOff()) {
-            return null;
-        }
-
-        if(activityList.isEmpty()){
-            throw new ActivityNotFound("Activity list is empty.");
-        }
-
-        if (activityIndex.get() >= activityList.size()) {
             return null;
         }
 
         City cityDay = cityDao.findCityByName(day.getCityName());
 
-        Activity selectedActivity = activityList.get(activityIndex.getAndIncrement());
+        List<Activity> matchingActivities = activityList.stream()
+                .filter(a -> a.getCityId() == cityDay.getId())
+                .toList();
 
-        if (!(selectedActivity.getCityId() == (cityDay.getId()))) {
-            log.warn("City mismatch: Activity {} (city {}) assigned to day in city {}",
-                    selectedActivity.getId(), selectedActivity.getCityId(), cityDay.getId());
+        if (matchingActivities.isEmpty()) {
+            throw new ActivityNotFound("No matching activity for city " + cityDay.getName());
         }
-        return selectedActivity;
+
+        Activity selected = matchingActivities.get(new Random().nextInt(matchingActivities.size()));
+
+        activityList.remove(selected);
+
+        return selected;
     }
+
 
 }

@@ -227,7 +227,7 @@ public class UserDailyPlanService {
 
         day.setCountryName(locationAssigner.assignCountry(day, countries));
         day.setCityName(locationAssigner.assignCity(day, cities, draftData.getDraft().getDuration()));
-        day.setActivity(activityAssigner.assignActivity(day, activities, index));
+        day.setActivity(activityAssigner.assignActivity(day, activities));
         day.setHotel(hotelAssigner.assignHotel(day, hotels));
 
         return flightAssigner.assignFlight(day, visitedCities, totalPeople)

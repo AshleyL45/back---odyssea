@@ -148,21 +148,25 @@ public class HotelService {
                     }
 
                     HotelDto dto4 = mapJsonNodeToHotelDto(node, cityId);
-                    dto4.setStarRating(4);
-                    safeSave(dto4);
-
                     HotelDto dto5 = mapJsonNodeToHotelDto(node, cityId);
+
+                    dto4.setStarRating(4);
+                    dto4 = safeSave(dto4);
+
                     dto5.setStarRating(5);
-                    safeSave(dto5);
+                    dto5 = safeSave(dto5);
 
                     return Mono.just(requestedStar == 4 ? dto4 : dto5);
                 });
     }
 
-    private void safeSave(HotelDto dto) {
+    private HotelDto safeSave(HotelDto dto) {
         try {
-            createHotel(dto);
+            return createHotel(dto);
         } catch (HotelAlreadyExistsException e) {
+            return hotelDao.findById(dto.getId())
+                    .map(HotelDto::fromEntity)
+                    .orElse(null);
         }
     }
 
