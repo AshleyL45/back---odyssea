@@ -76,6 +76,25 @@ public class HotelDao {
     }
 
 
+    public Hotel findByNameAndCityId(String name, int cityId) {
+        String sql = "SELECT * FROM hotel WHERE name = ? AND city_id = ?";
+
+        return jdbcTemplate.queryForObject(
+                sql,
+                new Object[]{name, cityId},
+                (rs, rowNum) -> {
+                    Hotel h = new Hotel();
+                    h.setId(rs.getInt("id"));
+                    h.setName(rs.getString("name"));
+                    h.setCityId(rs.getInt("city_id"));
+                    h.setStarRating(rs.getInt("star_rating"));
+                    h.setDescription(rs.getString("description"));
+                    h.setPrice(rs.getDouble("price"));
+                    return h;
+                }
+        );
+    }
+
 
 
     public void update(Hotel hotel) {

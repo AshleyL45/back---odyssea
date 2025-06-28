@@ -164,11 +164,10 @@ public class HotelService {
         try {
             return createHotel(dto);
         } catch (HotelAlreadyExistsException e) {
-            return hotelDao.findById(dto.getId())
-                    .map(HotelDto::fromEntity)
-                    .orElse(null);
+            return HotelDto.fromEntity(hotelDao.findByNameAndCityId(dto.getName(), dto.getCityId()));
         }
     }
+
 
 
 }
