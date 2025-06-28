@@ -5,10 +5,13 @@ import com.example.odyssea.dtos.userItinerary.UserItineraryDayDTO;
 import com.example.odyssea.entities.mainTables.Activity;
 import com.example.odyssea.entities.mainTables.City;
 import com.example.odyssea.exceptions.ActivityNotFound;
+import com.example.odyssea.exceptions.DatabaseException;
+import com.example.odyssea.exceptions.GlobalExceptionHandler;
 import com.example.odyssea.exceptions.ValidationException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
+import org.springframework.util.StopWatch;
 
 import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -43,7 +46,6 @@ public class ActivityAssigner {
         if (!(selectedActivity.getCityId() == (cityDay.getId()))) {
             log.warn("City mismatch: Activity {} (city {}) assigned to day in city {}",
                     selectedActivity.getId(), selectedActivity.getCityId(), cityDay.getId());
-
         }
         return selectedActivity;
     }

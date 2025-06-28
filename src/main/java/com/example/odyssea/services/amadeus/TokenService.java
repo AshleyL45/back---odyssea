@@ -20,7 +20,6 @@ public class TokenService {
 
         // Vérifie si le token en cache est valide
         if (token != null && !token.isExpired()) {
-            System.out.println("Utilisation du token en cache: " + token.getToken());
             return Mono.just(token.getToken());
         }
 

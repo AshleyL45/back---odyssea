@@ -152,7 +152,6 @@ public class UserItineraryDraftService {
         }
 
         for (Integer id : activitiesIds) {
-            // findById() lève déjà ActivityNotFound si besoin
             Activity activity = activityDao.findById(id);
             if (!cityIds.contains(activity.getCityId())) {
                 throw new ValidationException("Activity " + activity.getName() + " does not belong to selected cities.");

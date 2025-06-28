@@ -23,7 +23,6 @@ public class APIAuthService {
     }
 
     public Mono<TokenAmadeus> loginToAmadeus() {
-        System.out.println("Demande d'un nouveau token à Amadeus...");
         return webClient.post()
                 .uri("v1/security/oauth2/token")
                 .contentType(MediaType.APPLICATION_FORM_URLENCODED)

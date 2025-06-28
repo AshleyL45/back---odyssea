@@ -50,12 +50,14 @@ public class HotelService {
     }
 
 
-    public void createHotel(HotelDto hotelDto) {
+    public HotelDto createHotel(HotelDto hotelDto) {
         Hotel hotel = hotelDto.toEntity();
         if (!hotelDao.cityExists(hotel.getCityId())) {
             throw new ResourceNotFoundException("City not found with id : " + hotel.getCityId());
         }
         hotelDao.save(hotel);
+        return HotelDto.fromEntity(hotel);
+
     }
 
     private HotelDto mapJsonNodeToHotelDto(JsonNode node, int cityId) {

@@ -6,10 +6,14 @@ import com.example.odyssea.exceptions.HotelNotFound;
 import com.example.odyssea.exceptions.ResourceNotFoundException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
+import org.springframework.jdbc.support.GeneratedKeyHolder;
+import org.springframework.jdbc.support.KeyHolder;
 import org.springframework.stereotype.Repository;
 
+import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.Statement;
 import java.util.List;
 import java.util.Optional;
 
@@ -33,6 +37,7 @@ public class HotelDao {
         if (!cityExists(hotel.getCityId())) {
             throw new ResourceNotFoundException("City with id " + hotel.getCityId() + " not found.");
         }
+
         String checkSql = "SELECT COUNT(*) FROM hotel WHERE name = ? AND city_id = ? AND star_rating = ?";
         Integer count = jdbcTemplate.queryForObject(
                 checkSql,
@@ -41,6 +46,7 @@ public class HotelDao {
                 hotel.getCityId(),
                 hotel.getStarRating()
         );
+
         if (count != null && count > 0) {
             throw new HotelAlreadyExistsException(
                     "Hotel \"" + hotel.getName() +
@@ -49,17 +55,26 @@ public class HotelDao {
             );
         }
 
-        String sql = "INSERT INTO hotel "
-                + "(city_id, name, star_rating, description, price) "
-                + "VALUES (?, ?, ?, ?, ?)";
-        jdbcTemplate.update(sql,
-                hotel.getCityId(),
-                hotel.getName(),
-                hotel.getStarRating(),
-                hotel.getDescription(),
-                hotel.getPrice()
-        );
+        String sql = "INSERT INTO hotel (city_id, name, star_rating, description, price) " +
+                "VALUES (?, ?, ?, ?, ?)";
+
+        KeyHolder keyHolder = new GeneratedKeyHolder();
+
+        jdbcTemplate.update(connection -> {
+            PreparedStatement ps = connection.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS);
+            ps.setInt(1, hotel.getCityId());
+            ps.setString(2, hotel.getName());
+            ps.setInt(3, hotel.getStarRating());
+            ps.setString(4, hotel.getDescription());
+            ps.setDouble(5, hotel.getPrice());
+            return ps;
+        }, keyHolder);
+
+        if (keyHolder.getKey() != null) {
+            hotel.setId(((Number) keyHolder.getKey()).intValue());
+        }
     }
+
 
 
 

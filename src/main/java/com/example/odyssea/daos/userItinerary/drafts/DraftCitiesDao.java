@@ -50,13 +50,26 @@ public class DraftCitiesDao {
         jdbcTemplate.batchUpdate(sql, batchArgs);
     }
 
-    public List<City> findDraftCities(Integer userId){
+    public List<City> findDraftCities(Integer userId) {
         Integer draftId = userItineraryDraftDao.getLastDraftIdByUser(userId);
-        String sql = "SELECT city.* FROM draft_cities\n" +
-                "INNER JOIN city ON draft_cities.city_id = city.id WHERE draft_cities.draft_user_itinerary_id = ? ";
+        String sql = "SELECT city.* FROM draft_cities " +
+                "INNER JOIN city ON draft_cities.city_id = city.id " +
+                "WHERE draft_cities.draft_user_itinerary_id = ?";
 
-        return jdbcTemplate.query(sql, new Object[]{draftId}, new BeanPropertyRowMapper<>(City.class));
+        RowMapper<City> cityRowMapper = (rs, rowNum) -> {
+            City city = new City();
+            city.setId(rs.getInt("id"));
+            city.setCountryId(rs.getInt("country_id"));
+            city.setName(rs.getString("name"));
+            city.setIataCode(rs.getString("iata_code"));
+            city.setLongitude(rs.getDouble("longitude"));
+            city.setLatitude(rs.getDouble("latitude"));
+            return city;
+        };
+
+        return jdbcTemplate.query(sql, new Object[]{draftId}, cityRowMapper);
     }
+
 
     private void deleteCitiesByDraftId(Integer draftId) {
         String deleteSql = "DELETE FROM draft_cities WHERE draft_user_itinerary_id = ?";

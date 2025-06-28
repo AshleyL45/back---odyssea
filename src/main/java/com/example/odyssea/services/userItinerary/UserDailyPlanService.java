@@ -58,6 +58,7 @@ public class UserDailyPlanService {
         UserItinerary savedItinerary = userItineraryDao.findById(userItinerary.getId());
 
         days.stream()
+                .peek(dayDTO -> System.out.println("Hotel ID: " + dayDTO.getHotel().getId()))
                 .map(dayDTO -> buildUserItineraryStep(savedItinerary, dayDTO))
                 .forEach(userItineraryStepDao::save);
     }
@@ -170,7 +171,6 @@ public class UserDailyPlanService {
         List<Country> countries = draftData.getCountries();
         List<City> cities = draftData.getCities();
         List<Activity> activities = draftData.getActivities();
-        //List<HotelDto> hotels = fetchHotels(draftData);
         List<City> visitedCities = buildFlightCities(draftData);
         int totalPeople = draftData.getDraft().getNumberAdults() + draftData.getDraft().getNumberKids();
 

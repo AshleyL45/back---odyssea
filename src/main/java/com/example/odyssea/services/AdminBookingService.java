@@ -108,7 +108,7 @@ public class AdminBookingService {
 
 
     @PreAuthorize("hasRole('ADMIN')")
-    public void updateBooking(int bookingId, BookingStatus status) {
+    public void updateBookingStatus(int bookingId, BookingStatus status) {
         bookingDao.updateBooking(bookingId, status);
     }
 

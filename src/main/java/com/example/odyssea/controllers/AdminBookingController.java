@@ -128,7 +128,7 @@ public class AdminBookingController {
     public ResponseEntity<ApiResponse<Void>> updateBookingStatus( @Parameter(description = "Booking ID of the booking to update", required = true)
                                                                       @PathVariable int id,
                                                                   @RequestBody @Valid  BookingStatusUpdate status) {
-        adminBookingService.updateBooking(id, status.getNewStatus());
+        adminBookingService.updateBookingStatus(id, status.getNewStatus());
         return ResponseEntity.status(HttpStatus.OK).body(
                 ApiResponse.success("Booking status successfully updated.", HttpStatus.OK)
         );
