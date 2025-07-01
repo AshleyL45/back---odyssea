@@ -79,7 +79,7 @@ public class HotelDao {
     public Hotel findByNameAndCityId(String name, int cityId) {
         String sql = "SELECT * FROM hotel WHERE name = ? AND city_id = ?";
 
-        return jdbcTemplate.queryForObject(
+        return jdbcTemplate.query(
                 sql,
                 new Object[]{name, cityId},
                 (rs, rowNum) -> {
@@ -92,7 +92,9 @@ public class HotelDao {
                     h.setPrice(rs.getDouble("price"));
                     return h;
                 }
-        );
+        ).stream()
+                .findFirst()
+                .orElseThrow(() -> new HotelNotFound("Hotel not found in city " + name + " with ID " + cityId));
     }
 
 

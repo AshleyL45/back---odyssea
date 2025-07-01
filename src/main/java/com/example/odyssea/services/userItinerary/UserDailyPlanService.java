@@ -156,17 +156,15 @@ public class UserDailyPlanService {
 
     public Mono<List<UserItineraryDayDTO>> generateDailyPlan(DraftData draftData){
         int duration = draftData.getDraft().getDuration();
-        AtomicInteger index = new AtomicInteger(0);
 
         List<Mono<UserItineraryDayDTO>> days = IntStream.range(1, duration + 1)
-                .mapToObj(i -> createItineraryDay(draftData, i, index))
+                .mapToObj(i -> createItineraryDay(draftData, i))
                 .toList();
 
         return Flux.mergeSequential(days).collectList();
-
     }
 
-    private Mono<UserItineraryDayDTO> createItineraryDay(DraftData draftData, int dayNumber, AtomicInteger index) {
+    private Mono<UserItineraryDayDTO> createItineraryDay(DraftData draftData, int dayNumber) {
 
         List<Country> countries = draftData.getCountries();
         List<City> cities = draftData.getCities();
@@ -177,7 +175,7 @@ public class UserDailyPlanService {
         UserItineraryDayDTO day = initDay(dayNumber, draftData);
 
         return fetchHotels(draftData)
-                .flatMap(hotels -> assignDayData(day, draftData, countries, cities, activities, hotels, visitedCities, totalPeople, index));
+                .flatMap(hotels -> assignDayData(day, draftData, countries, cities, activities, hotels, visitedCities, totalPeople));
     }
 
 
@@ -221,8 +219,7 @@ public class UserDailyPlanService {
             List<Activity> activities,
             List<HotelDto> hotels,
             List<City> visitedCities,
-            int totalPeople,
-            AtomicInteger index
+            int totalPeople
     ) {
 
         day.setCountryName(locationAssigner.assignCountry(day, countries));

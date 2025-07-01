@@ -26,19 +26,14 @@ import java.util.stream.Stream;
 
 @Service
 public class UserItineraryService {
-    private UserItineraryDao userItineraryDao;
-    private UserDailyPlanDao userDailyPlanDao;
-    private UserDailyPlanService userDailyPlanService;
-    private UserItineraryDraftService userItineraryDraftService;
-    private UserItineraryOptionDao userItineraryOptionDao;
-    private CurrentUserService currentUserService;
+    private final UserItineraryDao userItineraryDao;
+    private final UserDailyPlanDao userDailyPlanDao;
+    private final UserDailyPlanService userDailyPlanService;
+    private final UserItineraryDraftService userItineraryDraftService;
+    private final UserItineraryOptionDao userItineraryOptionDao;
+    private final CurrentUserService currentUserService;
 
 
-    public UserItineraryService() {
-
-    }
-
-    @Autowired
     public UserItineraryService(UserItineraryDao userItineraryDao, UserDailyPlanDao userDailyPlanDao, UserDailyPlanService userDailyPlanService, UserItineraryDraftService userItineraryDraftService, UserItineraryOptionDao userItineraryOptionDao, CurrentUserService currentUserService) {
         this.userItineraryDao = userItineraryDao;
         this.userDailyPlanDao = userDailyPlanDao;
@@ -48,6 +43,7 @@ public class UserItineraryService {
         this.currentUserService = currentUserService;
     }
 
+    // Méthodes métier publiques
 
     public Mono<UserItineraryDTO> generateItineraryAsync() {
         StopWatch watch = new StopWatch();
@@ -104,7 +100,6 @@ public class UserItineraryService {
                 });
     }
 
-
     public List<UserItineraryDTO> getAllUserItineraries() {
         StopWatch watch = new StopWatch();
         watch.start("Getting all user itineraries");
@@ -132,12 +127,13 @@ public class UserItineraryService {
         userItineraryDao.updateUserItineraryName(id, newItineraryName);
     }
 
+    // Méthodes de sauvegarde/conversion
     @Transactional
     private UserItinerary saveUserItinerary(UserItineraryDTO userItineraryDTO) {
         UserItinerary userItinerary = toUserItineraryEntity(userItineraryDTO);
         UserItinerary savedItinerary = userItineraryDao.save(userItinerary);
 
-        if (userItineraryDTO.getOptions() != null && !userItineraryDTO.getOptions().isEmpty()) { // TODO enregistrer les options en fonction de draftData
+        if (userItineraryDTO.getOptions() != null && !userItineraryDTO.getOptions().isEmpty()) {
             System.out.println("Options size is : " + userItineraryDTO.getOptions().size());
             for (Option option : userItineraryDTO.getOptions()) {
                 userItineraryOptionDao.save(savedItinerary.getId(), option.getId());
@@ -148,7 +144,60 @@ public class UserItineraryService {
 
         return savedItinerary;
     }
+    private UserItinerary toUserItineraryEntity(UserItineraryDTO dto) {
+        UserItinerary entity = new UserItinerary();
+        entity.setUserId(dto.getUserId());
+        entity.setStartDate(dto.getStartDate());
+        entity.setEndDate(dto.getEndDate());
+        entity.setTotalDuration(dto.getTotalDuration());
+        entity.setDepartureCity(dto.getDepartureCity());
+        entity.setStartingPrice(dto.getStartingPrice());
+        entity.setItineraryName(dto.getItineraryName());
+        entity.setNumberOfAdults(dto.getNumberOfAdults());
+        entity.setNumberOfKids(dto.getNumberOfKids());
+        entity.setBookingDate(LocalDate.now());
+        entity.setStatus(BookingStatus.PENDING);
+        return entity;
+    }
 
+    @Transactional
+    public UserItineraryDTO toUserItineraryDTO (UserItinerary userItinerary){
+        LocalDate startDate = userItinerary.getStartDate();
+        LocalDate endDate = userItinerary.getEndDate();
+
+        List<UserItineraryStep> daysEntities = userDailyPlanDao.findDailyPlansOfAnItinerary(userItinerary.getId());
+
+        List<UserItineraryDayDTO> days = new ArrayList<>();
+        for(UserItineraryStep day : daysEntities){
+            days.add(userDailyPlanService.toUserItineraryDay(userItinerary, day));
+        }
+
+        List<Option> options = userItineraryOptionDao.findOptionsByUserItineraryId(userItinerary.getId());
+        if(options.isEmpty()){
+            options = new ArrayList<>();
+        }
+
+        return new UserItineraryDTO(
+                userItinerary.getId(),
+                userItinerary.getUserId(),
+                startDate,
+                endDate,
+                userItinerary.getTotalDuration(),
+                userItinerary.getDepartureCity(),
+                userItinerary.getStartingPrice(),
+                userItinerary.getItineraryName(),
+                userItinerary.getNumberOfAdults(),
+                userItinerary.getNumberOfKids(),
+                days,
+                options,
+                userItinerary.getBookingDate(),
+                userItinerary.getStatus()
+
+        );
+
+    }
+
+    // Méthodes métier internes
     private BigDecimal calculateTotalPrice(
             List<Country> countries,
             List<Option> options,
@@ -206,57 +255,38 @@ public class UserItineraryService {
                 .reduce(BigDecimal.ZERO, BigDecimal::add);
     }
 
-    private UserItinerary toUserItineraryEntity(UserItineraryDTO dto) {
-        UserItinerary entity = new UserItinerary();
-        entity.setUserId(dto.getUserId());
-        entity.setStartDate(dto.getStartDate());
-        entity.setEndDate(dto.getEndDate());
-        entity.setTotalDuration(dto.getTotalDuration());
-        entity.setDepartureCity(dto.getDepartureCity());
-        entity.setStartingPrice(dto.getStartingPrice());
-        entity.setItineraryName(dto.getItineraryName());
-        entity.setNumberOfAdults(dto.getNumberOfAdults());
-        entity.setNumberOfKids(dto.getNumberOfKids());
-        entity.setBookingDate(LocalDate.now());
-        entity.setStatus(BookingStatus.PENDING);
-        return entity;
+    private UserItineraryDTO buildUserItineraryDTO(DraftData draftData, List<UserItineraryDayDTO> days, BigDecimal price) {
+        LocalDate endDate = draftData.getDraft().getStartDate().plusDays(draftData.getDraft().getDuration());
+
+        UserItineraryDTO dto = new UserItineraryDTO();
+        dto.setUserId(currentUserService.getCurrentUserId());
+        dto.setItineraryDays(days);
+        dto.setStartDate(draftData.getDraft().getStartDate());
+        dto.setEndDate(endDate);
+        dto.setTotalDuration(draftData.getDraft().getDuration());
+        dto.setDepartureCity(draftData.getDraft().getDepartureCity());
+        dto.setNumberOfAdults(draftData.getDraft().getNumberAdults());
+        dto.setNumberOfKids(draftData.getDraft().getNumberKids());
+        dto.setItineraryName(null);
+        dto.setOptions(draftData.getOptions());
+        dto.setStartingPrice(price);
+        dto.setBookingDate(LocalDate.now());
+        dto.setStatus(BookingStatus.PENDING);
+        return dto;
     }
 
-   @Transactional
-    public UserItineraryDTO toUserItineraryDTO (UserItinerary userItinerary){
-        LocalDate startDate = userItinerary.getStartDate();
-        LocalDate endDate = userItinerary.getEndDate();
-
-        List<UserItineraryStep> daysEntities = userDailyPlanDao.findDailyPlansOfAnItinerary(userItinerary.getId());
-
-        List<UserItineraryDayDTO> days = new ArrayList<>();
-        for(UserItineraryStep day : daysEntities){
-            days.add(userDailyPlanService.toUserItineraryDay(userItinerary, day));
-        }
-
-        List<Option> options = userItineraryOptionDao.findOptionsByUserItineraryId(userItinerary.getId());
-        if(options.isEmpty()){
-            options = new ArrayList<>();
-        }
-
-        return new UserItineraryDTO(
-                userItinerary.getId(),
-                userItinerary.getUserId(),
-                startDate,
-                endDate,
-                userItinerary.getTotalDuration(),
-                userItinerary.getDepartureCity(),
-                userItinerary.getStartingPrice(),
-                userItinerary.getItineraryName(),
-                userItinerary.getNumberOfAdults(),
-                userItinerary.getNumberOfKids(),
-                days,
-                options,
-                userItinerary.getBookingDate(),
-                userItinerary.getStatus()
-
-        );
-
+    // Helpers d'extraction
+    private List<HotelDto> extractHotels(List<UserItineraryDayDTO> days) {
+        return days.stream()
+                .map(UserItineraryDayDTO::getHotel)
+                .toList();
     }
+    private List<Activity> extractActivities(List<UserItineraryDayDTO> days) {
+        return days.stream()
+                .filter(Objects::nonNull)
+                .map(UserItineraryDayDTO::getActivity)
+                .toList();
+    }
+
 
 }

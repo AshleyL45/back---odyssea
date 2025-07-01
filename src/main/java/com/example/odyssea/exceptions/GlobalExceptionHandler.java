@@ -17,13 +17,15 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.servlet.NoHandlerFoundException;
 import org.springframework.web.servlet.resource.NoResourceFoundException;
 
+import java.util.stream.Collectors;
+
 
 @RestControllerAdvice
 public class GlobalExceptionHandler {
     private static final Logger logger = LoggerFactory.getLogger(GlobalExceptionHandler.class);
 
     @ExceptionHandler(ValidationException.class)
-    public ResponseEntity<ApiResponse<Void>> handleInvalidDataException(ValidationException e){
+    public ResponseEntity<ApiResponse<Void>> handleInvalidDataException(ValidationException e) {
         logger.error("Validation exception : {}", e.getMessage());
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(
                 ApiResponse.error(e.getMessage(), HttpStatus.BAD_REQUEST)
@@ -197,12 +199,9 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(MethodArgumentNotValidException.class)
     public ResponseEntity<ApiResponse<Void>> handleValidationException(MethodArgumentNotValidException ex) {
-        String errorMessage = ex.getBindingResult()
-                .getFieldErrors()
-                .stream()
-                .map(DefaultMessageSourceResolvable::getDefaultMessage)
-                .findFirst()
-                .orElse("Invalid input.");
+        String errorMessage = ex.getBindingResult().getFieldErrors().stream()
+                .map(error -> error.getDefaultMessage())
+                .collect(Collectors.joining(", "));
 
         return ResponseEntity
                 .badRequest()
@@ -210,9 +209,8 @@ public class GlobalExceptionHandler {
     }
 
 
-
     @ExceptionHandler(NoResourceFoundException.class)
-    public ResponseEntity<ApiResponse<Void>> handleNoEndpointFound(NoResourceFoundException ex){
+    public ResponseEntity<ApiResponse<Void>> handleNoEndpointFound(NoResourceFoundException ex) {
         logger.error("Endpoint not found: {}", ex.getMessage(), ex);
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(
                 ApiResponse.error("Invalid endpoint.", HttpStatus.BAD_REQUEST)
