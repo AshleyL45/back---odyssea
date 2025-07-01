@@ -1,4 +1,4 @@
-// Pour l'executer, se placer dans le terminal au niveau de ce fichier et -> node generate-image-insert.js
+// Pour l'executer, se placer dans le terminal au niveau de ce fichier et -> node generate_image_inserts.js
 const fs   = require('fs');
 const path = require('path');
 
