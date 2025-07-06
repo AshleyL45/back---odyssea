@@ -101,8 +101,6 @@ public class UserItineraryService {
     }
 
     public List<UserItineraryDTO> getAllUserItineraries() {
-        StopWatch watch = new StopWatch();
-        watch.start("Getting all user itineraries");
         Integer userId = currentUserService.getCurrentUserId();
         List<UserItinerary> foundItineraries = userItineraryDao.findAllUserItineraries(userId);
 
@@ -113,8 +111,6 @@ public class UserItineraryService {
             userItineraries.add(toUserItineraryDTO(itinerary));
         }
 
-        watch.stop();
-        System.out.println(watch.prettyPrint());
         return userItineraries;
     }
 

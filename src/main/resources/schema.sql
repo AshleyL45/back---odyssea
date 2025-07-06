@@ -1,4 +1,3 @@
--- 1. D'abord les tables sans dépendances
 CREATE TABLE IF NOT EXISTS `theme` (
   `id` int NOT NULL AUTO_INCREMENT,
   `name` text NOT NULL,
@@ -56,7 +55,7 @@ CREATE TABLE IF NOT EXISTS `plane_ride` (
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
--- 2. Tables dépendant des tables ci-dessus
+
 CREATE TABLE IF NOT EXISTS `city` (
   `id` int NOT NULL AUTO_INCREMENT,
   `country_id` int NOT NULL,
@@ -117,7 +116,7 @@ CREATE TABLE IF NOT EXISTS `user_itinerary_draft` (
   CONSTRAINT `fk_userItineraryDraft_1` FOREIGN KEY (`user_id`) REFERENCES `user` (`id`) ON DELETE CASCADE ON UPDATE SET NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
--- 3. Tables dépendant des tables précédentes
+
 CREATE TABLE IF NOT EXISTS `hotel` (
   `id` int NOT NULL AUTO_INCREMENT,
   `city_id` int NOT NULL,

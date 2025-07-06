@@ -12,12 +12,12 @@ public class ItineraryDetails {
     private BigDecimal price;
     private int totalDuration;
     private String themeName;
-    private List<DailyPlanDto> days;
+    private List<DailyPlanWithCityDto> days;
 
     public ItineraryDetails() {
     }
 
-    public ItineraryDetails(int id, String name, String description, String shortDescription, int stock, BigDecimal price, int totalDuration, String themeName, List<DailyPlanDto> days) {
+    public ItineraryDetails(int id, String name, String description, String shortDescription, int stock, BigDecimal price, int totalDuration, String themeName, List<DailyPlanWithCityDto> days) {
         this.id = id;
         this.name = name;
         this.description = description;
@@ -94,11 +94,11 @@ public class ItineraryDetails {
         this.themeName = themeName;
     }
 
-    public List<DailyPlanDto> getDays() {
+    public List<DailyPlanWithCityDto> getDays() {
         return days;
     }
 
-    public void setDays(List<DailyPlanDto> days) {
+    public void setDays(List<DailyPlanWithCityDto> days) {
         this.days = days;
     }
 }

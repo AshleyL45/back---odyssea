@@ -39,8 +39,8 @@ public class DailyPlanWithCityDto {
                 rs.getString("hotelDescription"),
                 rs.getString("activityName"),
                 rs.getString("activityDescription"),
-                rs.getString("descriptionPerDay"),
-                rs.getInt("dayNumber"),
+                rs.getString("description_per_day"),
+                rs.getInt("day_number"),
                 rs.getDouble("latitude"),
                 rs.getDouble("longitude")
         );

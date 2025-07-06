@@ -42,7 +42,7 @@ public class ItineraryService {
 
     public ItineraryDetails getItineraryDetails(int id){
         Itinerary itinerary = itineraryDao.findById(id);
-        List<DailyPlanDto> daysDetails = itineraryStepService.getDailyPlansByItineraryId(itinerary.getId());
+        List<DailyPlanWithCityDto> daysDetails = getDailyPlanWithCity(itinerary.getId());
         return new ItineraryDetails(
                 itinerary.getId(),
                 itinerary.getName(),
@@ -56,7 +56,7 @@ public class ItineraryService {
         );
     }
 
-    private List<DailyPlanWithCityDto> getDailyPlanWithCity(int itineraryId) {//TODO Demander à Ashley
+    private List<DailyPlanWithCityDto> getDailyPlanWithCity(int itineraryId) {
         return itineraryStepDao.findByItineraryIdWithCity(itineraryId);
     }
 

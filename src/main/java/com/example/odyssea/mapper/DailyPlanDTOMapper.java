@@ -15,8 +15,8 @@ public class DailyPlanDTOMapper implements RowMapper<DailyPlanDto> {
         dailyPlanDto.setHotelDescription(rs.getString("hotelDescription"));
         dailyPlanDto.setActivityName(rs.getString("activityName"));
         dailyPlanDto.setActivityDescription(rs.getString("activityDescription"));
-        dailyPlanDto.setDescriptionPerDay(rs.getString("descriptionPerDay"));
-        dailyPlanDto.setDayNumber(rs.getInt("dayNumber"));
+        dailyPlanDto.setDescriptionPerDay(rs.getString("description_per_day"));
+        dailyPlanDto.setDayNumber(rs.getInt("day_number"));
         return dailyPlanDto;
     }
 }
