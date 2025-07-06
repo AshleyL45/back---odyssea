@@ -56,7 +56,7 @@ public class SecurityConfig {
                 // règles d’autorisation
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers(
-                                "/auth/**","/userItinerary/**",
+                                "/auth/**",
                                 "/hotels/**",
                                 "/flights/**",
                                 "/activities/**",
