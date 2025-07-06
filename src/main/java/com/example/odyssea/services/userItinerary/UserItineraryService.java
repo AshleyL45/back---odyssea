@@ -130,7 +130,6 @@ public class UserItineraryService {
         UserItinerary savedItinerary = userItineraryDao.save(userItinerary);
 
         if (userItineraryDTO.getOptions() != null && !userItineraryDTO.getOptions().isEmpty()) {
-            System.out.println("Options size is : " + userItineraryDTO.getOptions().size());
             for (Option option : userItineraryDTO.getOptions()) {
                 userItineraryOptionDao.save(savedItinerary.getId(), option.getId());
             }
