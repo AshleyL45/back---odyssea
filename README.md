@@ -267,4 +267,4 @@ Import et lancement du projet :
 
 - Importez le projet dans votre IDE;
 
-- Accédez à l'application sur : http://localhost:3306
+- Accédez à l'application sur : http://localhost:8080
