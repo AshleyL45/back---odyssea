@@ -1,6 +1,6 @@
 package com.example.odyssea.daos.itinerary;
 
-import com.example.odyssea.dtos.mainTables.ItineraryThemes;
+import com.example.odyssea.dtos.mainTables.ItinerarySummary;
 import com.example.odyssea.entities.itinerary.Itinerary;
 import com.example.odyssea.exceptions.ResourceNotFoundException;
 import com.example.odyssea.mapper.ItineraryThemesMapper;
@@ -9,6 +9,7 @@ import org.springframework.jdbc.core.RowMapper;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Repository
 public class ItineraryDao {
@@ -18,17 +19,17 @@ public class ItineraryDao {
     public ItineraryDao(JdbcTemplate jdbcTemplate) {
         this.jdbcTemplate = jdbcTemplate;
     }
-    
-    
+
+
     public final RowMapper<Itinerary> itineraryRowMapper =(rs, _) -> new Itinerary(
             rs.getInt("id"),
             rs.getString("name"),
             rs.getString("description"),
-            rs.getString("shortDescription"),
+            rs.getString("short_description"),
             rs.getInt("stock"),
             rs.getBigDecimal("price"),
-            rs.getInt("totalDuration"),
-            rs.getInt("themeId")
+            rs.getInt("total_duration"),
+            rs.getInt("theme_id")
     );
 
 
@@ -37,19 +38,19 @@ public class ItineraryDao {
         return jdbcTemplate.query(sql, itineraryRowMapper);
     }
 
-    public List<ItineraryThemes> findAllItinerariesWithTheme(){
+    public List<ItinerarySummary> findAllItinerariesSummaries(){
         String sql = "SELECT \n" +
                 "    itinerary.*, \n" +
-                "    theme.name AS themeName,\n" +
-                "    GROUP_CONCAT(DISTINCT country.name ORDER BY country.name ASC SEPARATOR ', ') AS countriesVisited\n" +
+                "    theme.name AS theme_name,\n" +
+                "    GROUP_CONCAT(DISTINCT country.name ORDER BY country.name ASC SEPARATOR ', ') AS countries_visited\n" +
                 "FROM \n" +
-                "    dailyItinerary\n" +
+                "    daily_itinerary\n" +
                 "INNER JOIN \n" +
-                "    country ON country.id = dailyItinerary.countryId\n" +
+                "    country ON country.id = daily_itinerary.country_id\n" +
                 "INNER JOIN \n" +
-                "    itinerary ON dailyItinerary.itineraryId = itinerary.id\n" +
+                "    itinerary ON daily_itinerary.itinerary_id = itinerary.id\n" +
                 "INNER JOIN \n" +
-                "    theme ON itinerary.themeId = theme.id\n" +
+                "    theme ON itinerary.theme_id = theme.id\n" +
                 "GROUP BY \n" +
                 "    itinerary.id;";
         return jdbcTemplate.query(sql, new ItineraryThemesMapper());
@@ -69,70 +70,22 @@ public class ItineraryDao {
                 .orElseThrow(() -> new ResourceNotFoundException("Itinéraire avec l'Id : " + idItinerary + " n'existe pas"));
     }
 
-
-
-    public Itinerary findByName(String name) {
-        String sql = "SELECT * FROM itinerary WHERE name = ?";
-        return jdbcTemplate.query(sql, itineraryRowMapper, name)
-                .stream()
-                .findFirst()
-                .orElseThrow(() -> new ResourceNotFoundException("Itinéraire avec le nom : " + name + " n'existe pas"));
-    }
-
-
-
-    public Itinerary findByDuration(int totalDuration) {
-        String sql = "SELECT * FROM itinerary WHERE totalDuration = ?";
-        return jdbcTemplate.query(sql, itineraryRowMapper, totalDuration)
-                .stream()
-                .findFirst()
-                .orElseThrow(() -> new ResourceNotFoundException("Itinéraire avec une durée de : " + totalDuration + " n'existe pas"));
-    }
-
-
-
-
-    public Itinerary save(Itinerary itinerary) {
-        String sql = "INSERT INTO itinerary (name, description, shortDescription, stock, price, totalDuration, themeId) VALUES (?, ?, ?, ?, ?, ?,?)";
-        jdbcTemplate.update(sql, itinerary.getName(), itinerary.getDescription(), itinerary.getShortDescription(), itinerary.getStock(), itinerary.getPrice(), itinerary.getTotalDuration(), itinerary.getThemeId());
-
-        String sqlGetId = "SELECT LAST_INSERT_ID()";
-        int id = jdbcTemplate.queryForObject(sqlGetId, Integer.class);
-
-        itinerary.setId(id);
-        return itinerary;
-    }
-
-
-    public Itinerary update(int id, Itinerary itinerary) {
-        if (!itineraryExists(id)) {
-            throw new RuntimeException("Itinéraire avec l'ID : " + id + " n'existe pas");
+    public List<Itinerary> findValidItineraries(List<String> excludedCountries) {
+        if (excludedCountries == null || excludedCountries.isEmpty()) {
+            return findAll();
         }
-
-        String sql = "UPDATE itinerary SET name = ?, description = ?, shortDescription = ?, stock = ?, price = ?, totalDuration = ?, themeId = ? WHERE id = ?";
-        int rowsAffected = jdbcTemplate.update(sql, itinerary.getName(), itinerary.getDescription(), itinerary.getShortDescription(), itinerary.getStock(), itinerary.getPrice(), itinerary.getTotalDuration(), itinerary.getThemeId(), id);
-
-        if (rowsAffected <= 0) {
-            throw new ResourceNotFoundException("Cannot update itinerary with ID : " + id);
-        }
-
-        return this.findById(id);
-    }
-
-
-
-    private boolean itineraryExists(int id) {
-        String checkSql = "SELECT COUNT(*) FROM itinerary WHERE id = ?";
-        int count = jdbcTemplate.queryForObject(checkSql, Integer.class, id);
-        return count > 0;
-    }
-
-
-
-    public boolean delete(int id) {
-        String sql = "DELETE FROM itinerary WHERE id = ?";
-        int rowsAffected = jdbcTemplate.update(sql, id);
-        return rowsAffected > 0;
+        String inClause = excludedCountries.stream()
+                .map(c -> "'" + c.replace("'", "''") + "'")
+                .collect(Collectors.joining(", "));
+        String sql = ""
+                + "SELECT * FROM itinerary "
+                + "WHERE id NOT IN ( "
+                + "  SELECT DISTINCT dt.itinerary_id "
+                + "  FROM daily_itinerary dt "
+                + "  JOIN country c ON dt.country_id = c.id "
+                + "  WHERE c.name IN (" + inClause + ")"
+                + ")";
+        return jdbcTemplate.query(sql, itineraryRowMapper);
     }
 
 }

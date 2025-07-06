@@ -1,10 +1,12 @@
 package com.example.odyssea.entities.userItinerary;
 
+import com.example.odyssea.enums.BookingStatus;
 import org.springframework.data.annotation.Id;
 import jakarta.validation.constraints.*;
 
 import java.math.BigDecimal;
 import java.sql.Date;
+import java.time.LocalDate;
 
 
 public class UserItinerary {
@@ -16,10 +18,10 @@ public class UserItinerary {
     private int userId;
 
     @NotNull(message = "Start date cannot be null.")
-    private Date startDate;
+    private LocalDate startDate;
 
     @NotNull(message = "End date cannot be null.")
-    private Date endDate;
+    private LocalDate endDate;
 
     @NotNull(message = "Starting price is required.")
     @DecimalMin(value = "0.0", inclusive = true, message = "Starting price must be greater than or equal to 0")
@@ -43,16 +45,13 @@ public class UserItinerary {
     @PositiveOrZero(message = "Number of kids must be zero or positive.")
     private int numberOfKids;
 
-    @PositiveOrZero(message = "Flight ID cannot be negative.")
-    private int flightId;
-
-    @PositiveOrZero(message = "Option ID cannot be negative.")
-    private int optionId;
+    private LocalDate bookingDate;
+    private BookingStatus status;
 
     public UserItinerary() {
     }
 
-    public UserItinerary(int id, int userId, Date startDate, Date endDate, BigDecimal startingPrice, int totalDuration, String departureCity, String itineraryName, int numberOfAdults, int numberOfKids) {
+    public UserItinerary(int id, int userId, LocalDate startDate, LocalDate endDate, BigDecimal startingPrice, int totalDuration, String departureCity, String itineraryName, int numberOfAdults, int numberOfKids, LocalDate bookingDate, BookingStatus status) {
         this.id = id;
         this.userId = userId;
         this.startDate = startDate;
@@ -63,7 +62,10 @@ public class UserItinerary {
         this.itineraryName = itineraryName;
         this.numberOfAdults = numberOfAdults;
         this.numberOfKids = numberOfKids;
+        this.bookingDate = bookingDate;
+        this.status = status;
     }
+
 
     public int getId() {
         return id;
@@ -77,16 +79,16 @@ public class UserItinerary {
     public void setUserId(int userId) {
         this.userId = userId;
     }
-    public Date getStartDate() {
+    public LocalDate getStartDate() {
         return startDate;
     }
-    public void setStartDate(Date startDate) {
+    public void setStartDate(LocalDate startDate) {
         this.startDate = startDate;
     }
-    public Date getEndDate() {
+    public LocalDate getEndDate() {
         return endDate;
     }
-    public void setEndDate(Date endDate) {
+    public void setEndDate(LocalDate endDate) {
         this.endDate = endDate;
     }
     public BigDecimal getStartingPrice() {
@@ -124,5 +126,21 @@ public class UserItinerary {
     }
     public void setNumberOfKids(int numberOfKids) {
         this.numberOfKids = numberOfKids;
+    }
+
+    public LocalDate getBookingDate() {
+        return bookingDate;
+    }
+
+    public void setBookingDate(LocalDate bookingDate) {
+        this.bookingDate = bookingDate;
+    }
+
+    public BookingStatus getStatus() {
+        return status;
+    }
+
+    public void setStatus(BookingStatus status) {
+        this.status = status;
     }
 }

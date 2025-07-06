@@ -18,6 +18,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
+
 @Service
 public class PlaneRideService {
     private static final Logger logger = LoggerFactory.getLogger(PlaneRideService.class);
@@ -27,6 +28,7 @@ public class PlaneRideService {
     private final TokenService tokenService;
     private final WebClient webClient;
     private final FlightSegmentService flightSegmentService;
+
 
     public PlaneRideService(PlaneRideDao planeRideDao,
                             FlightSegmentRideDao flightSegmentRideDao,
@@ -43,11 +45,12 @@ public class PlaneRideService {
     public Mono<List<FlightItineraryDTO>> getFlights(String departureIata, String arrivalIata,
                                                      LocalDate departureDate, LocalDate arrivalDate,
                                                      int totalPeople) {
+
         return tokenService.getValidToken()
                 .flatMap(token -> fetchFlightOffers(departureIata, arrivalIata, departureDate, arrivalDate, totalPeople, token))
                 .flatMap(this::processFlightData)
                 .onErrorResume(e -> {
-                    logger.error("Error fetching flights: {}", e.getMessage());
+                    logger.error("Erreur lors de getFlights : {}", e.getMessage());
                     return Mono.just(Collections.emptyList());
                 });
     }
@@ -70,30 +73,34 @@ public class PlaneRideService {
                 .bodyToMono(FlightDataDTO.class);
     }
 
+
     private Mono<List<FlightItineraryDTO>> processFlightData(FlightDataDTO flightDataDTO) {
+
         if (flightDataDTO == null || flightDataDTO.getData() == null || flightDataDTO.getData().isEmpty()) {
+            logger.warn("Données Amadeus vides");
+
             return Mono.just(Collections.emptyList());
         }
 
         FlightOffersDTO offer = flightDataDTO.getData().get(0);
         if (offer.getItineraries() == null || offer.getItineraries().isEmpty()) {
+            logger.warn("Pas d’itinéraires trouvés");
             return Mono.just(Collections.emptyList());
         }
 
         FlightItineraryDTO itinerary = offer.getItineraries().get(0);
         DictionnaryDTO dict = flightDataDTO.getDictionnary();
 
-        // Process segments
+
         List<Integer> savedSegmentIds = processSegments(itinerary, dict);
 
-        // Create and save plane ride
+
         BigDecimal totalPrice = getTotalPrice(offer);
         PlaneRide savedPlaneRide = createAndSavePlaneRide(offer, totalPrice);
 
-        // Link segments to plane ride
         linkSegmentsToPlaneRide(savedSegmentIds, savedPlaneRide);
 
-        // Build complete response DTO
+
         FlightItineraryDTO responseDto = buildResponseDto(itinerary, totalPrice, offer, savedPlaneRide);
 
         return Mono.just(Collections.singletonList(responseDto));
@@ -132,16 +139,14 @@ public class PlaneRideService {
         planeRideDTO.setTotalPrice(totalPrice);
 
         PlaneRide planeRideEntity = new PlaneRide(
-                0,  // ID sera généré automatiquement
+                0,
                 true,
                 planeRideDTO.getTotalPrice(),
                 planeRideDTO.getCurrency(),
                 null
         );
 
-        PlaneRide saved = planeRideDao.save(planeRideEntity);
-        logger.info("Saved PlaneRide with ID: {}", saved.getId());
-        return saved;
+        return planeRideDao.save(planeRideEntity);
     }
 
     private void linkSegmentsToPlaneRide(List<Integer> segmentIds, PlaneRide planeRide) {
@@ -156,17 +161,15 @@ public class PlaneRideService {
                                                 FlightOffersDTO offer,
                                                 PlaneRide planeRide) {
         FlightItineraryDTO responseDto = new FlightItineraryDTO();
-        responseDto.setId(planeRide.getId()); // Set the ID from saved entity
+        responseDto.setId(planeRide.getId());
         responseDto.setSegments(itinerary.getSegments());
-        //responseDto.setPrice(totalPrice);
-        //responseDto.setCurrency(offer.getPrice() != null ? offer.getPrice().getCurrency() : "EUR");
         responseDto.setDuration(itinerary.getDuration());
         return responseDto;
     }
 
     private PlaneRideDTO createFlightDTO(FlightOffersDTO flightOffer) {
         if (flightOffer == null || flightOffer.getPrice() == null) {
-            return new PlaneRideDTO(); // Return empty DTO instead of null
+            return new PlaneRideDTO();
         }
 
         PlaneRideDTO dto = new PlaneRideDTO();

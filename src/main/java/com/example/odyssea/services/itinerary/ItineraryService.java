@@ -5,8 +5,8 @@ import com.example.odyssea.daos.itinerary.ItineraryStepDao;
 import com.example.odyssea.daos.mainTables.ThemeDao;
 import com.example.odyssea.dtos.mainTables.DailyPlanDto;
 import com.example.odyssea.dtos.mainTables.DailyPlanWithCityDto;
-import com.example.odyssea.dtos.mainTables.ItineraryResponseDTO;
-import com.example.odyssea.dtos.mainTables.ItineraryThemes;
+import com.example.odyssea.dtos.mainTables.ItineraryDetails;
+import com.example.odyssea.dtos.mainTables.ItinerarySummary;
 import com.example.odyssea.entities.itinerary.Itinerary;
 import org.springframework.stereotype.Service;
 
@@ -16,17 +16,15 @@ import java.util.List;
 public class ItineraryService {
 
     private final ItineraryDao itineraryDao;
+    private final ItineraryStepService itineraryStepService;
     private final ItineraryStepDao itineraryStepDao;
     private final ThemeDao themeDao;
 
-    public ItineraryService(ItineraryDao itineraryDao, ItineraryStepDao itineraryStepDao, ThemeDao themeDao) {
+    public ItineraryService(ItineraryDao itineraryDao, ItineraryStepService itineraryStepService, ItineraryStepDao itineraryStepDao, ThemeDao themeDao) {
         this.itineraryDao = itineraryDao;
+        this.itineraryStepService = itineraryStepService;
         this.itineraryStepDao = itineraryStepDao;
         this.themeDao = themeDao;
-    }
-
-    public List<DailyPlanWithCityDto> getDailyPlanWithCity(int itineraryId) {
-        return itineraryStepDao.findByItineraryIdWithCity(itineraryId);
     }
 
 
@@ -34,22 +32,18 @@ public class ItineraryService {
         return itineraryDao.findAll();
     }
 
-    public List<ItineraryThemes> getAllItinerariesWithThemes(){
-        return itineraryDao.findAllItinerariesWithTheme();
-    }
-
-    public Itinerary getItineraryById(int id) {
-        return itineraryDao.findById(id);
+    public List<ItinerarySummary> getAllItinerariesSummaries(){
+        return itineraryDao.findAllItinerariesSummaries();
     }
 
     public List<Itinerary> searchItineraries(String query){
         return itineraryDao.searchItinerary(query);
     }
 
-    public ItineraryResponseDTO getItineraryDetails(int id){
+    public ItineraryDetails getItineraryDetails(int id){
         Itinerary itinerary = itineraryDao.findById(id);
-        List<DailyPlanDto> daysDetails = itineraryStepDao.findByItineraryId(itinerary.getId());
-        return new ItineraryResponseDTO(
+        List<DailyPlanWithCityDto> daysDetails = getDailyPlanWithCity(itinerary.getId());
+        return new ItineraryDetails(
                 itinerary.getId(),
                 itinerary.getName(),
                 itinerary.getDescription(),
@@ -62,15 +56,12 @@ public class ItineraryService {
         );
     }
 
-    public Itinerary createItinerary(Itinerary itinerary) {
-        return itineraryDao.save(itinerary);
+    private List<DailyPlanWithCityDto> getDailyPlanWithCity(int itineraryId) {
+        return itineraryStepDao.findByItineraryIdWithCity(itineraryId);
     }
 
-    public Itinerary updateItinerary(int id, Itinerary itinerary) {
-        return itineraryDao.update(id, itinerary);
+    public List<Itinerary> findValidItineraries(List<String> excludedCountries) {
+        return itineraryDao.findValidItineraries(excludedCountries);
     }
 
-    public boolean deleteItinerary(int id) {
-        return itineraryDao.delete(id);
-    }
 }

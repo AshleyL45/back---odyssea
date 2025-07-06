@@ -1,6 +1,7 @@
 package com.example.odyssea.daos.userAuth;
 
 import com.example.odyssea.entities.userAuth.User;
+import com.example.odyssea.exceptions.DatabaseException;
 import com.example.odyssea.exceptions.UserNotFoundException;
 import com.example.odyssea.exceptions.UsernameNotFoundException;
 import org.springframework.jdbc.core.JdbcTemplate;
@@ -24,8 +25,8 @@ public class UserDao {
             rs.getString("email"),
             rs.getString("password"),
             rs.getString("role"),
-            rs.getString("firstName"),
-            rs.getString("lastName")
+            rs.getString("first_name"),
+            rs.getString("last_name")
     );
 
     public List<User> findAll(){
@@ -49,33 +50,33 @@ public class UserDao {
                 .orElseThrow(() -> new UserNotFoundException("User with id : " + id + " doesn't exist."));
     }
 
-    public boolean save(User user) {
-        String sql = "INSERT INTO user (email, password, role, firstName, lastName) VALUES (?, ?, ?, ?, ?)";
+    public void save(User user) {
+        String sql = "INSERT INTO user (email, password, role, first_name, last_name) VALUES (?, ?, ?, ?, ?)";
         int rowsAffected = jdbcTemplate.update(sql, user.getEmail(), user.getPassword(), user.getRole(), user.getFirstName(), user.getLastName());
-        return rowsAffected > 0;
+        if(rowsAffected <= 0){
+            throw new DatabaseException("Could not save user.");
+        }
     }
 
-    public User update(int id, User user) {
+    public void update(int id, String email, String firstname, String lastname) {
         if (!userExistsById(id)) {
             throw new UserNotFoundException("User with id : " + id + " doesn't exist.");
         }
 
         User existingUser = this.findById(id);
 
-        String sql = "UPDATE user SET email = ?, firstName = ?, lastName = ? WHERE id = ?";
+        String sql = "UPDATE user SET email = ?, first_name = ?, last_name = ? WHERE id = ?";
         int rowsAffected = jdbcTemplate.update(
                 sql,
-                user.getEmail() != null ? user.getEmail() : existingUser.getEmail(),
-                user.getFirstName() != null ? user.getFirstName() : existingUser.getFirstName(),
-                user.getLastName() != null ? user.getLastName() : existingUser.getLastName(),
+                email != null ? email : existingUser.getEmail(),
+                firstname != null ? firstname : existingUser.getFirstName(),
+                lastname != null ? lastname : existingUser.getLastName(),
                 id
         );
 
         if (rowsAffected <= 0) {
-            throw new RuntimeException("Failed to update user with id : " + id);
+            throw new DatabaseException("Failed to update user with id : " + id);
         }
-
-        return this.findById(id);
     }
 
     public void updatePassword(int id, String newPassword) {
@@ -90,15 +91,17 @@ public class UserDao {
         int rowsAffected = jdbcTemplate.update(sql, hashedPassword, id);
 
         if (rowsAffected <= 0) {
-            throw new RuntimeException("Failed to update password for user with id : " + id);
+            throw new DatabaseException("Failed to update password for user with id : " + id);
         }
     }
 
 
-    public boolean delete(int id) {
+    public void delete(int id) {
         String sql = "DELETE FROM user WHERE id = ?";
         int rowsAffected = jdbcTemplate.update(sql, id);
-        return rowsAffected > 0;
+        if (rowsAffected <= 0) {
+            throw new DatabaseException("Failed to delete account for user with id : " + id);
+        }
     }
 
 

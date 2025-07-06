@@ -24,6 +24,7 @@ public class HotelDto {
     }
 
     public static HotelDto fromEntity(Hotel hotel) {
+        if (hotel == null) return null;
         return new HotelDto(
                 hotel.getId(),
                 hotel.getCityId(),
@@ -33,7 +34,6 @@ public class HotelDto {
                 hotel.getPrice()
         );
     }
-
 
     public Hotel toEntity() {
         return new Hotel(
@@ -46,8 +46,6 @@ public class HotelDto {
         );
     }
 
-  
-    // Getters & Setters
     public Integer getId() {
         return id;
     }

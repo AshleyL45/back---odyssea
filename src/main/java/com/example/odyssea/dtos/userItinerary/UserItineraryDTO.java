@@ -1,6 +1,7 @@
 package com.example.odyssea.dtos.userItinerary;
 
 import com.example.odyssea.entities.mainTables.Option;
+import com.example.odyssea.enums.BookingStatus;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
@@ -19,8 +20,15 @@ public class UserItineraryDTO {
     private int numberOfKids;
     private List<UserItineraryDayDTO> itineraryDays;
     private List<Option> options;
+    private LocalDate bookingDate;
+    private BookingStatus status;
 
-    public UserItineraryDTO(int id, int userId, LocalDate startDate, LocalDate endDate, int totalDuration, String departureCity, BigDecimal startingPrice, String itineraryName, int numberOfAdults, int numberOfKids, List<UserItineraryDayDTO> itineraryDays, List<Option> options) {
+
+
+    public UserItineraryDTO() {
+    }
+
+    public UserItineraryDTO(int id, int userId, LocalDate startDate, LocalDate endDate, int totalDuration, String departureCity, BigDecimal startingPrice, String itineraryName, int numberOfAdults, int numberOfKids, List<UserItineraryDayDTO> itineraryDays, List<Option> options, LocalDate bookingDate, BookingStatus status) {
         this.id = id;
         this.userId = userId;
         this.startDate = startDate;
@@ -33,9 +41,8 @@ public class UserItineraryDTO {
         this.numberOfKids = numberOfKids;
         this.itineraryDays = itineraryDays;
         this.options = options;
-    }
-
-    public UserItineraryDTO() {
+        this.bookingDate = bookingDate;
+        this.status = status;
     }
 
     public int getId() {
@@ -132,5 +139,21 @@ public class UserItineraryDTO {
 
     public void setOptions(List<Option> options) {
         this.options = options;
+    }
+
+    public LocalDate getBookingDate() {
+        return bookingDate;
+    }
+
+    public void setBookingDate(LocalDate bookingDate) {
+        this.bookingDate = bookingDate;
+    }
+
+    public BookingStatus getStatus() {
+        return status;
+    }
+
+    public void setStatus(BookingStatus status) {
+        this.status = status;
     }
 }

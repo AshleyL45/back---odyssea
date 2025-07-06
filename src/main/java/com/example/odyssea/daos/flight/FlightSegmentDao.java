@@ -27,14 +27,14 @@ public class FlightSegmentDao {
     private final RowMapper<FlightSegment> flightSegmentRowMapper = (rs, rowNum) -> {
         FlightSegment segment = new FlightSegment();
         segment.setId(rs.getInt("id"));
-        segment.setDepartureAirportIata(rs.getString("departureAirportIata"));
-        segment.setArrivalAirportIata(rs.getString("arrivalAirportIata"));
-        segment.setDepartureDateTime(rs.getTimestamp("departureDateTime").toLocalDateTime());
-        segment.setArrivalDateTime(rs.getTimestamp("arrivalDateTime").toLocalDateTime());
-        segment.setCarrierCode(rs.getString("carrierCode"));
-        segment.setCarrierName(rs.getString("carrierName"));
-        segment.setAircraftCode(rs.getString("aircraftCode"));
-        segment.setAircraftName(rs.getString("aircraftName"));
+        segment.setDepartureAirportIata(rs.getString("departure_airport_iata"));
+        segment.setArrivalAirportIata(rs.getString("arrival_airport_iata"));
+        segment.setDepartureDateTime(rs.getTimestamp("departure_date_time").toLocalDateTime());
+        segment.setArrivalDateTime(rs.getTimestamp("arrival_date_time").toLocalDateTime());
+        segment.setCarrierCode(rs.getString("carrier_code"));
+        segment.setCarrierName(rs.getString("carrier_name"));
+        segment.setAircraftCode(rs.getString("aircraft_code"));
+        segment.setAircraftName(rs.getString("aircraft_name"));
         Time time = rs.getTime("duration");
         LocalTime localTime = time.toLocalTime();
         segment.setDuration(Duration.ofHours(localTime.getHour())
@@ -44,17 +44,17 @@ public class FlightSegmentDao {
     };
 
     public List<FlightSegment> findAll() {
-        String sql = "SELECT * FROM flightSegment";
+        String sql = "SELECT * FROM flight_segment";
         return jdbcTemplate.query(sql, flightSegmentRowMapper);
     }
 
     public FlightSegment findById(int id) {
-        String sql = "SELECT * FROM flightSegment WHERE id = ?";
+        String sql = "SELECT * FROM flight_segment WHERE id = ?";
         return jdbcTemplate.queryForObject(sql, flightSegmentRowMapper, id);
     }
 
     public FlightSegment save(FlightSegment segment) {
-        String sql = "INSERT INTO flightSegment (departureAirportIata, arrivalAirportIata, departureDateTime, arrivalDateTime, carrierCode, carrierName, aircraftCode, aircraftName, duration) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)";
+        String sql = "INSERT INTO flight_segment (departure_airport_iata, arrival_airport_iata, departure_date_time, arrival_date_time, carrier_code, carrier_name, aircraft_code, aircraft_name, duration) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)";
         KeyHolder keyHolder = new GeneratedKeyHolder();
         jdbcTemplate.update(connection -> {
             PreparedStatement ps = connection.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS);
@@ -77,7 +77,7 @@ public class FlightSegmentDao {
     }
 
     public FlightSegment update(int id, FlightSegment segment) {
-        String sql = "UPDATE flightSegment SET departureAirportIata = ?, arrivalAirportIata = ?, departureDateTime = ?, arrivalDateTime = ?, carrierCode = ?, carrierName = ?, aircraftCode = ?, aircraftName = ?, duration = ? WHERE id = ?";
+        String sql = "UPDATE flight_segment SET departure_airport_iata = ?, arrival_airport_iata = ?, departure_date_time = ?, arrival_date_time = ?, carrier_code = ?, carrier_name = ?, aircraft_code = ?, aircraft_name = ?, duration = ? WHERE id = ?";
         jdbcTemplate.update(sql,
                 segment.getDepartureAirportIata(),
                 segment.getArrivalAirportIata(),
@@ -94,7 +94,7 @@ public class FlightSegmentDao {
     }
 
     public boolean delete(int id) {
-        String sql = "DELETE FROM flightSegment WHERE id = ?";
+        String sql = "DELETE FROM flight_segment WHERE id = ?";
         int rowsAffected = jdbcTemplate.update(sql, id);
         return rowsAffected > 0;
     }

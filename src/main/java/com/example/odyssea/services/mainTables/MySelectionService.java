@@ -3,6 +3,9 @@ package com.example.odyssea.services.mainTables;
 import com.example.odyssea.daos.mainTables.MySelectionDao;
 import com.example.odyssea.entities.MySelection;
 import com.example.odyssea.entities.itinerary.Itinerary;
+import com.example.odyssea.exceptions.SelectionNotFoundException;
+import com.example.odyssea.services.CurrentUserService;
+import org.springframework.expression.spel.ast.Selection;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -12,63 +15,39 @@ import java.util.stream.Collectors;
 public class MySelectionService {
 
     private final MySelectionDao mySelectionDao;
+    private final CurrentUserService currentUserService;
 
-    public MySelectionService(MySelectionDao mySelectionDao) {
+    public MySelectionService(MySelectionDao mySelectionDao, CurrentUserService currentUserService) {
         this.mySelectionDao = mySelectionDao;
+        this.currentUserService = currentUserService;
     }
 
-    // Retourne toutes les sélections
-    public List<MySelection> getAllSelections() {
-        return mySelectionDao.findAll();
-    }
-
-    // Retourne les sélections pour un utilisateur donné
-    public List<MySelection> getSelectionsByUserId(int userId) {
-        return mySelectionDao.findAll().stream()
-                .filter(selection -> selection.getUserId() == userId)
-                .collect(Collectors.toList());
+    private Integer getUserId() {
+        return currentUserService.getCurrentUserId();
     }
 
     // Retourne les sélections d'un utilisateur sous forme de liste d'itinéraires
-    public List<Itinerary> getUserFavorites(int userId){
+    public List<Itinerary> getUserFavorites(){
+        Integer userId = getUserId();
         return mySelectionDao.findAllUserFavorites(userId);
     }
 
-    // Retourne les sélections pour un itinéraire donné
-    public List<MySelection> getSelectionsByItineraryId(int itineraryId) {
-        return mySelectionDao.findAll().stream()
-                .filter(selection -> selection.getItineraryId() == itineraryId)
-                .collect(Collectors.toList());
-    }
-
-    // Retourne la sélection correspondant à un utilisateur et un itinéraire donnés
-    public MySelection getSelection(int userId, int itineraryId) {
-        return mySelectionDao.findAll().stream()
-                .filter(selection -> selection.getUserId() == userId && selection.getItineraryId() == itineraryId)
-                .findFirst()
-                .orElseThrow(() -> new RuntimeException("Selection with userId: " + userId + " and itineraryId: " + itineraryId + " does not exist"));
-    }
-
     // Crée une nouvelle sélection
-    public MySelection createSelection(MySelection selection) {
-        return mySelectionDao.save(selection);
+    public void addToSelection(Integer itineraryId) {
+        Integer userId = getUserId();
+        MySelection selection = new MySelection(userId, itineraryId);
+        mySelectionDao.save(selection);
     }
 
     // Met à jour une sélection pour un utilisateur donné
-    public MySelection updateSelection(int userId, int itineraryId, MySelection selection) {
+    public MySelection updateSelection(int itineraryId, MySelection selection) {
+        Integer userId = getUserId();
         return mySelectionDao.update(userId, itineraryId, selection);
     }
 
     // Supprime une sélection correspondant à un utilisateur et un itinéraire donnés
-    public boolean deleteSelection(int userId, int itineraryId) {
-        List<MySelection> selections = mySelectionDao.findAll();
-        boolean deleted = false;
-        for (MySelection s : selections) {
-            if (s.getUserId() == userId && s.getItineraryId() == itineraryId) {
-                deleted = mySelectionDao.delete(userId, itineraryId);
-                break;
-            }
-        }
-        return deleted;
+    public void deleteFromSelection(int itineraryId) {
+        Integer userId = getUserId();
+        mySelectionDao.delete(userId, itineraryId);
     }
 }

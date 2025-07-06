@@ -50,7 +50,6 @@ public class Activity {
         this.price = price;
     }
 
-    // Getters & Setters
     public int getId() {
         return id;
     }

@@ -29,7 +29,7 @@ public class CountryService {
      * Récupère un pays spécifique par son identifiant
      */
     public Country getCountry(int id) {
-        return countryDao.findById(id).orElse(null);
+        return countryDao.findById(id);
     }
 
     /**
@@ -42,26 +42,18 @@ public class CountryService {
     /**
      * Met à jour les informations d'un pays existant
      */
-    public boolean updateCountry(int id, Country country) {
-        Optional<Country> existing = countryDao.findById(id);
-        if (existing.isEmpty()) {
-            return false;
-        }
+    public void updateCountry(int id, Country country) {
+        countryDao.findById(id); // throws if not found
         country.setId(id);
         countryDao.update(country);
-        return true;
     }
 
     /**
      * Supprime un pays de la base de données
      */
-    public boolean deleteCountry(int id) {
-        Optional<Country> existing = countryDao.findById(id);
-        if (existing.isEmpty()) {
-            return false;
-        }
+    public void deleteCountry(int id) {
+        countryDao.findById(id); // throws if not found
         countryDao.deleteById(id);
-        return true;
     }
 
     /**
@@ -75,6 +67,6 @@ public class CountryService {
      * Récupère le pays associé au nom d'une ville spécifique
      */
     public Country getCountryByCityName(String cityName) {
-        return countryDao.findByCityName(cityName).orElse(null);
+        return countryDao.findByCityName(cityName);
     }
 }

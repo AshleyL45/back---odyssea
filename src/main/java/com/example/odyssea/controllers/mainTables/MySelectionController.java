@@ -1,8 +1,12 @@
 package com.example.odyssea.controllers.mainTables;
 
+import com.example.odyssea.dtos.ApiResponse;
 import com.example.odyssea.entities.MySelection;
 import com.example.odyssea.entities.itinerary.Itinerary;
 import com.example.odyssea.services.mainTables.MySelectionService;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -10,6 +14,10 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/mySelection")
+@Tag(
+        name = "My selection",
+        description = "Handles all operations related to user selection of itineraries (favorites)."
+)
 public class MySelectionController {
 
     private final MySelectionService mySelectionService;
@@ -18,56 +26,54 @@ public class MySelectionController {
         this.mySelectionService = mySelectionService;
     }
 
-    // Récupère toutes les sélections
-    @GetMapping
-    public ResponseEntity<List<MySelection>> getAllSelections() {
-        return ResponseEntity.ok(mySelectionService.getAllSelections());
+    @Operation(
+            summary = "Get all selected itineraries by user",
+            description = "Returns the list of itineraries the user has marked as favorite."
+    )
+    @GetMapping("/")
+    public ResponseEntity<ApiResponse<List<Itinerary>>> getAllUserFavorites() {
+        List<Itinerary> favorites = mySelectionService.getUserFavorites();
+        return ResponseEntity.ok(
+                ApiResponse.success("Favorites retrieved successfully.", favorites, HttpStatus.OK)
+        );
     }
 
-    // Récupère les sélections d'un utilisateur sous forme d'itinéraires
-    @GetMapping("/{userId}")
-    public ResponseEntity<List<Itinerary>> getAllUserFavorites(@PathVariable int userId){
-        return ResponseEntity.ok(mySelectionService.getUserFavorites(userId));
+    @Operation(
+            summary = "Add an itinerary to user selection",
+            description = "Adds an itinerary to the current user's selection using the itinerary ID."
+    )
+    @PostMapping("/add/{itineraryId}")
+    public ResponseEntity<ApiResponse<Void>> createSelection(@PathVariable int itineraryId) {
+        mySelectionService.addToSelection(itineraryId);
+        return ResponseEntity.ok(
+                ApiResponse.success("Itinerary added to selection.", HttpStatus.OK)
+        );
     }
 
-    // Récupère les sélections d'un utilisateur donné
-    @GetMapping("/user/{userId}")
-    public ResponseEntity<List<MySelection>> getSelectionsByUser(@PathVariable int userId) {
-        return ResponseEntity.ok(mySelectionService.getSelectionsByUserId(userId));
+    @Operation(
+            summary = "Update a selection",
+            description = "Updates a selection entry for a specific itinerary."
+    )
+    @PutMapping("/{itineraryId}")
+    public ResponseEntity<ApiResponse<MySelection>> updateSelection(
+            @PathVariable int itineraryId,
+            @RequestBody MySelection selection
+    ) {
+        MySelection updated = mySelectionService.updateSelection(itineraryId, selection);
+        return ResponseEntity.ok(
+                ApiResponse.success("Selection updated successfully.", updated, HttpStatus.OK)
+        );
     }
 
-    // Récupère les sélections pour un itinéraire donné
-    @GetMapping("/itinerary/{itineraryId}")
-    public ResponseEntity<List<MySelection>> getSelectionsByItinerary(@PathVariable int itineraryId) {
-        return ResponseEntity.ok(mySelectionService.getSelectionsByItineraryId(itineraryId));
-    }
-
-    // Récupère la sélection correspondant à un utilisateur et un itinéraire donnés
-    @GetMapping("/user/{userId}/itinerary/{itineraryId}")
-    public ResponseEntity<MySelection> getSelection(@PathVariable int userId, @PathVariable int itineraryId) {
-        return ResponseEntity.ok(mySelectionService.getSelection(userId, itineraryId));
-    }
-
-    // Crée une nouvelle sélection
-    @PostMapping("/add")
-    public ResponseEntity<MySelection> createSelection(@RequestBody MySelection selection) {
-        return ResponseEntity.ok(mySelectionService.createSelection(selection));
-    }
-
-    // Met à jour une sélection pour un utilisateur donné
-    @PutMapping("/user/{userId}/itinerary/{itineraryId}")
-    public ResponseEntity<MySelection> updateSelection(@PathVariable int userId, @PathVariable int itineraryId, @RequestBody MySelection selection) {
-        return ResponseEntity.ok(mySelectionService.updateSelection(userId, itineraryId, selection));
-    }
-
-    // Supprime une sélection correspondant à un utilisateur et un itinéraire donnés
-    @DeleteMapping("/{userId}/remove/{itineraryId}")
-    public ResponseEntity<String> deleteSelection(@PathVariable int userId, @PathVariable int itineraryId) {
-        boolean isDeleted = mySelectionService.deleteSelection(userId, itineraryId);
-       if(isDeleted){
-           return ResponseEntity.ok("Selection successfully deleted.");
-       } else {
-           return ResponseEntity.badRequest().body("Cannot delete reservation of user id " + userId + " with itinerary id " + itineraryId);
-       }
+    @Operation(
+            summary = "Remove an itinerary from user selection",
+            description = "Removes a specific itinerary from the user's selection."
+    )
+    @DeleteMapping("/remove/{itineraryId}")
+    public ResponseEntity<ApiResponse<Void>> deleteSelection(@PathVariable int itineraryId) {
+        mySelectionService.deleteFromSelection(itineraryId);
+        return ResponseEntity.ok(
+                ApiResponse.success("Itinerary removed from selection.", HttpStatus.OK)
+        );
     }
 }

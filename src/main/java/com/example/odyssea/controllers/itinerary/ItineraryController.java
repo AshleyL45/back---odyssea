@@ -1,18 +1,24 @@
 package com.example.odyssea.controllers.itinerary;
 
-import com.example.odyssea.dtos.mainTables.DailyPlanWithCityDto;
-import com.example.odyssea.dtos.mainTables.ItineraryResponseDTO;
-import com.example.odyssea.dtos.mainTables.ItineraryThemes;
+import com.example.odyssea.dtos.ApiResponse;
+import com.example.odyssea.dtos.mainTables.ItineraryDetails;
+import com.example.odyssea.dtos.mainTables.ItinerarySummary;
 import com.example.odyssea.entities.itinerary.Itinerary;
 import com.example.odyssea.services.itinerary.ItineraryService;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.Collections;
 import java.util.List;
+import java.util.Optional;
 
 @RestController
 @RequestMapping("/api/itineraries")
+@Tag(name = "Itineraries", description = "Endpoints for managing standard travel itineraries")
 public class ItineraryController {
 
     private final ItineraryService itineraryService;
@@ -20,57 +26,53 @@ public class ItineraryController {
     public ItineraryController(ItineraryService itineraryService) {
         this.itineraryService = itineraryService;
     }
-
+    @Operation(summary = "Get all itineraries", description = "Retrieve all itineraries with full entity structure")
     @GetMapping
-    public ResponseEntity<List<Itinerary>> getAllItineraries() {
+    public ResponseEntity<ApiResponse<List<Itinerary>>> getAllItineraries() {
         List<Itinerary> itineraries = itineraryService.getAllItineraries();
-        return new ResponseEntity<>(itineraries, HttpStatus.OK);
+        return ResponseEntity.ok(ApiResponse.success("All itineraries retrieved successfully", itineraries, HttpStatus.OK));
     }
 
+    @Operation(summary = "Get all itinerary summaries", description = "Retrieve all itineraries with their theme")
     @GetMapping("/themes")
-    public ResponseEntity<List<ItineraryThemes>> getAllItinerariesWithThemes() {
-        List<ItineraryThemes> itineraries = itineraryService.getAllItinerariesWithThemes();
-        return new ResponseEntity<>(itineraries, HttpStatus.OK);
+    public ResponseEntity<ApiResponse<List<ItinerarySummary>>> getAllItinerariesSummaries() {
+        List<ItinerarySummary> summaries = itineraryService.getAllItinerariesSummaries();
+        return ResponseEntity.ok(ApiResponse.success("Itinerary summaries retrieved successfully", summaries, HttpStatus.OK));
     }
 
+    @Operation(summary = "Get itinerary details", description = "Retrieve full details for a given itinerary ID")
     @GetMapping("/{id}")
-    public ResponseEntity<Itinerary> getItineraryById(@PathVariable int id) {
-        Itinerary itinerary = itineraryService.getItineraryById(id);
-        return new ResponseEntity<>(itinerary, HttpStatus.OK);
+    public ResponseEntity<ApiResponse<ItineraryDetails>> getItineraryDetails(
+            @Parameter(description = "Itinerary ID") @PathVariable int id) {
+        ItineraryDetails details = itineraryService.getItineraryDetails(id);
+        return ResponseEntity.ok(ApiResponse.success("Itinerary details retrieved successfully", details, HttpStatus.OK));
     }
 
-    @GetMapping("/{id}/details")
-    public ResponseEntity<ItineraryResponseDTO> getItineraryDetails(@PathVariable int id) {
-        return ResponseEntity.ok(itineraryService.getItineraryDetails(id));
-    }
-
+    @Operation(summary = "Search itineraries", description = "Search itineraries using a free-text query")
     @GetMapping("/search")
-    public ResponseEntity<List<Itinerary>> searchItineraries(@RequestParam String query){
-        return ResponseEntity.ok(itineraryService.searchItineraries(query));
+    public ResponseEntity<ApiResponse<List<Itinerary>>> searchItineraries(
+            @Parameter(description = "Free-text search query") @RequestParam String query) {
+        List<Itinerary> results = itineraryService.searchItineraries(query);
+        return ResponseEntity.ok(ApiResponse.success("Itineraries retrieved by search query", results, HttpStatus.OK));
     }
 
-    @PostMapping
-    public ResponseEntity<Itinerary> createItinerary(@RequestBody Itinerary itinerary) {
-        Itinerary created = itineraryService.createItinerary(itinerary);
-        return new ResponseEntity<>(created, HttpStatus.CREATED);
-    }
+    @Operation(
+            summary = "Get valid itineraries",
+            description = "Retrieve itineraries excluding the given countries"
+    )
+    @GetMapping("/valid")
+    public ResponseEntity<ApiResponse<List<Itinerary>>> getValidItineraries(
+            @RequestParam(required = false) String excludedCountries
+    ) {
+        List<String> excluded = Optional.ofNullable(excludedCountries)
+                .map(s -> List.of(s.split(",")))
+                .orElse(Collections.emptyList());
 
-    @PutMapping("/{id}")
-    public ResponseEntity<Itinerary> updateItinerary(@PathVariable int id, @RequestBody Itinerary itinerary) {
-        Itinerary updated = itineraryService.updateItinerary(id, itinerary);
-        return new ResponseEntity<>(updated, HttpStatus.OK);
-    }
-
-    @DeleteMapping("/{id}")
-    public ResponseEntity<Void> deleteItinerary(@PathVariable int id) {
-        boolean deleted = itineraryService.deleteItinerary(id);
-        return deleted ? new ResponseEntity<>(HttpStatus.NO_CONTENT)
-                : new ResponseEntity<>(HttpStatus.NOT_FOUND);
-    }
-
-    @GetMapping("/{id}/daily")
-    public ResponseEntity<List<DailyPlanWithCityDto>> getDailyPlanWithCity(@PathVariable int id) {
-        List<DailyPlanWithCityDto> dailyPlan = itineraryService.getDailyPlanWithCity(id);
-        return ResponseEntity.ok(dailyPlan);
+        List<Itinerary> results = itineraryService.findValidItineraries(excluded);
+        return ResponseEntity.ok(ApiResponse.success(
+                "Valid itineraries retrieved successfully",
+                results,
+                HttpStatus.OK
+        ));
     }
 }

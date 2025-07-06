@@ -5,156 +5,145 @@ import com.example.odyssea.daos.mainTables.CityDao;
 import com.example.odyssea.dtos.mainTables.ActivityDto;
 import com.example.odyssea.entities.mainTables.Activity;
 import com.example.odyssea.entities.mainTables.City;
-import com.example.odyssea.exceptions.ResourceNotFoundException;
-import com.example.odyssea.services.amadeus.TokenService;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
-import org.springframework.stereotype.Service;
-import org.springframework.web.client.RestTemplate;
+import com.example.odyssea.exceptions.ActivityNotFound;
+import com.example.odyssea.exceptions.CityNotFound;
+import com.example.odyssea.exceptions.ExternalServiceException;
+import com.example.odyssea.utils.PriceUtils;
 import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import org.springframework.http.*;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.HttpStatus;
+import org.springframework.stereotype.Service;
+import org.springframework.web.reactive.function.client.WebClient;
+import org.springframework.web.util.UriComponentsBuilder;
+import reactor.core.publisher.Mono;
 
-
+import java.time.Duration;
 import java.util.List;
 
 @Service
 public class ActivityService {
 
+    private static final Logger LOGGER = LoggerFactory.getLogger(ActivityService.class);
+    private static final String GOOGLE_API_TYPE = "tourist_attraction";
+    private static final java.time.LocalTime DEFAULT_DURATION = java.time.LocalTime.of(1, 0);
+
+    private final WebClient webClient;
     private final ActivityDao activityDao;
-    private final TokenService tokenService;
     private final CityDao cityDao;
 
+    @Value("${GOOGLE_PLACES_API_KEY}")
+    private String googlePlacesApiKey;
 
-    public ActivityService(ActivityDao activityDao, TokenService tokenService, CityDao cityDao) {
+    public ActivityService(ActivityDao activityDao,
+                           CityDao cityDao,
+                           WebClient webClient) {
         this.activityDao = activityDao;
-        this.tokenService = tokenService;
-        this.cityDao = cityDao;
+        this.cityDao     = cityDao;
+        this.webClient   = webClient;
     }
 
-    /**
-     * Récupère la liste complète des activités depuis la base de données
-     */
     public List<Activity> getAllActivities() {
         return activityDao.findAll();
     }
 
-    /**
-     * Récupère une activité spécifique par son identifiant
-     */
     public Activity getActivity(int id) {
-        return activityDao.findById(id).orElse(null);
+        return activityDao.findById(id);
     }
 
-    /**
-     * Crée une nouvelle activité en base de données
-     */
+
     public void createActivity(ActivityDto activityDto, int cityId) {
-        if (!activityDao.cityExists(cityId)) {
-            throw new IllegalArgumentException("The cityId supplied does not exist in the database!");
-        }
+        checkCityExists(cityId);
         Activity activity = activityDto.toActivity(cityId);
         activityDao.save(activity);
+        LOGGER.info("Created activity '{}' in city id {}", activity.getName(), cityId);
     }
 
-    /**
-     * Met à jour une activité existante
-     */
-    public boolean updateActivity(int id, Activity activity) {
-        if (!activityDao.existsById(id)) {
-            return false;
+    public List<Activity> importAndGetActivities(int cityId, int radius) {
+        checkCityExists(cityId);
+        List<Activity> activities = getTop5ActivitiesByCityId(cityId);
+
+        if (activities.size() < 5) {
+            importActivitiesFromGooglePlaces(cityId, radius);
+            activities = getTop5ActivitiesByCityId(cityId);
         }
-        activity.setId(id);
-        activityDao.update(activity);
-        return true;
-    }
 
-    /**
-     * Supprime une activité en fonction de son identifiant
-     */
-    public boolean deleteActivity(int id) {
-        if (!activityDao.existsById(id)) {
-            return false;
+        if (activities.isEmpty()) {
+            throw new ActivityNotFound("No activities found for city ID " + cityId);
         }
-        activityDao.deleteById(id);
-        return true;
+        return activities;
     }
 
-    /**
-     * Récupère les 5 activités d'une ville spécifique
-     */
+    private void importActivitiesFromGooglePlaces(int cityId, int radius) {
+        String url = buildPlacesUrl(cityId, radius);
+        JsonNode root = fetchFromGooglePlaces(url);
+        JsonNode results = root.path("results");
+
+        int count = 0;
+        for (JsonNode node : results) {
+            if (count >= 5) break;
+            String name     = node.path("name").asText(null);
+            String vicinity = node.path("vicinity").asText(null);
+            if (name == null || vicinity == null) continue;
+            if (activityDao.activityExists(cityId, name)) continue;
+
+            Activity act = new Activity(
+                    0, cityId, name, "Tourist Attraction",
+                    "Low", DEFAULT_DURATION, vicinity,
+                    PriceUtils.generatePriceInTens()
+            );
+            activityDao.save(act);
+            count++;
+        }
+    }
+
+    private JsonNode fetchFromGooglePlaces(String url) {
+        try {
+            return webClient.get()
+                    .uri(url)
+                    .retrieve()
+                    .onStatus(status -> status.is4xxClientError(), resp ->
+                            Mono.error(new ExternalServiceException(
+                                    "Google Places 4xx error for URL " + url)))
+                    .onStatus(status -> status.is5xxServerError(), resp ->
+                            Mono.error(new ExternalServiceException(
+                                    "Google Places 5xx error for URL " + url)))
+                    .bodyToMono(JsonNode.class)
+                    .timeout(Duration.ofSeconds(3),
+                            Mono.error(new ExternalServiceException("Google Places timeout")))
+                    .block();
+        } catch (ExternalServiceException e) {
+            throw e;
+        } catch (Exception e) {
+            throw new ExternalServiceException("Failed to call Google Places", e);
+        }
+    }
+
+    private String buildPlacesUrl(int cityId, int radius) {
+        City city = cityDao.findById(cityId);
+        if (city == null) {
+            throw new CityNotFound("City not found: " + cityId);
+        }
+        return UriComponentsBuilder
+                .fromHttpUrl("https://maps.googleapis.com/maps/api/place/nearbysearch/json")
+                .queryParam("location", city.getLatitude() + "," + city.getLongitude())
+                .queryParam("radius", radius)
+                .queryParam("type", GOOGLE_API_TYPE)
+                .queryParam("key", googlePlacesApiKey)
+                .toUriString();
+    }
+
+
     public List<Activity> getTop5ActivitiesByCityId(int cityId) {
-        try{
-            return activityDao.findTop5ByCityId(cityId);
-        } catch (ResourceNotFoundException e){
-            return null;
-        }
+        checkCityExists(cityId);
+        return activityDao.findTop5ByCityId(cityId);
     }
 
-    /**
-     * Importe les activités depuis l'API Amadeus pour une ville donnée
-     * en filtrant par le code IATA, la latitude et la longitude de la ville,
-     * en demandant 5 activités et en vérifiant qu'au moins 5 résultats sont obtenus
-     * Seules les 5 premières activités seront insérées
-     */
-    public void importActivitiesFromAmadeus(int cityId, int radius) {
-        // Vérifier que la ville existe, récupérer les infos, etc.
-        City city = cityDao.findById(cityId).orElseThrow(() ->
-                new IllegalStateException("City not found for id " + cityId));
-
-        String cityCode = city.getIataCode();
-        double latitude = city.getLatitude();
-        double longitude = city.getLongitude();
-
-        if (cityCode == null || cityCode.isEmpty()) {
-            throw new IllegalStateException("IATA code for city id " + cityId + " cannot be found.");
-        }
-
-        String token = tokenService.getValidToken().block();
-        if (token == null) {
-            throw new IllegalStateException("Unable to retrieve Amadeus token.");
-        }
-
-        // Ajout du paramètre "radius" dans l'URL
-        String url = "https://test.api.amadeus.com/v1/shopping/activities"
-                + "?cityCode=" + cityCode
-                + "&latitude=" + latitude
-                + "&longitude=" + longitude
-                + "&radius=" + radius
-                + "&limit=5";
-
-        HttpHeaders headers = new HttpHeaders();
-        headers.setBearerAuth(token);
-        HttpEntity<?> entity = new HttpEntity<>(headers);
-
-        RestTemplate restTemplate = new RestTemplate();
-        ResponseEntity<String> response = restTemplate.exchange(url, HttpMethod.GET, entity, String.class);
-
-        if (response.getStatusCode() == HttpStatus.OK) {
-            ObjectMapper mapper = new ObjectMapper();
-            try {
-                JsonNode root = mapper.readTree(response.getBody());
-                JsonNode dataArray = root.path("data");
-
-                // Si aucune activité n'est retournée, on log et on arrête l'import
-                if (!dataArray.isArray() || dataArray.size() == 0) {
-                    System.out.println("No activities returned for the city with IATA code " + cityCode);
-                    return;
-                }
-
-                int numberOfActivitiesToImport = Math.min(5, dataArray.size());
-                for (int i = 0; i < numberOfActivitiesToImport; i++) {
-                    JsonNode node = dataArray.get(i);
-                    ActivityDto dto = mapper.treeToValue(node, ActivityDto.class);
-                    Activity activity = dto.toActivity(cityId);
-                    activityDao.save(activity);
-                }
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
-        } else {
-            System.out.println("Error calling Amadeus API: " + response.getStatusCode());
+    public void checkCityExists(int cityId) {
+        City city = cityDao.findById(cityId);
+        if (city == null) {
+            throw new CityNotFound("City not found: " + cityId);
         }
     }
-
 }

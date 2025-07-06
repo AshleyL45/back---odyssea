@@ -18,20 +18,4 @@ public class ThemeService {
     public List<Theme> getAllThemes() {
         return themeDao.findAll();
     }
-
-    public Theme getThemeById(int id) {
-        return themeDao.findById(id);
-    }
-
-    public Theme createTheme(Theme theme) {
-        return themeDao.save(theme);
-    }
-
-    public Theme updateTheme(int id, Theme theme) {
-        return themeDao.update(id, theme);
-    }
-
-    public boolean deleteTheme(int id) {
-        return themeDao.delete(id);
-    }
 }
